@@ -24,6 +24,19 @@
             LUNA<span class="logo-dot">'</span>s Car Rental
         </div>
 
+        <div class="header-mini-search" id="headerMiniSearch">
+            <div class="hms-item" id="hmsLocBox">
+                <i class="fa-solid fa-location-dot"></i>
+                <span id="hmsLoc">Quezon City</span>
+            </div>
+            <div class="hms-divider"></div>
+            <div class="hms-item" id="hmsDateBox">
+                <i class="fa-regular fa-calendar"></i>
+                <span id="hmsDates">Select Dates</span>
+            </div>
+            <button class="hms-btn" id="hmsSearchBtn" type="button" aria-label="Go to booking"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+
         <ul class="nav-links" id="navLinks">
             <li><a href="#">Home</a></li>
             <li><a href="#fleet">Fleet</a></li>
@@ -97,118 +110,261 @@
 
 <section class="booking-bar" id="booking">
 
-    <form class="booking-card" id="bookingForm" novalidate>
+    <div class="booking-card" id="bookingCard">
 
-        <div class="booking-top-row">
+        <div class="booking-progress" id="bookingProgress">
+            <div class="progress-step active" data-step="1">1. Search</div>
+            <div class="progress-step" data-step="2">2. Select Car</div>
+            <div class="progress-step" data-step="3">3. Credentials</div>
+            <div class="progress-step" data-step="4">4. Done</div>
+        </div>
 
-            <label class="switch">
-                <input type="checkbox" id="sameLocation" checked>
-                <span class="switch-track"><span class="switch-thumb"></span></span>
-                <span class="switch-label">Return to same location</span>
-            </label>
+        <form class="step-view active-step" id="step1Form" novalidate>
 
-            <div class="booking-top-right">
+            <div class="booking-top-row">
 
-                <span class="booking-hint" id="bookingHint"><i class="fa-regular fa-clock"></i> Takes less than a minute</span>
+                <label class="switch">
+                    <input type="checkbox" id="sameLocation" checked>
+                    <span class="switch-track"><span class="switch-thumb"></span></span>
+                    <span class="switch-label">Return to same location</span>
+                </label>
 
-                <span class="vehicle-pill" id="vehiclePill">
-                    <i class="fa-solid fa-car-side"></i>
-                    <span id="vehiclePillText">Xpander</span>
-                    <button type="button" id="vehiclePillClear" aria-label="Clear selected vehicle"><i class="fa-solid fa-xmark"></i></button>
-                </span>
+                <div class="booking-top-right">
+
+                    <span class="booking-hint"><i class="fa-regular fa-clock"></i> Instant Availability Check</span>
+
+                    <span class="vehicle-pill" id="vehiclePill">
+                        <i class="fa-solid fa-car-side"></i>
+                        <span id="vehiclePillText">Xpander</span>
+                        <button type="button" id="vehiclePillClear" aria-label="Clear selected vehicle"><i class="fa-solid fa-xmark"></i></button>
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="booking-fields">
+
+                <div class="field-group field-location">
+                    <label class="field-label" for="pickupLocation">Pick-up Location</label>
+                    <div class="field-input">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <input type="text" id="pickupLocation" placeholder="Quezon City, Philippines" autocomplete="off" required>
+                    </div>
+                </div>
+
+                <div class="field-group field-location field-dropoff" id="dropoffGroup">
+                    <label class="field-label" for="dropoffLocation">Drop-off Location</label>
+                    <div class="field-input">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <input type="text" id="dropoffLocation" placeholder="Same as pick-up" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="pickupDate">Pick-up Date</label>
+                    <div class="field-input">
+                        <i class="fa-regular fa-calendar"></i>
+                        <input type="date" id="pickupDate" required>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="pickupTime">Pick-up Time</label>
+                    <div class="field-input">
+                        <i class="fa-regular fa-clock"></i>
+                        <select id="pickupTime" required></select>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="dropoffDate">Drop-off Date</label>
+                    <div class="field-input">
+                        <i class="fa-regular fa-calendar"></i>
+                        <input type="date" id="dropoffDate" required>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="dropoffTime">Drop-off Time</label>
+                    <div class="field-input">
+                        <i class="fa-regular fa-clock"></i>
+                        <select id="dropoffTime" required></select>
+                    </div>
+                </div>
+
+                <button type="submit" class="booking-btn">
+                    <span>Check Availability</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+            </div>
+
+            <div class="booking-bottom-row">
+
+                <div class="driver-age">
+                    <label class="field-label" for="driverAge">Driver Age</label>
+                    <select id="driverAge">
+                        <option value="">Please select an age</option>
+                        <option>18–20 years old</option>
+                        <option>21–24 years old</option>
+                        <option selected>25 years old and above</option>
+                    </select>
+                </div>
+
+                <span class="booking-note"><i class="fa-solid fa-circle-info"></i> Rates and requirements may vary by driver age.</span>
+
+            </div>
+
+            <div class="booking-error" id="bookingError">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>Drop-off must be after your pick-up date and time.</span>
+            </div>
+
+        </form>
+
+        <div class="step-view" id="step2Cars">
+
+            <div class="step-header">
+                <h3>Available Vehicles</h3>
+                <button class="back-btn" type="button" onclick="goToStep(1)"><i class="fa-solid fa-arrow-left"></i> Change Dates</button>
+            </div>
+
+            <div class="car-results-list">
+
+                <div class="car-result-card" data-key="Sedan">
+                    <div class="car-result-img"><i class="fa-solid fa-car fa-3x" style="color:var(--slate-light)"></i></div>
+                    <div class="car-result-details">
+                        <h4>Toyota Vios <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
+                        <div class="car-specs-mini">
+                            <span><i class="fa-solid fa-user"></i> 5 seats</span>
+                            <span><i class="fa-solid fa-gears"></i> Auto</span>
+                            <span><i class="fa-solid fa-suitcase"></i> 2 bags</span>
+                        </div>
+                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
+                    </div>
+                    <div class="car-result-action">
+                        <div class="price">₱1,800<small>/day</small></div>
+                        <button type="button" class="select-car-btn" onclick="selectCar('Toyota Vios', 1800, 'Sedan')">Select</button>
+                    </div>
+                </div>
+
+                <div class="car-result-card" data-key="Xpander">
+                    <div class="car-result-img"><img src="1.png" alt="Xpander"></div>
+                    <div class="car-result-details">
+                        <h4>Mitsubishi Xpander <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
+                        <div class="car-specs-mini">
+                            <span><i class="fa-solid fa-user"></i> 7 seats</span>
+                            <span><i class="fa-solid fa-gears"></i> Auto</span>
+                            <span><i class="fa-solid fa-suitcase"></i> 4 bags</span>
+                        </div>
+                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
+                    </div>
+                    <div class="car-result-action">
+                        <div class="price">₱2,500<small>/day</small></div>
+                        <button type="button" class="select-car-btn" onclick="selectCar('Mitsubishi Xpander', 2500, 'Xpander')">Select</button>
+                    </div>
+                </div>
+
+                <div class="car-result-card" data-key="SUV">
+                    <div class="car-result-img"><i class="fa-solid fa-truck-monster fa-3x" style="color:var(--slate-light)"></i></div>
+                    <div class="car-result-details">
+                        <h4>Toyota Fortuner <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
+                        <div class="car-specs-mini">
+                            <span><i class="fa-solid fa-user"></i> 7 seats</span>
+                            <span><i class="fa-solid fa-gears"></i> Auto</span>
+                            <span><i class="fa-solid fa-suitcase"></i> 4 bags</span>
+                        </div>
+                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
+                    </div>
+                    <div class="car-result-action">
+                        <div class="price">₱3,800<small>/day</small></div>
+                        <button type="button" class="select-car-btn" onclick="selectCar('Toyota Fortuner', 3800, 'SUV')">Select</button>
+                    </div>
+                </div>
+
+                <div class="car-result-card" data-key="Van">
+                    <div class="car-result-img"><i class="fa-solid fa-van-shuttle fa-3x" style="color:var(--slate-light)"></i></div>
+                    <div class="car-result-details">
+                        <h4>Toyota Hiace <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
+                        <div class="car-specs-mini">
+                            <span><i class="fa-solid fa-user"></i> 12 seats</span>
+                            <span><i class="fa-solid fa-gears"></i> Auto</span>
+                            <span><i class="fa-solid fa-suitcase"></i> 6 bags</span>
+                        </div>
+                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
+                    </div>
+                    <div class="car-result-action">
+                        <div class="price">₱5,500<small>/day</small></div>
+                        <button type="button" class="select-car-btn" onclick="selectCar('Toyota Hiace', 5500, 'Van')">Select</button>
+                    </div>
+                </div>
 
             </div>
 
         </div>
 
-        <div class="booking-fields">
+        <form class="step-view" id="step3Form">
 
-            <div class="field-group field-location">
-                <label class="field-label" for="pickupLocation">Pick-up Location</label>
-                <div class="field-input">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <input type="text" id="pickupLocation" placeholder="Quezon City, Philippines" autocomplete="off" required>
+            <div class="step-header">
+                <h3>Driver Information</h3>
+                <button class="back-btn" type="button" onclick="goToStep(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            </div>
+
+            <div class="credentials-grid">
+                <div class="field-group">
+                    <label class="field-label">Full Name</label>
+                    <div class="field-input"><i class="fa-solid fa-user"></i><input type="text" required placeholder="John Doe"></div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Email Address</label>
+                    <div class="field-input"><i class="fa-solid fa-envelope"></i><input type="email" required placeholder="john@example.com"></div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Phone Number</label>
+                    <div class="field-input"><i class="fa-solid fa-phone"></i><input type="tel" required placeholder="+63 900 000 0000"></div>
+                </div>
+                <div class="field-group file-upload-group">
+                    <label class="field-label">Upload Driver's License</label>
+                    <div class="file-upload-box">
+                        <input type="file" id="licenseUpload" accept="image/*" required>
+                        <div class="upload-content">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Click to upload image</span>
+                            <small>JPEG, PNG up to 5MB</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="field-group field-location field-dropoff" id="dropoffGroup">
-                <label class="field-label" for="dropoffLocation">Drop-off Location</label>
-                <div class="field-input">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <input type="text" id="dropoffLocation" placeholder="Same as pick-up" autocomplete="off">
+            <div class="step-footer">
+                <div class="summary-box">
+                    <strong>Selected:</strong> <span id="summaryCar">—</span> |
+                    <strong>Total Est:</strong> <span id="summaryPrice">₱0</span>
                 </div>
+                <button type="submit" class="booking-btn confirm-btn">
+                    <span>Submit Request</span>
+                    <i class="fa-solid fa-check"></i>
+                </button>
             </div>
 
-            <div class="field-group">
-                <label class="field-label" for="pickupDate">Pick-up Date</label>
-                <div class="field-input">
-                    <i class="fa-regular fa-calendar"></i>
-                    <input type="date" id="pickupDate" required>
-                </div>
+        </form>
+
+        <div class="step-view" id="step4Success">
+            <div class="success-content">
+                <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h3>Request Submitted Successfully!</h3>
+                <p>We've received your booking request and driver credentials. Our staff is currently reviewing your details and will call you shortly to confirm the reservation and assist with payment terms.</p>
+                <button type="button" class="secondary-btn mt-4" onclick="location.reload()">Back to Home</button>
             </div>
-
-            <div class="field-group">
-                <label class="field-label" for="pickupTime">Pick-up Time</label>
-                <div class="field-input">
-                    <i class="fa-regular fa-clock"></i>
-                    <select id="pickupTime" required></select>
-                </div>
-            </div>
-
-            <div class="field-group">
-                <label class="field-label" for="dropoffDate">Drop-off Date</label>
-                <div class="field-input">
-                    <i class="fa-regular fa-calendar"></i>
-                    <input type="date" id="dropoffDate" required>
-                </div>
-            </div>
-
-            <div class="field-group">
-                <label class="field-label" for="dropoffTime">Drop-off Time</label>
-                <div class="field-input">
-                    <i class="fa-regular fa-clock"></i>
-                    <select id="dropoffTime" required></select>
-                </div>
-            </div>
-
-            <button type="submit" class="booking-btn">
-                <span>Check Availability</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
-
         </div>
 
-        <div class="booking-bottom-row">
-
-            <div class="driver-age">
-                <label class="field-label" for="driverAge">Driver Age</label>
-                <select id="driverAge">
-                    <option value="">Please select an age</option>
-                    <option>18–20 years old</option>
-                    <option>21–24 years old</option>
-                    <option>25 years old and above</option>
-                </select>
-            </div>
-
-            <span class="booking-note"><i class="fa-solid fa-circle-info"></i> Rates and requirements may vary by driver age.</span>
-
+        <div class="loader-overlay" id="loaderOverlay">
+            <div class="spinner"></div>
+            <p id="loaderText">Checking availability...</p>
         </div>
 
-        <div class="booking-error" id="bookingError">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>Drop-off must be after your pick-up date and time.</span>
-        </div>
-
-        <div class="booking-success" id="bookingSuccess">
-            <i class="fa-solid fa-circle-check"></i>
-            <div>
-                <h4>Request received!</h4>
-                <p>We're reviewing your details — expect a confirmation call shortly.</p>
-            </div>
-            <button type="button" class="booking-reset" id="bookingReset">Modify Search</button>
-        </div>
-
-    </form>
+    </div>
 
 </section>
 

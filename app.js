@@ -1,4 +1,6 @@
-// Mobile menu toggle
+// ==========================================
+// 1. Mobile menu toggle
+// ==========================================
 const menuToggle = document.getElementById('menuToggle');
 const navLinks = document.getElementById('navLinks');
 
@@ -20,8 +22,13 @@ if(menuToggle && navLinks){
     });
 }
 
-// Header shrink on scroll
+// ==========================================
+// 2. Header shrink on scroll + mini search sync
+// ==========================================
 const header = document.getElementById('siteHeader');
+const hmsLoc = document.getElementById('hmsLoc');
+const hmsDates = document.getElementById('hmsDates');
+const hmsSearchBtn = document.getElementById('hmsSearchBtn');
 
 if(header){
     const onScroll = () => {
@@ -31,7 +38,31 @@ if(header){
     window.addEventListener('scroll', onScroll, { passive:true });
 }
 
-// Scroll reveal animations
+if(hmsSearchBtn){
+    hmsSearchBtn.addEventListener('click', () => {
+        const bookingSection = document.getElementById('booking');
+        if(bookingSection) bookingSection.scrollIntoView({ behavior:'smooth', block:'center' });
+    });
+}
+
+function syncMiniHeader(){
+    const pickupLocation = document.getElementById('pickupLocation');
+    const pickupDate = document.getElementById('pickupDate');
+    const dropoffDate = document.getElementById('dropoffDate');
+
+    if(hmsLoc && pickupLocation){
+        hmsLoc.textContent = pickupLocation.value || 'Quezon City';
+    }
+    if(hmsDates && pickupDate && pickupDate.value && dropoffDate && dropoffDate.value){
+        const pDate = new Date(pickupDate.value).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+        const dDate = new Date(dropoffDate.value).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+        hmsDates.textContent = `${pDate} - ${dDate}`;
+    }
+}
+
+// ==========================================
+// 3. Scroll reveal animations
+// ==========================================
 const revealEls = document.querySelectorAll('.reveal');
 
 if(revealEls.length){
@@ -47,23 +78,29 @@ if(revealEls.length){
     revealEls.forEach(el => observer.observe(el));
 }
 
-// Hero "Book Now" scrolls to the booking widget and focuses the first field
+// ==========================================
+// 4. Hero "Book Now" scrolls to booking and focuses first field
+// ==========================================
 const openBooking = document.getElementById('openBooking');
 const bookingSection = document.getElementById('booking');
 const pickupLocationInput = document.getElementById('pickupLocation');
 
-if(openBooking && bookingSection){
-    openBooking.addEventListener('click', () => {
-        bookingSection.scrollIntoView({ behavior:'smooth', block:'center' });
-        setTimeout(() => pickupLocationInput && pickupLocationInput.focus(), 500);
-    });
+function goToBooking(){
+    if(!bookingSection) return;
+    bookingSection.scrollIntoView({ behavior:'smooth', block:'center' });
+    setTimeout(() => pickupLocationInput && pickupLocationInput.focus(), 500);
 }
 
-// ===================== Booking widget =====================
+if(openBooking){
+    openBooking.addEventListener('click', goToBooking);
+}
 
-const bookingForm = document.getElementById('bookingForm');
+// ==========================================
+// 5. Multi-step booking widget
+// ==========================================
+const step1Form = document.getElementById('step1Form');
 
-if(bookingForm){
+if(step1Form){
 
     const sameLocation = document.getElementById('sameLocation');
     const dropoffGroup = document.getElementById('dropoffGroup');
@@ -75,11 +112,20 @@ if(bookingForm){
     const dropoffTime = document.getElementById('dropoffTime');
 
     const bookingError = document.getElementById('bookingError');
-    const bookingSuccess = document.getElementById('bookingSuccess');
-    const bookingReset = document.getElementById('bookingReset');
-    const bookingCard = document.querySelector('.booking-card');
 
-    // Build half-hour time options (24hr display, matches date-input style)
+    const loaderOverlay = document.getElementById('loaderOverlay');
+    const loaderText = document.getElementById('loaderText');
+    const progressSteps = document.querySelectorAll('.progress-step');
+    const stepViews = document.querySelectorAll('.step-view');
+
+    const vehiclePill = document.getElementById('vehiclePill');
+    const vehiclePillText = document.getElementById('vehiclePillText');
+    const vehiclePillClear = document.getElementById('vehiclePillClear');
+
+    let currentStep = 1;
+    let selectedVehicleKey = null;
+
+    // ---- Build half-hour time options ----
     const buildTimeOptions = (select, defaultValue) => {
         select.innerHTML = '';
         for(let h = 6; h <= 22; h++){
@@ -100,7 +146,7 @@ if(bookingForm){
     buildTimeOptions(pickupTime, '13:00');
     buildTimeOptions(dropoffTime, '13:00');
 
-    // Default dates: today for pick-up, tomorrow for drop-off
+    // ---- Default dates: today for pick-up, tomorrow for drop-off ----
     const toInputDate = (d) => d.toISOString().split('T')[0];
     const today = new Date();
     const tomorrow = new Date();
@@ -116,9 +162,14 @@ if(bookingForm){
         if(dropoffDate.value < pickupDate.value){
             dropoffDate.value = pickupDate.value;
         }
+        syncMiniHeader();
     });
+    dropoffDate.addEventListener('change', syncMiniHeader);
+    if(pickupLocationInput) pickupLocationInput.addEventListener('input', syncMiniHeader);
 
-    // Toggle drop-off location field
+    syncMiniHeader();
+
+    // ---- Toggle drop-off location field ----
     const syncLocationField = () => {
         if(sameLocation.checked){
             dropoffGroup.classList.add('is-hidden');
@@ -132,65 +183,122 @@ if(bookingForm){
     sameLocation.addEventListener('change', syncLocationField);
     syncLocationField();
 
-    // Submit handling
-    bookingForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+    // ---- Vehicle pill (carried over from the fleet section) ----
+    function setVehiclePill(name, key){
+        selectedVehicleKey = key;
+        if(vehiclePillText) vehiclePillText.textContent = name;
+        if(vehiclePill) vehiclePill.classList.add('show');
+    }
 
+    if(vehiclePillClear){
+        vehiclePillClear.addEventListener('click', () => {
+            selectedVehicleKey = null;
+            vehiclePill.classList.remove('show');
+            document.querySelectorAll('.car-result-card.matched').forEach(card => card.classList.remove('matched'));
+        });
+    }
+
+    // ---- Step navigation ----
+    function showLoader(text, duration, callback){
+        loaderText.textContent = text;
+        loaderOverlay.classList.add('active');
+        setTimeout(() => {
+            loaderOverlay.classList.remove('active');
+            callback();
+        }, duration);
+    }
+
+    function updateProgressUI(stepIndex){
+        progressSteps.forEach(st => {
+            const stepNum = parseInt(st.getAttribute('data-step'));
+            st.classList.toggle('active', stepNum <= stepIndex);
+        });
+    }
+
+    window.goToStep = function(stepIndex){
+        stepViews.forEach(view => view.classList.remove('active-step'));
+
+        let viewId = 'step1Form';
+        if(stepIndex === 2) viewId = 'step2Cars';
+        if(stepIndex === 3) viewId = 'step3Form';
+        if(stepIndex === 4) viewId = 'step4Success';
+
+        document.getElementById(viewId).classList.add('active-step');
+        updateProgressUI(stepIndex);
+        currentStep = stepIndex;
+
+        if(stepIndex === 2){
+            document.querySelectorAll('.car-result-card').forEach(card => {
+                card.classList.toggle('matched', selectedVehicleKey && card.dataset.key === selectedVehicleKey);
+            });
+        }
+    };
+
+    // ---- Step 1 -> Step 2 ----
+    step1Form.addEventListener('submit', (e) => {
+        e.preventDefault();
         bookingError.classList.remove('show');
+
+        if(!step1Form.checkValidity()){
+            step1Form.reportValidity();
+            return;
+        }
 
         const pickup = new Date(`${pickupDate.value}T${pickupTime.value}`);
         const dropoff = new Date(`${dropoffDate.value}T${dropoffTime.value}`);
-
-        if(!bookingForm.checkValidity()){
-            bookingForm.reportValidity();
-            return;
-        }
 
         if(dropoff <= pickup){
             bookingError.classList.add('show');
             return;
         }
 
-        bookingCard.classList.add('is-locked');
-        bookingSuccess.classList.add('show');
+        showLoader('Searching fleet...', 1200, () => goToStep(2));
     });
 
-    bookingReset.addEventListener('click', () => {
-        bookingCard.classList.remove('is-locked');
-        bookingSuccess.classList.remove('show');
-        bookingError.classList.remove('show');
-    });
+    // ---- Step 2 -> Step 3 ----
+    window.selectCar = function(carName, dailyRate, key){
+        const d1 = new Date(pickupDate.value);
+        const d2 = new Date(dropoffDate.value);
+        const diffTime = Math.abs(d2 - d1);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+        const total = diffDays * dailyRate;
 
+        setVehiclePill(carName, key);
+
+        document.getElementById('summaryCar').textContent = carName;
+        document.getElementById('summaryPrice').textContent = `₱${total.toLocaleString()}`;
+
+        showLoader('Preparing secure form...', 600, () => goToStep(3));
+    };
+
+    // ---- Step 3 -> Step 4 ----
+    const step3Form = document.getElementById('step3Form');
+    if(step3Form){
+        step3Form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if(!step3Form.checkValidity()){
+                step3Form.reportValidity();
+                return;
+            }
+            showLoader('Uploading secure documents...', 1800, () => goToStep(4));
+        });
+    }
+
+    // ---- Fleet "Reserve" buttons feed straight into Step 1 ----
+    const vehicleButtons = document.querySelectorAll('.vehicle-btn');
+    vehicleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.dataset.vehicle;
+            setVehiclePill(name, name);
+            goToStep(1);
+            goToBooking();
+        });
+    });
 }
 
-// ===================== Fleet -> booking widget =====================
-
-const vehicleButtons = document.querySelectorAll('.vehicle-btn');
-const vehiclePill = document.getElementById('vehiclePill');
-const vehiclePillText = document.getElementById('vehiclePillText');
-const vehiclePillClear = document.getElementById('vehiclePillClear');
-
-vehicleButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const name = btn.dataset.vehicle;
-        if(vehiclePillText) vehiclePillText.textContent = name;
-        if(vehiclePill) vehiclePill.classList.add('show');
-
-        if(bookingSection){
-            bookingSection.scrollIntoView({ behavior:'smooth', block:'center' });
-            setTimeout(() => pickupLocationInput && pickupLocationInput.focus(), 500);
-        }
-    });
-});
-
-if(vehiclePillClear){
-    vehiclePillClear.addEventListener('click', () => {
-        vehiclePill.classList.remove('show');
-    });
-}
-
-// ===================== FAQ accordion =====================
-
+// ==========================================
+// 6. FAQ accordion
+// ==========================================
 const faqItems = document.querySelectorAll('.faq-item');
 
 faqItems.forEach(item => {
