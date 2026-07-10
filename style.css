@@ -1,7 +1,3 @@
-/* =====================================================
-   RESET
-===================================================== */
-
 *{
     margin:0;
     padding:0;
@@ -340,6 +336,22 @@ footer{
 
 @media (max-width:992px){
 
+    .steps{
+
+        grid-template-columns:1fr;
+
+        max-width:650px;
+
+        margin:auto;
+
+    }
+
+    .section-title h2{
+
+        font-size:2.3rem;
+
+    }
+
     section{
         padding:80px 5%;
     }
@@ -466,6 +478,24 @@ footer{
 
 @media (max-width:480px){
 
+    .section-title h2{
+
+        font-size:2rem;
+
+    }
+
+    .section-title p{
+
+        font-size:15px;
+
+    }
+
+    .step-card{
+
+        padding:35px 25px;
+
+    }
+
     .logo{
         font-size:1.15rem;
     }
@@ -487,5 +517,133 @@ footer{
         padding:14px 25px;
         font-size:15px;
     }
+
+}
+
+/* =====================================================
+   HOW IT WORKS
+===================================================== */
+
+.how-it-works{
+
+    background:#ffffff;
+
+}
+
+.section-title{
+
+    max-width:700px;
+
+    margin:0 auto 70px;
+
+    text-align:center;
+
+}
+
+.section-title span{
+
+    color:#2563EB;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    letter-spacing:2px;
+
+}
+
+.section-title h2{
+
+    margin:15px 0;
+
+    font-size:2.8rem;
+
+    color:#0F172A;
+
+}
+
+.section-title p{
+
+    color:#64748B;
+
+    line-height:1.8;
+
+    font-size:17px;
+
+}
+
+.steps{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:35px;
+
+}
+
+.step-card{
+
+    background:#F8FAFC;
+
+    padding:45px 35px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    transition:.35s;
+
+    border:1px solid #E2E8F0;
+
+}
+
+.step-card:hover{
+
+    transform:translateY(-10px);
+
+    box-shadow:0 20px 40px rgba(0,0,0,.08);
+
+}
+
+.step-icon{
+
+    width:80px;
+
+    height:80px;
+
+    margin:0 auto 25px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#DBEAFE;
+
+    color:#2563EB;
+
+    font-size:30px;
+
+}
+
+.step-card h3{
+
+    margin-bottom:15px;
+
+    font-size:1.35rem;
+
+    color:#0F172A;
+
+}
+
+.step-card p{
+
+    color:#64748B;
+
+    line-height:1.8;
 
 }
