@@ -8,41 +8,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- Main Header -->
 <header id="siteHeader">
-
     <nav class="navbar">
-
-        <div class="logo">
-            LUNA<span class="logo-dot">'</span>s Car Rental
-        </div>
-
-        <div class="header-mini-search" id="headerMiniSearch">
-            <div class="hms-item" id="hmsLocBox">
-                <i class="fa-solid fa-location-dot"></i>
-                <span id="hmsLoc">Quezon City</span>
-            </div>
-            <div class="hms-divider"></div>
-            <div class="hms-item" id="hmsDateBox">
-                <i class="fa-regular fa-calendar"></i>
-                <span id="hmsDates">Select Dates</span>
-            </div>
-            <button class="hms-btn" id="hmsSearchBtn" type="button" aria-label="Go to booking"><i class="fa-solid fa-magnifying-glass"></i></button>
-        </div>
+        <div class="logo clickable-logo">LUNA<span class="logo-dot">'</span>s</div>
 
         <ul class="nav-links" id="navLinks">
-            <li><a href="#">Home</a></li>
-            <li><a href="#fleet">Fleet</a></li>
-            <li><a href="#how-it-works">How It Works</a></li>
-            <li><a href="#faq">FAQ</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li><a href="#fleet" class="scroll-link">Car Services</a></li>
+            <li><a href="#how-it-works" class="scroll-link">Guide</a></li>
+            <li><a href="#faq" class="scroll-link">FAQ</a></li>
+            <li><a href="#contact" class="scroll-link">Contact</a></li>
         </ul>
 
         <div class="buttons">
@@ -53,745 +34,467 @@
         <div class="menu-toggle" id="menuToggle">
             <i class="fa-solid fa-bars"></i>
         </div>
-
     </nav>
-
 </header>
 
-<main>
+<main id="mainContent">
 
-<section class="hero">
-
-    <div class="hero-glow" aria-hidden="true"></div>
-
-    <div class="hero-content">
-
-        <span class="eyebrow"><i class="eyebrow-dot"></i>CAR RENTAL SERVICE</span>
-
-        <h1>
-            Book Your Rental Car
-            <br>
-            In <span class="highlight">Minutes.</span>
-        </h1>
-
-        <p>
-            Fast, simple and hassle-free booking. Select your vehicle,
-            choose your rental dates, submit your information,
-            and wait for our confirmation call.
-        </p>
-
-        <div class="hero-buttons">
-
-            <button class="primary-btn" id="openBooking" type="button">
-                <span>Book Now</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
-
-            <a href="#contact" class="secondary-btn">
-                Contact Us
-            </a>
-
-        </div>
-
-        <div class="hero-route" aria-hidden="true">
-            <svg viewBox="0 0 420 40" preserveAspectRatio="none">
-                <path class="route-path" d="M0,25 C80,5 140,40 220,20 C300,2 340,30 420,12" />
-            </svg>
-        </div>
-
-    </div>
-
-    <div class="hero-image">
-        <div class="hero-image-blob" aria-hidden="true"></div>
-        <img src="1.png" alt="Mitsubishi Xpander">
-    </div>
-
-</section>
-
-<section class="booking-bar" id="booking">
-
-    <div class="booking-card" id="bookingCard">
-
-        <div class="booking-progress" id="bookingProgress">
-            <div class="progress-step active" data-step="1">1. Search</div>
-            <div class="progress-step" data-step="2">2. Select Car</div>
-            <div class="progress-step" data-step="3">3. Credentials</div>
-            <div class="progress-step" data-step="4">4. Done</div>
-        </div>
-
-        <form class="step-view active-step" id="step1Form" novalidate>
-
-            <div class="booking-top-row">
-
-                <label class="switch">
-                    <input type="checkbox" id="sameLocation" checked>
-                    <span class="switch-track"><span class="switch-thumb"></span></span>
-                    <span class="switch-label">Return to same location</span>
-                </label>
-
-                <div class="booking-top-right">
-
-                    <span class="booking-hint"><i class="fa-regular fa-clock"></i> Instant Availability Check</span>
-
-                    <span class="vehicle-pill" id="vehiclePill">
-                        <i class="fa-solid fa-car-side"></i>
-                        <span id="vehiclePillText">Xpander</span>
-                        <button type="button" id="vehiclePillClear" aria-label="Clear selected vehicle"><i class="fa-solid fa-xmark"></i></button>
-                    </span>
-
-                </div>
-
+    <!-- Landing Page View -->
+    <div id="landingView">
+        
+        <section class="hero landing-only">
+            <div class="hero-glow" aria-hidden="true"></div>
+            <div class="hero-content">
+                <span class="eyebrow"><i class="eyebrow-dot"></i>CAR RENTAL SERVICE</span>
+                <h1>Book Your Rental Car<br>In <span class="highlight">Minutes.</span></h1>
+                <p>Fast, simple and hassle-free booking. Select your vehicle, choose your rental dates, submit your information, and wait for our confirmation call.</p>
             </div>
-
-            <div class="booking-fields">
-
-                <div class="field-group field-location">
-                    <label class="field-label" for="pickupLocation">Pick-up Location</label>
-                    <div class="field-input">
-                        <i class="fa-solid fa-location-dot"></i>
-                        <input type="text" id="pickupLocation" placeholder="Quezon City, Philippines" autocomplete="off" required>
-                    </div>
-                </div>
-
-                <div class="field-group field-location field-dropoff" id="dropoffGroup">
-                    <label class="field-label" for="dropoffLocation">Drop-off Location</label>
-                    <div class="field-input">
-                        <i class="fa-solid fa-location-dot"></i>
-                        <input type="text" id="dropoffLocation" placeholder="Same as pick-up" autocomplete="off">
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label class="field-label" for="pickupDate">Pick-up Date</label>
-                    <div class="field-input">
-                        <i class="fa-regular fa-calendar"></i>
-                        <input type="date" id="pickupDate" required>
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label class="field-label" for="pickupTime">Pick-up Time</label>
-                    <div class="field-input">
-                        <i class="fa-regular fa-clock"></i>
-                        <select id="pickupTime" required></select>
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label class="field-label" for="dropoffDate">Drop-off Date</label>
-                    <div class="field-input">
-                        <i class="fa-regular fa-calendar"></i>
-                        <input type="date" id="dropoffDate" required>
-                    </div>
-                </div>
-
-                <div class="field-group">
-                    <label class="field-label" for="dropoffTime">Drop-off Time</label>
-                    <div class="field-input">
-                        <i class="fa-regular fa-clock"></i>
-                        <select id="dropoffTime" required></select>
-                    </div>
-                </div>
-
-                <button type="submit" class="booking-btn">
-                    <span>Check Availability</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-
-            </div>
-
-            <div class="booking-bottom-row">
-
-                <div class="driver-age">
-                    <label class="field-label" for="driverAge">Driver Age</label>
-                    <select id="driverAge">
-                        <option value="">Please select an age</option>
-                        <option>18–20 years old</option>
-                        <option>21–24 years old</option>
-                        <option selected>25 years old and above</option>
-                    </select>
-                </div>
-
-                <span class="booking-note"><i class="fa-solid fa-circle-info"></i> Rates and requirements may vary by driver age.</span>
-
-            </div>
-
-            <div class="booking-error" id="bookingError">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span>Drop-off must be after your pick-up date and time.</span>
-            </div>
-
-        </form>
-
-        <div class="step-view" id="step2Cars">
-
-            <div class="step-header">
-                <h3>Available Vehicles</h3>
-                <button class="back-btn" type="button" onclick="goToStep(1)"><i class="fa-solid fa-arrow-left"></i> Change Dates</button>
-            </div>
-
-            <div class="car-results-list">
-
-                <div class="car-result-card" data-key="Sedan">
-                    <div class="car-result-img"><i class="fa-solid fa-car fa-3x" style="color:var(--slate-light)"></i></div>
-                    <div class="car-result-details">
-                        <h4>Toyota Vios <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
-                        <div class="car-specs-mini">
-                            <span><i class="fa-solid fa-user"></i> 5 seats</span>
-                            <span><i class="fa-solid fa-gears"></i> Auto</span>
-                            <span><i class="fa-solid fa-suitcase"></i> 2 bags</span>
-                        </div>
-                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
-                    </div>
-                    <div class="car-result-action">
-                        <div class="price">₱1,800<small>/day</small></div>
-                        <button type="button" class="select-car-btn" onclick="selectCar('Toyota Vios', 1800, 'Sedan')">Select</button>
-                    </div>
-                </div>
-
-                <div class="car-result-card" data-key="Xpander">
-                    <div class="car-result-img"><img src="1.png" alt="Xpander"></div>
-                    <div class="car-result-details">
-                        <h4>Mitsubishi Xpander <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
-                        <div class="car-specs-mini">
-                            <span><i class="fa-solid fa-user"></i> 7 seats</span>
-                            <span><i class="fa-solid fa-gears"></i> Auto</span>
-                            <span><i class="fa-solid fa-suitcase"></i> 4 bags</span>
-                        </div>
-                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
-                    </div>
-                    <div class="car-result-action">
-                        <div class="price">₱2,500<small>/day</small></div>
-                        <button type="button" class="select-car-btn" onclick="selectCar('Mitsubishi Xpander', 2500, 'Xpander')">Select</button>
-                    </div>
-                </div>
-
-                <div class="car-result-card" data-key="SUV">
-                    <div class="car-result-img"><i class="fa-solid fa-truck-monster fa-3x" style="color:var(--slate-light)"></i></div>
-                    <div class="car-result-details">
-                        <h4>Toyota Fortuner <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
-                        <div class="car-specs-mini">
-                            <span><i class="fa-solid fa-user"></i> 7 seats</span>
-                            <span><i class="fa-solid fa-gears"></i> Auto</span>
-                            <span><i class="fa-solid fa-suitcase"></i> 4 bags</span>
-                        </div>
-                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
-                    </div>
-                    <div class="car-result-action">
-                        <div class="price">₱3,800<small>/day</small></div>
-                        <button type="button" class="select-car-btn" onclick="selectCar('Toyota Fortuner', 3800, 'SUV')">Select</button>
-                    </div>
-                </div>
-
-                <div class="car-result-card" data-key="Van">
-                    <div class="car-result-img"><i class="fa-solid fa-van-shuttle fa-3x" style="color:var(--slate-light)"></i></div>
-                    <div class="car-result-details">
-                        <h4>Toyota Hiace <span>or similar</span> <span class="matched-tag"><i class="fa-solid fa-check"></i> Your Pick</span></h4>
-                        <div class="car-specs-mini">
-                            <span><i class="fa-solid fa-user"></i> 12 seats</span>
-                            <span><i class="fa-solid fa-gears"></i> Auto</span>
-                            <span><i class="fa-solid fa-suitcase"></i> 6 bags</span>
-                        </div>
-                        <span class="status available"><i class="fa-solid fa-check"></i> Available on selected dates</span>
-                    </div>
-                    <div class="car-result-action">
-                        <div class="price">₱5,500<small>/day</small></div>
-                        <button type="button" class="select-car-btn" onclick="selectCar('Toyota Hiace', 5500, 'Van')">Select</button>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <form class="step-view" id="step3Form">
-
-            <div class="step-header">
-                <h3>Driver Information</h3>
-                <button class="back-btn" type="button" onclick="goToStep(2)"><i class="fa-solid fa-arrow-left"></i> Back</button>
-            </div>
-
-            <div class="credentials-grid">
-                <div class="field-group">
-                    <label class="field-label">Full Name</label>
-                    <div class="field-input"><i class="fa-solid fa-user"></i><input type="text" required placeholder="John Doe"></div>
-                </div>
-                <div class="field-group">
-                    <label class="field-label">Email Address</label>
-                    <div class="field-input"><i class="fa-solid fa-envelope"></i><input type="email" required placeholder="john@example.com"></div>
-                </div>
-                <div class="field-group">
-                    <label class="field-label">Phone Number</label>
-                    <div class="field-input"><i class="fa-solid fa-phone"></i><input type="tel" required placeholder="+63 900 000 0000"></div>
-                </div>
-                <div class="field-group file-upload-group">
-                    <label class="field-label">Upload Driver's License</label>
-                    <div class="file-upload-box">
-                        <input type="file" id="licenseUpload" accept="image/*" required>
-                        <div class="upload-content">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <span>Click to upload image</span>
-                            <small>JPEG, PNG up to 5MB</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="step-footer">
-                <div class="summary-box">
-                    <strong>Selected:</strong> <span id="summaryCar">—</span> |
-                    <strong>Total Est:</strong> <span id="summaryPrice">₱0</span>
-                </div>
-                <button type="submit" class="booking-btn confirm-btn">
-                    <span>Submit Request</span>
-                    <i class="fa-solid fa-check"></i>
-                </button>
-            </div>
-
-        </form>
-
-        <div class="step-view" id="step4Success">
-            <div class="success-content">
-                <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
-                <h3>Request Submitted Successfully!</h3>
-                <p>We've received your booking request and driver credentials. Our staff is currently reviewing your details and will call you shortly to confirm the reservation and assist with payment terms.</p>
-                <button type="button" class="secondary-btn mt-4" onclick="location.reload()">Back to Home</button>
-            </div>
-        </div>
-
-        <div class="loader-overlay" id="loaderOverlay">
-            <div class="spinner"></div>
-            <p id="loaderText">Checking availability...</p>
-        </div>
-
-    </div>
-
-</section>
-
-<section class="badges" id="badges">
-
-    <div class="badges-grid">
-
-        <div class="badge-card reveal" style="--delay:0s">
-            <div class="badge-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
-            <h4>Free Cancellation</h4>
-            <p>Cancel or reschedule at no charge up to 24 hours before pick-up.</p>
-        </div>
-
-        <div class="badge-card reveal" style="--delay:.08s">
-            <div class="badge-icon"><i class="fa-solid fa-shield-heart"></i></div>
-            <h4>Verified &amp; Insured</h4>
-            <p>Every unit is inspected, cleaned, and insured before it's handed to you.</p>
-        </div>
-
-        <div class="badge-card reveal" style="--delay:.16s">
-            <div class="badge-icon"><i class="fa-solid fa-bolt"></i></div>
-            <h4>Fast Confirmation</h4>
-            <p>Most requests get a confirmation call back within 2 hours.</p>
-        </div>
-
-        <div class="badge-card reveal" style="--delay:.24s">
-            <div class="badge-icon"><i class="fa-solid fa-headset"></i></div>
-            <h4>Real Support</h4>
-            <p>A real person to call before, during, and after your trip.</p>
-        </div>
-
-    </div>
-
-</section>
-
-<section class="fleet" id="fleet">
-
-    <div class="section-title reveal">
-        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>OUR FLEET</span>
-        <h2>Choose the Right Car for Your Trip</h2>
-        <p>
-            From city errands to weekend getaways, pick a vehicle that
-            matches your route and your crew.
-        </p>
-    </div>
-
-    <div class="fleet-grid">
-
-        <div class="vehicle-card reveal" style="--delay:0s">
-            <div class="vehicle-visual vehicle-visual--icon">
-                <i class="fa-solid fa-car"></i>
-            </div>
-            <div class="vehicle-body">
-                <div class="vehicle-head">
-                    <h3>Sedan</h3>
-                    <span class="vehicle-tag">Toyota Vios or similar</span>
-                </div>
-                <ul class="vehicle-specs">
-                    <li><i class="fa-solid fa-user"></i> 5 seats</li>
-                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
-                    <li><i class="fa-solid fa-suitcase"></i> 2 bags</li>
-                </ul>
-                <div class="vehicle-foot">
-                    <div class="vehicle-price"><span>From</span>₱1,800<small>/day</small></div>
-                    <button type="button" class="vehicle-btn" data-vehicle="Sedan">Reserve</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="vehicle-card vehicle-card--featured reveal" style="--delay:.1s">
-            <span class="vehicle-badge">Most Booked</span>
-            <div class="vehicle-visual">
+            <div class="hero-image">
+                <div class="hero-image-blob" aria-hidden="true"></div>
                 <img src="1.png" alt="Mitsubishi Xpander">
             </div>
-            <div class="vehicle-body">
-                <div class="vehicle-head">
-                    <h3>MPV</h3>
-                    <span class="vehicle-tag">Mitsubishi Xpander or similar</span>
-                </div>
-                <ul class="vehicle-specs">
-                    <li><i class="fa-solid fa-user"></i> 7 seats</li>
-                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
-                    <li><i class="fa-solid fa-suitcase"></i> 4 bags</li>
+        </section>
+
+        <!-- Booking Bar Wrapper -->
+        <div class="booking-wrapper" id="bookingWrapper">
+            <div class="booking-card" id="bookingCard">
+                <form id="mainSearchForm" novalidate>
+                    
+                    <!-- Trip.com Style Top Row -->
+                    <div class="booking-fields">
+                        <div class="field-group">
+                            <div class="field-input stacked-input">
+                                <label for="pickupLocation">Pick-up location</label>
+                                <input type="text" id="pickupLocation" placeholder="Select city, branch, or area..." autocomplete="off" required>
+                            </div>
+                        </div>
+
+                        <div class="field-group is-hidden" id="dropoffGroup">
+                            <div class="field-input stacked-input">
+                                <label for="dropoffLocation">Drop-off location</label>
+                                <input type="text" id="dropoffLocation" placeholder="Select drop-off location" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <div class="field-input date-time-input">
+                                <div class="dt-section">
+                                    <label for="pickupDate">Pick-up time</label>
+                                    <input type="date" id="pickupDate" required>
+                                </div>
+                                <div class="dt-divider"></div>
+                                <div class="dt-section">
+                                    <label>&nbsp;</label>
+                                    <select id="pickupTime" class="time-sel" required></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <div class="field-input date-time-input">
+                                <div class="dt-section">
+                                    <label for="dropoffDate">Drop-off time</label>
+                                    <input type="date" id="dropoffDate" required>
+                                </div>
+                                <div class="dt-divider"></div>
+                                <div class="dt-section">
+                                    <label>&nbsp;</label>
+                                    <select id="dropoffTime" class="time-sel" required></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="booking-btn">
+                            <i class="fa-solid fa-magnifying-glass"></i> Search
+                        </button>
+                    </div>
+
+                    <!-- Trip.com Style Bottom Row -->
+                    <div class="booking-bottom-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="differentDropoff">
+                            <span>Drop off at a different location</span>
+                        </label>
+                        
+                        <div class="booking-options-right">
+                            <div class="driver-option compact-hidden">
+                                <label for="driverCountry">Driver's license issuing country/region <i class="fa-solid fa-circle-info"></i></label>
+                                <select id="driverCountry">
+                                    <option selected>Philippines</option>
+                                    <option>United States</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="driver-option compact-hidden">
+                                <label for="driverAge">Driver's age</label>
+                                <select id="driverAge">
+                                    <option>18-29</option>
+                                    <option selected>30-60</option>
+                                    <option>61+</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Secondary Sticky Navigation -->
+        <div id="secondaryNav" class="secondary-nav">
+            <div class="sec-nav-container">
+                <div class="sec-logo clickable-logo">LUNA<span class="logo-dot">'</span>s</div>
+                <ul class="sec-nav-links">
+                    <li><a href="#fleet" id="link-fleet" class="sec-nav-item active">Recommended car rentals</a></li>
+                    <li><a href="#testimonials" id="link-testimonials" class="sec-nav-item">User reviews</a></li>
+                    <li><a href="#faq" id="link-faq" class="sec-nav-item">FAQs</a></li>
+                    <li><a href="#how-it-works" id="link-how-it-works" class="sec-nav-item">Guide</a></li>
                 </ul>
-                <div class="vehicle-foot">
-                    <div class="vehicle-price"><span>From</span>₱2,500<small>/day</small></div>
-                    <button type="button" class="vehicle-btn" data-vehicle="Xpander">Reserve</button>
+            </div>
+        </div>
+
+        <!-- Landing Page Content -->
+        <div class="landing-only">
+            
+            <section class="badges" id="badges">
+                <div class="badges-grid">
+                    <div class="badge-card reveal">
+                        <div class="badge-icon"><i class="fa-solid fa-tags"></i></div>
+                        <h4>Exclusive offers</h4>
+                        <p>Unlock exclusive car rental prices for your booked trips.</p>
+                    </div>
+                    <div class="badge-card reveal" style="--delay:.1s">
+                        <div class="badge-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <h4>Flexible rentals</h4>
+                        <p>Flexible cancellation policy - plan your trip with ease.</p>
+                    </div>
+                    <div class="badge-card reveal" style="--delay:.2s">
+                        <div class="badge-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h4>Booking guarantee</h4>
+                        <p>If your schedule is delayed, contact us for free assistance.</p>
+                    </div>
+                    <div class="badge-card reveal" style="--delay:.3s">
+                        <div class="badge-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <h4>Rapid support</h4>
+                        <p>We usually answer your call within 30 seconds ensuring reliable support.</p>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="vehicle-card reveal" style="--delay:.2s">
-            <div class="vehicle-visual vehicle-visual--icon">
-                <i class="fa-solid fa-truck-monster"></i>
-            </div>
-            <div class="vehicle-body">
-                <div class="vehicle-head">
-                    <h3>SUV</h3>
-                    <span class="vehicle-tag">Toyota Fortuner or similar</span>
+            <section class="fleet" id="fleet">
+                <div class="section-title reveal">
+                    <h2>Popular car rental types</h2>
                 </div>
-                <ul class="vehicle-specs">
-                    <li><i class="fa-solid fa-user"></i> 7 seats</li>
-                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
-                    <li><i class="fa-solid fa-suitcase"></i> 4 bags</li>
-                </ul>
-                <div class="vehicle-foot">
-                    <div class="vehicle-price"><span>From</span>₱3,800<small>/day</small></div>
-                    <button type="button" class="vehicle-btn" data-vehicle="SUV">Reserve</button>
+                <div class="fleet-grid">
+                    <!-- Sedan -->
+                    <div class="vehicle-card reveal">
+                        <div class="vehicle-head">
+                            <span class="v-type">Compact car</span>
+                            <h3>Toyota Vios or Similar</h3>
+                        </div>
+                        <div class="vehicle-visual">
+                            <i class="fa-solid fa-car fa-4x" style="color:var(--slate-light)"></i>
+                        </div>
+                        <ul class="vehicle-specs">
+                            <li><i class="fa-solid fa-user"></i> 5</li>
+                            <li><i class="fa-solid fa-suitcase"></i> 2</li>
+                            <li><i class="fa-solid fa-door-closed"></i> 4</li>
+                        </ul>
+                        <div class="vehicle-foot">
+                            <div class="vehicle-price"><span>From</span>₱1,700<small>/day</small></div>
+                            <button type="button" class="vehicle-btn select-trigger">View deal</button>
+                        </div>
+                    </div>
+                    <!-- Xpander -->
+                    <div class="vehicle-card vehicle-card--featured reveal" style="--delay:.1s">
+                        <div class="vehicle-head">
+                            <span class="v-type">Compact SUV</span>
+                            <h3>Mitsubishi Xpander or Similar</h3>
+                        </div>
+                        <div class="vehicle-visual">
+                            <img src="1.png" alt="Mitsubishi Xpander">
+                        </div>
+                        <ul class="vehicle-specs">
+                            <li><i class="fa-solid fa-user"></i> 7</li>
+                            <li><i class="fa-solid fa-suitcase"></i> 4</li>
+                            <li><i class="fa-solid fa-door-closed"></i> 4</li>
+                        </ul>
+                        <div class="vehicle-foot">
+                            <div class="vehicle-price"><span>From</span>₱1,950<small>/day</small></div>
+                            <button type="button" class="vehicle-btn select-trigger">View deal</button>
+                        </div>
+                    </div>
+                    <!-- SUV -->
+                    <div class="vehicle-card reveal" style="--delay:.2s">
+                        <div class="vehicle-head">
+                            <span class="v-type">Intermediate SUV</span>
+                            <h3>Toyota Fortuner or Similar</h3>
+                        </div>
+                        <div class="vehicle-visual">
+                            <i class="fa-solid fa-truck-monster fa-4x" style="color:var(--slate-light)"></i>
+                        </div>
+                        <ul class="vehicle-specs">
+                            <li><i class="fa-solid fa-user"></i> 7</li>
+                            <li><i class="fa-solid fa-suitcase"></i> 4</li>
+                            <li><i class="fa-solid fa-door-closed"></i> 4</li>
+                        </ul>
+                        <div class="vehicle-foot">
+                            <div class="vehicle-price"><span>From</span>₱2,400<small>/day</small></div>
+                            <button type="button" class="vehicle-btn select-trigger">View deal</button>
+                        </div>
+                    </div>
+                    <!-- Van -->
+                    <div class="vehicle-card reveal" style="--delay:.3s">
+                        <div class="vehicle-head">
+                            <span class="v-type">Van</span>
+                            <h3>Toyota Hiace or Similar</h3>
+                        </div>
+                        <div class="vehicle-visual">
+                            <i class="fa-solid fa-van-shuttle fa-4x" style="color:var(--slate-light)"></i>
+                        </div>
+                        <ul class="vehicle-specs">
+                            <li><i class="fa-solid fa-user"></i> 12</li>
+                            <li><i class="fa-solid fa-suitcase"></i> 6</li>
+                            <li><i class="fa-solid fa-door-closed"></i> 4</li>
+                        </ul>
+                        <div class="vehicle-foot">
+                            <div class="vehicle-price"><span>From</span>₱2,750<small>/day</small></div>
+                            <button type="button" class="vehicle-btn select-trigger">View deal</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="vehicle-card reveal" style="--delay:.3s">
-            <div class="vehicle-visual vehicle-visual--icon">
-                <i class="fa-solid fa-van-shuttle"></i>
-            </div>
-            <div class="vehicle-body">
-                <div class="vehicle-head">
-                    <h3>Van</h3>
-                    <span class="vehicle-tag">Toyota Hiace or similar</span>
+            <section class="testimonials" id="testimonials">
+                <div class="section-title reveal">
+                    <h2>User reviews</h2>
                 </div>
-                <ul class="vehicle-specs">
-                    <li><i class="fa-solid fa-user"></i> 12 seats</li>
-                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
-                    <li><i class="fa-solid fa-suitcase"></i> 6 bags</li>
-                </ul>
-                <div class="vehicle-foot">
-                    <div class="vehicle-price"><span>From</span>₱5,500<small>/day</small></div>
-                    <button type="button" class="vehicle-btn" data-vehicle="Van">Reserve</button>
+                <div class="testimonial-grid">
+                    <div class="testimonial-card reveal">
+                        <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p>"Booking took less than five minutes, and the confirmation call came in under an hour. The car was spotless."</p>
+                        <div class="testimonial-author">
+                            <strong>Andrea M.</strong><small>Quezon City</small>
+                        </div>
+                    </div>
+                    <div class="testimonial-card reveal" style="--delay:.1s">
+                        <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p>"Charged an extra fee I am not sure if this was because there was 5 liters of gasoline remaining... The fuel gauge was at two bars."</p>
+                        <div class="testimonial-author">
+                            <strong>Paolo S.</strong><small>Manila</small>
+                        </div>
+                    </div>
+                    <div class="testimonial-card reveal" style="--delay:.2s">
+                        <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p>"Been fine. Even though they know they could get it back, informing them beforehand would have made the customer feel more comfortable."</p>
+                        <div class="testimonial-author">
+                            <strong>Mikka R.</strong><small>Pasig</small>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-    </div>
-
-</section>
-
-<section class="how-it-works" id="how-it-works">
-
-    <div class="section-title reveal">
-
-        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>HOW IT WORKS</span>
-
-        <h2>Rent Your Car in 3 Easy Steps</h2>
-
-        <p>
-            Our booking process is quick and hassle-free.
-            Simply submit your request and we'll handle the rest.
-        </p>
-
-    </div>
-
-    <div class="steps">
-
-        <div class="step-line" aria-hidden="true"></div>
-
-        <div class="step-card reveal" style="--delay:0s">
-
-            <span class="step-number">01</span>
-
-            <div class="step-icon">
-                <i class="fa-solid fa-car"></i>
-            </div>
-
-            <h3>Select a Vehicle</h3>
-
-            <p>
-                Browse our available vehicles and choose the one
-                that fits your travel needs.
-            </p>
-
-        </div>
-
-        <div class="step-card reveal" style="--delay:.15s">
-
-            <span class="step-number">02</span>
-
-            <div class="step-icon">
-                <i class="fa-solid fa-calendar-check"></i>
-            </div>
-
-            <h3>Submit Your Booking</h3>
-
-            <p>
-                Fill in your rental information, preferred dates,
-                and contact details.
-            </p>
-
-        </div>
-
-        <div class="step-card reveal" style="--delay:.3s">
-
-            <span class="step-number">03</span>
-
-            <div class="step-icon">
-                <i class="fa-solid fa-phone"></i>
-            </div>
-
-            <h3>Receive Confirmation</h3>
-
-            <p>
-                Our staff will review your request and contact you
-                to confirm your reservation.
-            </p>
-
-        </div>
-
-    </div>
-
-</section>
-
-<section class="requirements" id="requirements">
-
-    <div class="requirements-grid">
-
-        <div class="req-copy reveal">
-            <span class="eyebrow"><i class="eyebrow-dot"></i>BEFORE YOU BOOK</span>
-            <h2>What You'll Need to Rent</h2>
-            <p>
-                A little preparation makes pick-up day quick. Here's
-                everything to have ready before your confirmation call.
-            </p>
-
-            <ul class="req-list">
-                <li><i class="fa-solid fa-check"></i> Valid driver's license, held for at least 1 year</li>
-                <li><i class="fa-solid fa-check"></i> One valid government-issued ID</li>
-                <li><i class="fa-solid fa-check"></i> Credit or debit card for the security deposit</li>
-                <li><i class="fa-solid fa-check"></i> Minimum age of 21 (under-25 drivers may incur a young-driver fee)</li>
-                <li><i class="fa-solid fa-check"></i> Additional drivers must present their own valid license</li>
-            </ul>
-        </div>
-
-        <div class="tips-card reveal" style="--delay:.15s">
-            <h4><i class="fa-solid fa-lightbulb"></i> Good to Know</h4>
-            <ul class="tips-list">
-                <li>Return the car with a full tank to skip refueling fees.</li>
-                <li>Walk around the vehicle with our staff before you drive off.</li>
-                <li>Save your confirmation message — you'll need it at pick-up.</li>
-                <li>Let us know early if you need a child seat or GPS unit.</li>
-            </ul>
-        </div>
-
-    </div>
-
-</section>
-
-<section class="testimonials" id="testimonials">
-
-    <div class="section-title reveal">
-        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>CUSTOMER STORIES</span>
-        <h2>Trusted by Everyday Drivers</h2>
-        <p>
-            Real feedback from renters who booked their trip through LUNA's.
-        </p>
-    </div>
-
-    <div class="testimonial-grid">
-
-        <div class="testimonial-card reveal" style="--delay:0s">
-            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-            <p>"Booking took less than five minutes, and the confirmation call came in under an hour. The car was spotless."</p>
-            <div class="testimonial-author">
-                <span class="avatar">AM</span>
-                <div>
-                    <strong>Andrea M.</strong>
-                    <small>Quezon City</small>
+            <section class="faq" id="faq">
+                <div class="section-title reveal">
+                    <h2>FAQs</h2>
                 </div>
-            </div>
-        </div>
-
-        <div class="testimonial-card reveal" style="--delay:.1s">
-            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-            <p>"We needed a van for a family trip to Tagaytay on short notice. LUNA's sorted us out the same day."</p>
-            <div class="testimonial-author">
-                <span class="avatar">PS</span>
-                <div>
-                    <strong>Paolo S.</strong>
-                    <small>Manila</small>
+                <div class="faq-list reveal">
+                    <div class="faq-item">
+                        <button type="button" class="faq-question">What do I need to book a car? <i class="fa-solid fa-chevron-down"></i></button>
+                        <div class="faq-answer"><p>A valid driver's license, one government-issued ID, and a credit or debit card for the security deposit.</p></div>
+                    </div>
+                    <div class="faq-item">
+                        <button type="button" class="faq-question">How does the confirmation process work? <i class="fa-solid fa-chevron-down"></i></button>
+                        <div class="faq-answer"><p>Submit your booking request through the form above. Our team reviews it and calls you to confirm.</p></div>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <div class="testimonial-card reveal" style="--delay:.2s">
-            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-            <p>"Straightforward process and no hidden charges at pick-up. Exactly what was quoted online."</p>
-            <div class="testimonial-author">
-                <span class="avatar">MR</span>
-                <div>
-                    <strong>Mikka R.</strong>
-                    <small>Pasig</small>
+            <section class="how-it-works" id="how-it-works">
+                <div class="section-title reveal">
+                    <h2>Guide</h2>
                 </div>
-            </div>
-        </div>
+                <div class="steps">
+                    <div class="step-card reveal">
+                        <div class="step-icon"><i class="fa-solid fa-car"></i></div>
+                        <h3>Select a Vehicle</h3>
+                        <p>Browse our available vehicles and choose the one that fits your travel needs.</p>
+                    </div>
+                    <div class="step-card reveal" style="--delay:.15s">
+                        <div class="step-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <h3>Submit Your Booking</h3>
+                        <p>Fill in your rental information, preferred dates, and contact details.</p>
+                    </div>
+                    <div class="step-card reveal" style="--delay:.3s">
+                        <div class="step-icon"><i class="fa-solid fa-phone"></i></div>
+                        <h3>Receive Confirmation</h3>
+                        <p>Our staff will review your request and contact you to confirm your reservation.</p>
+                    </div>
+                </div>
+            </section>
 
+        </div>
     </div>
 
-</section>
+    <!-- Interface: Search Results View -->
+    <div id="searchResultsView" class="results-interface" style="display: none;">
+        
+        <div class="results-layout">
+            
+            <!-- Sidebar Filters -->
+            <aside class="results-sidebar">
+                <div class="filter-box">
+                    <h3>Popular filters</h3>
+                    <label class="filter-check"><input type="checkbox" checked> <span>Automatic</span></label>
+                    <label class="filter-check"><input type="checkbox"> <span>Unlimited mileage</span></label>
+                    <label class="filter-check"><input type="checkbox"> <span>Promotions</span></label>
+                </div>
+                <div class="filter-box mt-3">
+                    <h3>Vehicle Size</h3>
+                    <label class="filter-check"><input type="checkbox"> <span>Small</span> <small>From ₱1,700</small></label>
+                    <label class="filter-check"><input type="checkbox" checked> <span>SUV</span> <small>From ₱1,950</small></label>
+                    <label class="filter-check"><input type="checkbox"> <span>Van</span> <small>From ₱2,750</small></label>
+                </div>
+            </aside>
 
-<section class="faq" id="faq">
+            <!-- Main Results List -->
+            <main class="results-main">
+                <div class="results-header">
+                    <h2>Recommended Offers</h2>
+                    <span class="offer-count">4 offers found</span>
+                </div>
 
-    <div class="section-title reveal">
-        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>FAQ</span>
-        <h2>Common Questions</h2>
-        <p>
-            Can't find what you're looking for? Reach out through the
-            contact details below.
-        </p>
+                <div class="results-list">
+                    
+                    <!-- Result 1 -->
+                    <div class="result-row-card">
+                        <div class="rr-visual">
+                            <img src="1.png" alt="Mitsubishi Xpander">
+                        </div>
+                        <div class="rr-details">
+                            <span class="top-choice-badge"><i class="fa-solid fa-thumbs-up"></i> Top choice</span>
+                            <h3>Mitsubishi Xpander <span>or similar Compact SUV</span></h3>
+                            <div class="rr-specs">
+                                <span><i class="fa-solid fa-user"></i> 7 Seats</span>
+                                <span><i class="fa-solid fa-gears"></i> Automatic</span>
+                                <span><i class="fa-solid fa-suitcase"></i> 4 Bags</span>
+                            </div>
+                            <div class="rr-perks">
+                                <span><i class="fa-solid fa-check"></i> Free delivery to your address</span>
+                                <span><i class="fa-solid fa-check"></i> Unlimited mileage</span>
+                            </div>
+                        </div>
+                        <div class="rr-action">
+                            <div class="price-block">
+                                <span class="price-label">Price per day</span>
+                                <div class="price-val">₱1,950.00</div>
+                                <div class="price-total">Total: ₱5,850.00</div>
+                            </div>
+                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                        </div>
+                    </div>
+
+                    <!-- Result 2 -->
+                    <div class="result-row-card">
+                        <div class="rr-visual">
+                            <i class="fa-solid fa-car fa-5x" style="color:var(--slate-light)"></i>
+                        </div>
+                        <div class="rr-details">
+                            <h3>Toyota Vios <span>or similar Compact Car</span></h3>
+                            <div class="rr-specs">
+                                <span><i class="fa-solid fa-user"></i> 5 Seats</span>
+                                <span><i class="fa-solid fa-gears"></i> Automatic</span>
+                                <span><i class="fa-solid fa-suitcase"></i> 2 Bags</span>
+                            </div>
+                            <div class="rr-perks">
+                                <span><i class="fa-solid fa-check"></i> Pick-up at branch</span>
+                            </div>
+                        </div>
+                        <div class="rr-action">
+                            <div class="price-block">
+                                <span class="price-label">Price per day</span>
+                                <div class="price-val">₱1,700.00</div>
+                                <div class="price-total">Total: ₱5,100.00</div>
+                            </div>
+                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                        </div>
+                    </div>
+
+                    <!-- Result 3 -->
+                    <div class="result-row-card">
+                        <div class="rr-visual">
+                            <i class="fa-solid fa-truck-monster fa-5x" style="color:var(--slate-light)"></i>
+                        </div>
+                        <div class="rr-details">
+                            <h3>Toyota Fortuner <span>or similar Intermediate SUV</span></h3>
+                            <div class="rr-specs">
+                                <span><i class="fa-solid fa-user"></i> 7 Seats</span>
+                                <span><i class="fa-solid fa-gears"></i> Automatic</span>
+                                <span><i class="fa-solid fa-suitcase"></i> 4 Bags</span>
+                            </div>
+                        </div>
+                        <div class="rr-action">
+                            <div class="price-block">
+                                <span class="price-label">Price per day</span>
+                                <div class="price-val">₱2,400.00</div>
+                                <div class="price-total">Total: ₱7,200.00</div>
+                            </div>
+                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                        </div>
+                    </div>
+
+                    <!-- Result 4 -->
+                    <div class="result-row-card">
+                        <div class="rr-visual">
+                            <i class="fa-solid fa-van-shuttle fa-5x" style="color:var(--slate-light)"></i>
+                        </div>
+                        <div class="rr-details">
+                            <h3>Toyota Hiace <span>or similar Van</span></h3>
+                            <div class="rr-specs">
+                                <span><i class="fa-solid fa-user"></i> 12 Seats</span>
+                                <span><i class="fa-solid fa-gears"></i> Automatic</span>
+                                <span><i class="fa-solid fa-suitcase"></i> 6 Bags</span>
+                            </div>
+                        </div>
+                        <div class="rr-action">
+                            <div class="price-block">
+                                <span class="price-label">Price per day</span>
+                                <div class="price-val">₱2,750.00</div>
+                                <div class="price-total">Total: ₱8,250.00</div>
+                            </div>
+                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+
+        </div>
     </div>
-
-    <div class="faq-list reveal" style="--delay:.1s">
-
-        <div class="faq-item">
-            <button type="button" class="faq-question">
-                What do I need to book a car?
-                <i class="fa-solid fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-                <p>A valid driver's license, one government-issued ID, and a credit or debit card for the security deposit. You'll also need to be at least 21 years old.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button type="button" class="faq-question">
-                How does the confirmation process work?
-                <i class="fa-solid fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-                <p>Submit your booking request through the form above. Our team reviews it and calls you, usually within a couple of hours, to confirm your vehicle, dates, and pick-up time.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button type="button" class="faq-question">
-                Is a security deposit required?
-                <i class="fa-solid fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-                <p>Yes. A hold is placed on your card at pick-up and released after the car is returned in good condition.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button type="button" class="faq-question">
-                Can I change my pick-up or drop-off details after booking?
-                <i class="fa-solid fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-                <p>Yes, just contact our team. Changes made ahead of your pick-up time are free of charge.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button type="button" class="faq-question">
-                Can someone else drive the car?
-                <i class="fa-solid fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-                <p>Only drivers listed on the agreement. Any additional driver must present their own valid license at pick-up.</p>
-            </div>
-        </div>
-
-        <div class="faq-item">
-            <button type="button" class="faq-question">
-                What happens if I return the car late?
-                <i class="fa-solid fa-chevron-down"></i>
-            </button>
-            <div class="faq-answer">
-                <p>A short grace period applies, after which an hourly late fee kicks in. Call us ahead of time if you're running behind and we'll do our best to work with you.</p>
-            </div>
-        </div>
-
-    </div>
-
-</section>
-
-<footer id="contact">
-
-    <div class="footer-content">
-
-        <div class="reveal">
-
-            <h2>LUNA's Car Rental</h2>
-
-            <p>
-                Direct Booking with Ease.
-                Premium Cars.
-                Reliable Service.
-            </p>
-
-        </div>
-
-        <div class="reveal" style="--delay:.1s">
-
-            <h4>Quick Links</h4>
-
-            <ul class="footer-links">
-                <li><a href="#fleet">Our Fleet</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#requirements">Requirements</a></li>
-                <li><a href="#faq">FAQ</a></li>
-            </ul>
-
-        </div>
-
-        <div class="reveal" style="--delay:.2s">
-
-            <h4>Contact</h4>
-
-            <p><i class="fa-solid fa-location-dot"></i> Quezon City, Philippines</p>
-
-            <p><i class="fa-solid fa-phone"></i> +63 912 345 6789</p>
-
-            <p><i class="fa-solid fa-envelope"></i> info@lunacarental.com</p>
-
-        </div>
-
-    </div>
-
-    <p class="copyright">
-        © 2026 LUNA's Car Rental. All Rights Reserved.
-    </p>
-
-</footer>
 
 </main>
 
-<script src="app.js"></script>
+<footer id="contact" class="landing-only">
+    <div class="footer-content">
+        <div class="reveal">
+            <h2>LUNA's Car Rental</h2>
+            <p>Direct Booking with Ease. Premium Cars. Reliable Service.</p>
+        </div>
+        <div class="reveal" style="--delay:.1s">
+            <h4>Quick Links</h4>
+            <ul class="footer-links">
+                <li><a href="#fleet">Our Fleet</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+        <div class="reveal" style="--delay:.2s">
+            <h4>Contact</h4>
+            <p><i class="fa-solid fa-location-dot"></i> Quezon City, Philippines</p>
+            <p><i class="fa-solid fa-envelope"></i> info@lunacarental.com</p>
+        </div>
+    </div>
+</footer>
 
+<script src="app.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 // ==========================================
-// 1. Mobile menu toggle
+// 1. Mobile menu toggle[cite: 3]
 // ==========================================
 const menuToggle = document.getElementById('menuToggle');
 const navLinks = document.getElementById('navLinks');
@@ -23,48 +23,9 @@ if(menuToggle && navLinks){
 }
 
 // ==========================================
-// 2. Header shrink on scroll + mini search sync
-// ==========================================
-const header = document.getElementById('siteHeader');
-const hmsLoc = document.getElementById('hmsLoc');
-const hmsDates = document.getElementById('hmsDates');
-const hmsSearchBtn = document.getElementById('hmsSearchBtn');
-
-if(header){
-    const onScroll = () => {
-        header.classList.toggle('scrolled', window.scrollY > 20);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive:true });
-}
-
-if(hmsSearchBtn){
-    hmsSearchBtn.addEventListener('click', () => {
-        const bookingSection = document.getElementById('booking');
-        if(bookingSection) bookingSection.scrollIntoView({ behavior:'smooth', block:'center' });
-    });
-}
-
-function syncMiniHeader(){
-    const pickupLocation = document.getElementById('pickupLocation');
-    const pickupDate = document.getElementById('pickupDate');
-    const dropoffDate = document.getElementById('dropoffDate');
-
-    if(hmsLoc && pickupLocation){
-        hmsLoc.textContent = pickupLocation.value || 'Quezon City';
-    }
-    if(hmsDates && pickupDate && pickupDate.value && dropoffDate && dropoffDate.value){
-        const pDate = new Date(pickupDate.value).toLocaleDateString('en-US', { month:'short', day:'numeric' });
-        const dDate = new Date(dropoffDate.value).toLocaleDateString('en-US', { month:'short', day:'numeric' });
-        hmsDates.textContent = `${pDate} - ${dDate}`;
-    }
-}
-
-// ==========================================
-// 3. Scroll reveal animations
+// 2. Scroll reveal animations[cite: 3]
 // ==========================================
 const revealEls = document.querySelectorAll('.reveal');
-
 if(revealEls.length){
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -74,240 +35,225 @@ if(revealEls.length){
             }
         });
     }, { threshold: 0.15 });
-
     revealEls.forEach(el => observer.observe(el));
 }
 
 // ==========================================
-// 4. Hero "Book Now" scrolls to booking and focuses first field
+// 3. Dynamic Sticky Booking Bar & Secondary Nav[cite: 4]
 // ==========================================
-const openBooking = document.getElementById('openBooking');
-const bookingSection = document.getElementById('booking');
-const pickupLocationInput = document.getElementById('pickupLocation');
+const header = document.getElementById('siteHeader');
+const bookingWrapper = document.getElementById('bookingWrapper');
+const bookingCard = document.getElementById('bookingCard');
+const secondaryNav = document.getElementById('secondaryNav');
+const fleetSection = document.getElementById('fleet');
 
-function goToBooking(){
-    if(!bookingSection) return;
-    bookingSection.scrollIntoView({ behavior:'smooth', block:'center' });
-    setTimeout(() => pickupLocationInput && pickupLocationInput.focus(), 500);
+// Store dynamic offsets
+let stickyOffset = 0;
+let fleetOffset = 0;
+
+function calculateOffsets() {
+    if(!bookingWrapper || !fleetSection) return;
+    // Calculate the absolute top position of elements relative to the document
+    const scrollPos = window.scrollY || window.pageYOffset;
+    stickyOffset = bookingWrapper.getBoundingClientRect().top + scrollPos - 20; 
+    fleetOffset = fleetSection.getBoundingClientRect().top + scrollPos - 150; // offset for the sticky header heights
 }
 
-if(openBooking){
-    openBooking.addEventListener('click', goToBooking);
-}
+// Run once immediately so offsets are correct even if the user scrolls
+// before all assets (images/fonts) finish loading, then refine on load/resize.
+calculateOffsets();
+window.addEventListener('load', calculateOffsets);
+window.addEventListener('resize', calculateOffsets);
+
+window.addEventListener('scroll', () => {
+    // If we are in results view, the bar is permanently sticky via CSS
+    if (document.body.classList.contains('show-results')) return;
+
+    const scrollY = window.scrollY;
+
+    // 1. Hide main header and make Booking card sticky
+    if (scrollY >= stickyOffset) {
+        document.body.classList.add('header-hidden');
+        bookingCard.classList.add('is-sticky');
+    } else {
+        document.body.classList.remove('header-hidden');
+        bookingCard.classList.remove('is-sticky');
+    }
+
+    // 2. Show Secondary Nav when hitting Fleet section
+    if (scrollY >= fleetOffset && scrollY >= stickyOffset) {
+        secondaryNav.classList.add('is-visible');
+    } else {
+        secondaryNav.classList.remove('is-visible');
+    }
+    
+    // 3. ScrollSpy for Secondary Nav
+    handleScrollSpy();
+}, { passive: true });
 
 // ==========================================
-// 5. Multi-step booking widget
+// 4. ScrollSpy Logic for Secondary Nav[cite: 4]
 // ==========================================
-const step1Form = document.getElementById('step1Form');
+const sections = [
+    { id: 'fleet', link: 'link-fleet' },
+    { id: 'testimonials', link: 'link-testimonials' },
+    { id: 'faq', link: 'link-faq' },
+    { id: 'how-it-works', link: 'link-how-it-works' }
+];
 
-if(step1Form){
+function handleScrollSpy() {
+    let currentId = '';
+    const scrollY = window.scrollY + 160; // offset account for sticky elements
 
-    const sameLocation = document.getElementById('sameLocation');
-    const dropoffGroup = document.getElementById('dropoffGroup');
-    const dropoffLocationInput = document.getElementById('dropoffLocation');
-
-    const pickupDate = document.getElementById('pickupDate');
-    const pickupTime = document.getElementById('pickupTime');
-    const dropoffDate = document.getElementById('dropoffDate');
-    const dropoffTime = document.getElementById('dropoffTime');
-
-    const bookingError = document.getElementById('bookingError');
-
-    const loaderOverlay = document.getElementById('loaderOverlay');
-    const loaderText = document.getElementById('loaderText');
-    const progressSteps = document.querySelectorAll('.progress-step');
-    const stepViews = document.querySelectorAll('.step-view');
-
-    const vehiclePill = document.getElementById('vehiclePill');
-    const vehiclePillText = document.getElementById('vehiclePillText');
-    const vehiclePillClear = document.getElementById('vehiclePillClear');
-
-    let currentStep = 1;
-    let selectedVehicleKey = null;
-
-    // ---- Build half-hour time options ----
-    const buildTimeOptions = (select, defaultValue) => {
-        select.innerHTML = '';
-        for(let h = 6; h <= 22; h++){
-            for(let m of [0, 30]){
-                if(h === 22 && m === 30) continue;
-                const hh = String(h).padStart(2, '0');
-                const mm = String(m).padStart(2, '0');
-                const value = `${hh}:${mm}`;
-                const opt = document.createElement('option');
-                opt.value = value;
-                opt.textContent = value;
-                if(value === defaultValue) opt.selected = true;
-                select.appendChild(opt);
+    sections.forEach(sec => {
+        const el = document.getElementById(sec.id);
+        if (el) {
+            const elTop = el.offsetTop;
+            const elHeight = el.offsetHeight;
+            if (scrollY >= elTop && scrollY < elTop + elHeight) {
+                currentId = sec.id;
             }
         }
-    };
+    });
 
-    buildTimeOptions(pickupTime, '13:00');
-    buildTimeOptions(dropoffTime, '13:00');
+    if (currentId) {
+        document.querySelectorAll('.sec-nav-item').forEach(a => a.classList.remove('active'));
+        const activeLink = document.getElementById(`link-${currentId}`);
+        if(activeLink) activeLink.classList.add('active');
+    }
+}
 
-    // ---- Default dates: today for pick-up, tomorrow for drop-off ----
-    const toInputDate = (d) => d.toISOString().split('T')[0];
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
+// Smooth scrolling for secondary links to offset sticky bars
+document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+            window.scrollTo({
+                top: targetSection.offsetTop - 120, // Offset for sticky headers
+                behavior: 'smooth'
+            });
+        }
+    });
+});
 
+// ==========================================
+// 5. Booking Widget Time Gen & Toggle[cite: 3, 4]
+// ==========================================
+const pickupTime = document.getElementById('pickupTime');
+const dropoffTime = document.getElementById('dropoffTime');
+const pickupDate = document.getElementById('pickupDate');
+const dropoffDate = document.getElementById('dropoffDate');
+const differentDropoff = document.getElementById('differentDropoff');
+const dropoffGroup = document.getElementById('dropoffGroup');
+const dropoffLocation = document.getElementById('dropoffLocation');
+
+const to12Hour = (h, m) => {
+    const period = h >= 12 ? 'PM' : 'AM';
+    let hour12 = h % 12;
+    if(hour12 === 0) hour12 = 12;
+    const mm = String(m).padStart(2, '0');
+    return `${hour12}:${mm} ${period}`;
+};
+
+const buildTimeOptions = (select, defaultValue) => {
+    if(!select) return;
+    select.innerHTML = '';
+    for(let h = 6; h <= 23; h++){
+        for(let m of [0, 30]){
+            const hh = String(h).padStart(2, '0');
+            const mm = String(m).padStart(2, '0');
+            const value = `${hh}:${mm}`; // kept in 24h format internally for easy sorting/processing
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = to12Hour(h, m); // displayed as 12h e.g. "11:00 PM"
+            if(value === defaultValue) opt.selected = true;
+            select.appendChild(opt);
+        }
+    }
+};
+
+buildTimeOptions(pickupTime, '10:00');
+buildTimeOptions(dropoffTime, '10:00');
+
+// Dates setup
+const toInputDate = (d) => d.toISOString().split('T')[0];
+const today = new Date();
+const tomorrow = new Date();
+tomorrow.setDate(today.getDate() + 3); // default 3 days as per reference
+
+if(pickupDate && dropoffDate) {
     pickupDate.value = toInputDate(today);
     dropoffDate.value = toInputDate(tomorrow);
     pickupDate.min = toInputDate(today);
-    dropoffDate.min = toInputDate(today);
-
+    
     pickupDate.addEventListener('change', () => {
         dropoffDate.min = pickupDate.value;
         if(dropoffDate.value < pickupDate.value){
             dropoffDate.value = pickupDate.value;
         }
-        syncMiniHeader();
     });
-    dropoffDate.addEventListener('change', syncMiniHeader);
-    if(pickupLocationInput) pickupLocationInput.addEventListener('input', syncMiniHeader);
+}
 
-    syncMiniHeader();
-
-    // ---- Toggle drop-off location field ----
-    const syncLocationField = () => {
-        if(sameLocation.checked){
-            dropoffGroup.classList.add('is-hidden');
-            dropoffLocationInput.required = false;
-        }else{
+if(differentDropoff && dropoffGroup) {
+    differentDropoff.addEventListener('change', () => {
+        if(differentDropoff.checked){
+            // User wants a different drop-off location -> reveal the field
             dropoffGroup.classList.remove('is-hidden');
-            dropoffLocationInput.required = true;
+            dropoffLocation.required = true;
+        }else{
+            dropoffGroup.classList.add('is-hidden');
+            dropoffLocation.required = false;
         }
-    };
-
-    sameLocation.addEventListener('change', syncLocationField);
-    syncLocationField();
-
-    // ---- Vehicle pill (carried over from the fleet section) ----
-    function setVehiclePill(name, key){
-        selectedVehicleKey = key;
-        if(vehiclePillText) vehiclePillText.textContent = name;
-        if(vehiclePill) vehiclePill.classList.add('show');
-    }
-
-    if(vehiclePillClear){
-        vehiclePillClear.addEventListener('click', () => {
-            selectedVehicleKey = null;
-            vehiclePill.classList.remove('show');
-            document.querySelectorAll('.car-result-card.matched').forEach(card => card.classList.remove('matched'));
-        });
-    }
-
-    // ---- Step navigation ----
-    function showLoader(text, duration, callback){
-        loaderText.textContent = text;
-        loaderOverlay.classList.add('active');
-        setTimeout(() => {
-            loaderOverlay.classList.remove('active');
-            callback();
-        }, duration);
-    }
-
-    function updateProgressUI(stepIndex){
-        progressSteps.forEach(st => {
-            const stepNum = parseInt(st.getAttribute('data-step'));
-            st.classList.toggle('active', stepNum <= stepIndex);
-        });
-    }
-
-    window.goToStep = function(stepIndex){
-        stepViews.forEach(view => view.classList.remove('active-step'));
-
-        let viewId = 'step1Form';
-        if(stepIndex === 2) viewId = 'step2Cars';
-        if(stepIndex === 3) viewId = 'step3Form';
-        if(stepIndex === 4) viewId = 'step4Success';
-
-        document.getElementById(viewId).classList.add('active-step');
-        updateProgressUI(stepIndex);
-        currentStep = stepIndex;
-
-        if(stepIndex === 2){
-            document.querySelectorAll('.car-result-card').forEach(card => {
-                card.classList.toggle('matched', selectedVehicleKey && card.dataset.key === selectedVehicleKey);
-            });
-        }
-    };
-
-    // ---- Step 1 -> Step 2 ----
-    step1Form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        bookingError.classList.remove('show');
-
-        if(!step1Form.checkValidity()){
-            step1Form.reportValidity();
-            return;
-        }
-
-        const pickup = new Date(`${pickupDate.value}T${pickupTime.value}`);
-        const dropoff = new Date(`${dropoffDate.value}T${dropoffTime.value}`);
-
-        if(dropoff <= pickup){
-            bookingError.classList.add('show');
-            return;
-        }
-
-        showLoader('Searching fleet...', 1200, () => goToStep(2));
-    });
-
-    // ---- Step 2 -> Step 3 ----
-    window.selectCar = function(carName, dailyRate, key){
-        const d1 = new Date(pickupDate.value);
-        const d2 = new Date(dropoffDate.value);
-        const diffTime = Math.abs(d2 - d1);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-        const total = diffDays * dailyRate;
-
-        setVehiclePill(carName, key);
-
-        document.getElementById('summaryCar').textContent = carName;
-        document.getElementById('summaryPrice').textContent = `₱${total.toLocaleString()}`;
-
-        showLoader('Preparing secure form...', 600, () => goToStep(3));
-    };
-
-    // ---- Step 3 -> Step 4 ----
-    const step3Form = document.getElementById('step3Form');
-    if(step3Form){
-        step3Form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if(!step3Form.checkValidity()){
-                step3Form.reportValidity();
-                return;
-            }
-            showLoader('Uploading secure documents...', 1800, () => goToStep(4));
-        });
-    }
-
-    // ---- Fleet "Reserve" buttons feed straight into Step 1 ----
-    const vehicleButtons = document.querySelectorAll('.vehicle-btn');
-    vehicleButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const name = btn.dataset.vehicle;
-            setVehiclePill(name, name);
-            goToStep(1);
-            goToBooking();
-        });
+        // Recalculate sticky offsets since the booking card's height just changed
+        calculateOffsets();
     });
 }
 
 // ==========================================
-// 6. FAQ accordion
+// 6. Search Submit -> Show Results Interface[cite: 4]
+// ==========================================
+const mainSearchForm = document.getElementById('mainSearchForm');
+const searchResultsView = document.getElementById('searchResultsView');
+
+if(mainSearchForm) {
+    mainSearchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        if(!mainSearchForm.checkValidity()){
+            mainSearchForm.reportValidity();
+            return;
+        }
+        
+        // Transition to Results Page Interface
+        document.body.classList.add('show-results');
+        searchResultsView.style.display = 'block';
+        
+        // Scroll back to top to view layout properly
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    });
+}
+
+// Triggers from the fleet section to also open results
+document.querySelectorAll('.select-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Mock a location value so form is valid
+        document.getElementById('pickupLocation').value = "Quezon City Branch";
+        mainSearchForm.dispatchEvent(new Event('submit'));
+    });
+});
+
+// ==========================================
+// 7. FAQ accordion[cite: 3]
 // ==========================================
 const faqItems = document.querySelectorAll('.faq-item');
-
 faqItems.forEach(item => {
     const question = item.querySelector('.faq-question');
     const answer = item.querySelector('.faq-answer');
 
     question.addEventListener('click', () => {
         const isOpen = item.classList.contains('open');
-
         faqItems.forEach(other => {
             other.classList.remove('open');
             other.querySelector('.faq-answer').style.maxHeight = null;
