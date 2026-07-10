@@ -69,6 +69,7 @@ body.header-hidden header{ transform:translateY(-100%); }
 ===================================================== */
 .hero{ position:relative; min-height:56vh; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding-top:150px; padding-bottom:170px; background:radial-gradient(65% 65% at 88% 15%, rgba(245,158,11,.20), transparent 60%), linear-gradient(135deg,#0B1220 0%, #16213E 45%, #1D2C6B 100%); overflow:hidden; }
 .hero-glow{ position:absolute; inset:0; background:radial-gradient(45% 45% at 15% 85%, rgba(37,99,235,.30), transparent 70%); pointer-events:none; z-index:1; }
+.hero-top{ position:relative; z-index:2; width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:26px; }
 .hero-content{ position:relative; z-index:2; max-width:640px; animation:heroRise .9s var(--ease) both; }
 .eyebrow{ display:inline-flex; align-items:center; gap:8px; color:#fff; font-size:13px; font-weight:600; padding:8px 16px; background:rgba(255,255,255,.12); border-radius:50px; }
 .eyebrow-dot{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--amber); }
@@ -76,7 +77,7 @@ body.header-hidden header{ transform:translateY(-100%); }
 .highlight{ position:relative; color:var(--amber); }
 .hero-content p{ max-width:560px; margin-bottom:0; font-size:17px; line-height:1.9; color:rgba(255,255,255,.75); }
 
-.my-bookings-btn{ position:absolute; top:36px; right:8%; z-index:3; display:flex; align-items:center; gap:8px; background:#fff; color:var(--ink); font-family:var(--font-body); font-weight:600; font-size:14px; padding:11px 20px; border:none; border-radius:50px; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.18); transition:transform .25s var(--ease), box-shadow .25s var(--ease); }
+.my-bookings-btn{ display:flex; align-items:center; gap:8px; background:#fff; color:var(--ink); font-family:var(--font-body); font-weight:600; font-size:14px; padding:11px 20px; border:none; border-radius:50px; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.18); transition:transform .25s var(--ease), box-shadow .25s var(--ease); flex-shrink:0; }
 .my-bookings-btn:hover{ transform:translateY(-2px); box-shadow:0 12px 26px rgba(0,0,0,.24); }
 .my-bookings-btn i{ color:var(--blue); }
 
@@ -87,6 +88,18 @@ body.header-hidden header{ transform:translateY(-100%); }
 ===================================================== */
 .booking-wrapper{ position:relative; z-index:1000; min-height:180px; margin-top:-100px; margin-bottom:40px; padding:0 8%; transition:padding 0.3s var(--ease); }
 .booking-card{ background:var(--white); border-radius:16px; padding:20px 24px; box-shadow:0 20px 40px -10px rgba(15,23,42,.12), 0 0 0 1px rgba(15,23,42,.04); transition:all 0.4s var(--ease); width:100%; margin:0 auto; max-width:1240px; }
+
+/* Rental Type Toggle (Rent a Car / Rent a Car with Driver) */
+.rental-type-toggle{ display:inline-flex; gap:4px; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:4px; margin-bottom:16px; }
+.rt-option{ display:flex; align-items:center; gap:8px; border:none; background:transparent; color:var(--slate); font-family:var(--font-body); font-size:14px; font-weight:600; padding:9px 18px; border-radius:7px; cursor:pointer; transition:background .25s var(--ease), color .25s var(--ease); }
+.rt-option i{ font-size:13px; }
+.rt-option:hover{ color:var(--ink); }
+.rt-option.active{ background:var(--trip-blue); color:#fff; box-shadow:0 4px 10px rgba(50,100,255,.25); }
+.rt-option.active:hover{ color:#fff; }
+
+/* Hide sticky search bar's bottom row when it collapses, but the toggle stays above that flow */
+.booking-card.is-sticky .rental-type-toggle{ display:none; }
+body.show-results .rental-type-toggle{ display:none; }
 
 .booking-fields{ display:flex; gap:12px; align-items:center; margin-bottom:16px; }
 .field-group{ flex:1; }
@@ -180,7 +193,8 @@ body.header-hidden header{ transform:translateY(-100%); }
 .testimonial-author strong{ display:block; font-size:14px; }
 .testimonial-author small{ color:var(--slate-light); font-size:12px; }
 
-.faq{ background:#fff; max-width:900px; margin:0 auto; width:100%; }
+.faq{ background:var(--bg); }
+.faq-list{ max-width:900px; margin:0 auto; width:100%; }
 .faq-item{ border-bottom:1px solid var(--line); }
 .faq-question{ width:100%; text-align:left; background:none; border:none; padding:20px 0; font-size:16px; font-weight:500; color:var(--ink); cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
 .faq-answer{ max-height:0; overflow:hidden; transition:max-height 0.3s; }
@@ -272,7 +286,6 @@ body.show-results .booking-bottom-row { display:flex; } /* Keep bottom row visib
     .hero-content{ max-width:100%; }
     .hero-content p{ margin-left:auto; margin-right:auto; }
     .hero-content h1{ font-size:2.8rem; }
-    .my-bookings-btn{ position:static; margin-bottom:24px; align-self:center; }
     .footer-content{ grid-template-columns:1fr 1fr; }
 }
 
@@ -300,6 +313,10 @@ body.show-results .booking-bottom-row { display:flex; } /* Keep bottom row visib
     .date-time-input{ flex-wrap:wrap; }
     .booking-options-right{ flex-direction:column; align-items:flex-start; gap:10px; }
     .compact-hidden{ display:none; }
+
+    .hero-top{ flex-direction:column; align-items:center; gap:16px; }
+    .rental-type-toggle{ width:100%; }
+    .rt-option{ flex:1; justify-content:center; }
 
     section{ padding:60px 6%; }
     .badges-grid{ grid-template-columns:1fr; }

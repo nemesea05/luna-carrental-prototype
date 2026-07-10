@@ -146,8 +146,12 @@ const dropoffTime = document.getElementById('dropoffTime');
 const pickupDate = document.getElementById('pickupDate');
 const dropoffDate = document.getElementById('dropoffDate');
 const differentDropoff = document.getElementById('differentDropoff');
+const differentDropoffWrap = document.getElementById('differentDropoffWrap');
 const dropoffGroup = document.getElementById('dropoffGroup');
 const dropoffLocation = document.getElementById('dropoffLocation');
+const pickupGroup = document.getElementById('pickupGroup');
+const pickupLocation = document.getElementById('pickupLocation');
+const rtButtons = document.querySelectorAll('.rt-option');
 
 const to12Hour = (h, m) => {
     const period = h >= 12 ? 'PM' : 'AM';
@@ -209,6 +213,44 @@ if(differentDropoff && dropoffGroup) {
         // Recalculate sticky offsets since the booking card's height just changed
         calculateOffsets();
     });
+}
+
+// ==========================================
+// 5b. Rental Type Toggle: "Rent a Car" vs "Rent a Car with Driver"
+// Self-drive rentals never ask for pick-up/drop-off location; a
+// with-driver rental always needs both, since the driver has to know
+// where to meet the customer and where to end the trip.
+// ==========================================
+function setRentalType(type){
+    const isDriver = type === 'driver';
+
+    rtButtons.forEach(btn => {
+        const active = btn.dataset.type === type;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+
+    pickupGroup.classList.toggle('is-hidden', !isDriver);
+    pickupLocation.required = isDriver;
+    differentDropoffWrap.classList.toggle('is-hidden', !isDriver);
+
+    if(!isDriver){
+        // Switching to self-drive: clear any driver-mode location state
+        pickupLocation.value = '';
+        differentDropoff.checked = false;
+        dropoffGroup.classList.add('is-hidden');
+        dropoffLocation.required = false;
+        dropoffLocation.value = '';
+    }
+
+    calculateOffsets();
+}
+
+if(rtButtons.length){
+    rtButtons.forEach(btn => {
+        btn.addEventListener('click', () => setRentalType(btn.dataset.type));
+    });
+    setRentalType('self'); // default: self-drive, no location needed
 }
 
 // ==========================================

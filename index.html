@@ -44,11 +44,13 @@
         
         <section class="hero landing-only">
             <div class="hero-glow" aria-hidden="true"></div>
-            <button type="button" class="my-bookings-btn" onclick="alert('No bookings yet — reserve a car to see it here!')">
-                <i class="fa-solid fa-clipboard-list"></i> My Bookings
-            </button>
-            <div class="hero-content">
+            <div class="hero-top">
                 <span class="eyebrow"><i class="eyebrow-dot"></i>CAR RENTAL SERVICE</span>
+                <button type="button" class="my-bookings-btn" onclick="alert('No bookings yet — reserve a car to see it here!')">
+                    <i class="fa-solid fa-clipboard-list"></i> My Bookings
+                </button>
+            </div>
+            <div class="hero-content">
                 <h1>Book Your Rental Car<br>In <span class="highlight">Minutes.</span></h1>
                 <p>Fast, simple and hassle-free booking. Select your vehicle, choose your rental dates, submit your information, and wait for our confirmation call.</p>
             </div>
@@ -58,13 +60,23 @@
         <div class="booking-wrapper" id="bookingWrapper">
             <div class="booking-card" id="bookingCard">
                 <form id="mainSearchForm" novalidate>
+
+                    <!-- Rental Type Selector -->
+                    <div class="rental-type-toggle" role="tablist" aria-label="Rental type">
+                        <button type="button" class="rt-option active" id="rtSelf" data-type="self" role="tab" aria-selected="true">
+                            <i class="fa-solid fa-car-side"></i> Rent a Car
+                        </button>
+                        <button type="button" class="rt-option" id="rtDriver" data-type="driver" role="tab" aria-selected="false">
+                            <i class="fa-solid fa-id-card-clip"></i> Rent a Car with Driver
+                        </button>
+                    </div>
                     
                     <!-- Trip.com Style Top Row -->
                     <div class="booking-fields">
-                        <div class="field-group">
+                        <div class="field-group is-hidden" id="pickupGroup">
                             <div class="field-input stacked-input">
                                 <label for="pickupLocation">Pick-up location</label>
-                                <input type="text" id="pickupLocation" placeholder="Select city, branch, or area..." autocomplete="off" required>
+                                <input type="text" id="pickupLocation" placeholder="Select city, branch, or area..." autocomplete="off">
                             </div>
                         </div>
 
@@ -110,7 +122,7 @@
 
                     <!-- Trip.com Style Bottom Row -->
                     <div class="booking-bottom-row">
-                        <label class="checkbox-label">
+                        <label class="checkbox-label is-hidden" id="differentDropoffWrap">
                             <input type="checkbox" id="differentDropoff">
                             <span>Drop off at a different location</span>
                         </label>
