@@ -46,6 +46,7 @@ const bookingWrapper = document.getElementById('bookingWrapper');
 const bookingCard = document.getElementById('bookingCard');
 const secondaryNav = document.getElementById('secondaryNav');
 const fleetSection = document.getElementById('fleet');
+const navCarServices = document.getElementById('navCarServices');
 
 // Store dynamic offsets
 let stickyOffset = 0;
@@ -53,20 +54,17 @@ let fleetOffset = 0;
 
 function calculateOffsets() {
     if(!bookingWrapper || !fleetSection) return;
-    // Calculate the absolute top position of elements relative to the document
     const scrollPos = window.scrollY || window.pageYOffset;
     stickyOffset = bookingWrapper.getBoundingClientRect().top + scrollPos - 20; 
-    fleetOffset = fleetSection.getBoundingClientRect().top + scrollPos - 150; // offset for the sticky header heights
+    fleetOffset = fleetSection.getBoundingClientRect().top + scrollPos - 150; 
 }
 
-// Run once immediately so offsets are correct even if the user scrolls
-// before all assets (images/fonts) finish loading, then refine on load/resize.
 calculateOffsets();
 window.addEventListener('load', calculateOffsets);
 window.addEventListener('resize', calculateOffsets);
 
 window.addEventListener('scroll', () => {
-    // If we are in results view, the bar is permanently sticky via CSS
+    // If we are in results view, navigation visibility mapping bypasses scroll state triggers
     if (document.body.classList.contains('show-results')) return;
 
     const scrollY = window.scrollY;
@@ -102,8 +100,10 @@ const sections = [
 ];
 
 function handleScrollSpy() {
+    if (document.body.classList.contains('show-results')) return;
+    
     let currentId = '';
-    const scrollY = window.scrollY + 160; // offset account for sticky elements
+    const scrollY = window.scrollY + 160; 
 
     sections.forEach(sec => {
         const el = document.getElementById(sec.id);
@@ -123,15 +123,16 @@ function handleScrollSpy() {
     }
 }
 
-// Smooth scrolling for secondary links to offset sticky bars
+// Smooth scrolling for links
 document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
+        if(document.body.classList.contains('show-results')) return; // Fallback handled by view resets
         e.preventDefault();
         const targetId = this.getAttribute('href').substring(1);
         const targetSection = document.getElementById(targetId);
         if (targetSection) {
             window.scrollTo({
-                top: targetSection.offsetTop - 120, // Offset for sticky headers
+                top: targetSection.offsetTop - 120, 
                 behavior: 'smooth'
             });
         }
@@ -167,10 +168,10 @@ const buildTimeOptions = (select, defaultValue) => {
         for(let m of [0, 30]){
             const hh = String(h).padStart(2, '0');
             const mm = String(m).padStart(2, '0');
-            const value = `${hh}:${mm}`; // kept in 24h format internally for easy sorting/processing
+            const value = `${hh}:${mm}`; 
             const opt = document.createElement('option');
             opt.value = value;
-            opt.textContent = to12Hour(h, m); // displayed as 12h e.g. "11:00 PM"
+            opt.textContent = to12Hour(h, m); 
             if(value === defaultValue) opt.selected = true;
             select.appendChild(opt);
         }
@@ -184,7 +185,7 @@ buildTimeOptions(dropoffTime, '10:00');
 const toInputDate = (d) => d.toISOString().split('T')[0];
 const today = new Date();
 const tomorrow = new Date();
-tomorrow.setDate(today.getDate() + 3); // default 3 days as per reference
+tomorrow.setDate(today.getDate() + 3); 
 
 if(pickupDate && dropoffDate) {
     pickupDate.value = toInputDate(today);
@@ -199,10 +200,6 @@ if(pickupDate && dropoffDate) {
     });
 }
 
-// ==========================================
-// 5b. Rental Type Toggle: "Rent a Car" vs "Rent a Car with Driver"
-// Self-drive rentals never ask for pick-up location in this design.
-// ==========================================
 function setRentalType(type){
     const isDriver = type === 'driver';
 
@@ -232,7 +229,7 @@ if(rtButtons.length){
     rtButtons.forEach(btn => {
         btn.addEventListener('click', () => setRentalType(btn.dataset.type));
     });
-    setRentalType('self'); // default: self-drive, no location needed
+    setRentalType('self'); 
 }
 
 // ==========================================
@@ -250,7 +247,6 @@ if(mainSearchForm) {
             return;
         }
         
-        // Clear any leftover scroll-triggered sticky state from the landing page.
         bookingCard.classList.remove('is-sticky');
         document.body.classList.remove('header-hidden');
         secondaryNav.classList.remove('is-visible');
@@ -259,27 +255,37 @@ if(mainSearchForm) {
         document.body.classList.add('show-results');
         searchResultsView.style.display = 'block';
         
-        // Scroll back to top to view layout properly
+        // Highlight the "Car Services" top navigation item explicitly
+        if(navCarServices) {
+            navCarServices.classList.add('highlight-active');
+        }
+        
         window.scrollTo({ top: 0, behavior: 'instant' });
     });
 }
 
-// Logo click returns to the landing view from search results
+// Return to home state view when the LUNA's logo is clicked
 document.querySelectorAll('.clickable-logo').forEach(logo => {
     logo.addEventListener('click', () => {
         if(!document.body.classList.contains('show-results')) return;
+        
         document.body.classList.remove('show-results');
         searchResultsView.style.display = 'none';
+        
+        // Remove active highlighters
+        if(navCarServices) {
+            navCarServices.classList.remove('highlight-active');
+        }
+        
         window.scrollTo({ top: 0, behavior: 'instant' });
         calculateOffsets();
     });
 });
 
-// Triggers from the fleet section to also open results
+// Grid deal item actions mapping
 document.querySelectorAll('.select-trigger').forEach(btn => {
     btn.addEventListener('click', () => {
-        // Mock a location value so form is valid
-        document.getElementById('pickupLocation').value = "Quezon City Branch";
+        document.getElementById('pickupLocation').value = "Quezon City Headquarters";
         mainSearchForm.dispatchEvent(new Event('submit'));
     });
 });
