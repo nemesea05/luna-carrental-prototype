@@ -7,7 +7,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
@@ -16,15 +16,15 @@
 
 <body>
 
-<header>
+<header id="siteHeader">
 
     <nav class="navbar">
 
         <div class="logo">
-            LUNA's Car Rental
+            LUNA<span class="logo-dot">'</span>s Car Rental
         </div>
 
-        <ul class="nav-links">
+        <ul class="nav-links" id="navLinks">
             <li><a href="#">Home</a></li>
             <li><a href="#how-it-works">How It Works</a></li>
             <li><a href="#contact">Contact</a></li>
@@ -35,7 +35,7 @@
             <a href="#" class="signup-btn">Sign Up</a>
         </div>
 
-        <div class="menu-toggle">
+        <div class="menu-toggle" id="menuToggle">
             <i class="fa-solid fa-bars"></i>
         </div>
 
@@ -47,14 +47,16 @@
 
 <section class="hero">
 
+    <div class="hero-glow" aria-hidden="true"></div>
+
     <div class="hero-content">
 
-        <span>CAR RENTAL SERVICE</span>
+        <span class="eyebrow"><i class="eyebrow-dot"></i>CAR RENTAL SERVICE</span>
 
         <h1>
             Book Your Rental Car
             <br>
-            In Minutes.
+            In <span class="highlight">Minutes.</span>
         </h1>
 
         <p>
@@ -66,7 +68,8 @@
         <div class="hero-buttons">
 
             <button class="primary-btn" id="openBooking">
-                Book Now
+                <span>Book Now</span>
+                <i class="fa-solid fa-arrow-right"></i>
             </button>
 
             <a href="#contact" class="secondary-btn">
@@ -75,21 +78,26 @@
 
         </div>
 
+        <div class="hero-route" aria-hidden="true">
+            <svg viewBox="0 0 420 40" preserveAspectRatio="none">
+                <path class="route-path" d="M0,25 C80,5 140,40 220,20 C300,2 340,30 420,12" />
+            </svg>
+        </div>
+
     </div>
 
     <div class="hero-image">
-
+        <div class="hero-image-blob" aria-hidden="true"></div>
         <img src="1.png" alt="Mitsubishi Xpander">
-
     </div>
 
 </section>
 
 <section class="how-it-works" id="how-it-works">
 
-    <div class="section-title">
+    <div class="section-title reveal">
 
-        <span>HOW IT WORKS</span>
+        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>HOW IT WORKS</span>
 
         <h2>Rent Your Car in 3 Easy Steps</h2>
 
@@ -102,7 +110,11 @@
 
     <div class="steps">
 
-        <div class="step-card">
+        <div class="step-line" aria-hidden="true"></div>
+
+        <div class="step-card reveal" style="--delay:0s">
+
+            <span class="step-number">01</span>
 
             <div class="step-icon">
                 <i class="fa-solid fa-car"></i>
@@ -117,7 +129,9 @@
 
         </div>
 
-        <div class="step-card">
+        <div class="step-card reveal" style="--delay:.15s">
+
+            <span class="step-number">02</span>
 
             <div class="step-icon">
                 <i class="fa-solid fa-calendar-check"></i>
@@ -132,7 +146,9 @@
 
         </div>
 
-        <div class="step-card">
+        <div class="step-card reveal" style="--delay:.3s">
+
+            <span class="step-number">03</span>
 
             <div class="step-icon">
                 <i class="fa-solid fa-phone"></i>
@@ -155,7 +171,7 @@
 
     <div class="footer-content">
 
-        <div>
+        <div class="reveal">
 
             <h2>LUNA's Car Rental</h2>
 
@@ -167,7 +183,7 @@
 
         </div>
 
-        <div>
+        <div class="reveal" style="--delay:.1s">
 
             <h4>Contact</h4>
 
@@ -186,6 +202,8 @@
     </p>
 
 </footer>
+
+</main>
 
 <script src="app.js"></script>
 
