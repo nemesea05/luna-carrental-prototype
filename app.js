@@ -1,5 +1,5 @@
 // ==========================================
-// 1. Mobile menu toggle[cite: 3]
+// 1. Mobile menu toggle
 // ==========================================
 const menuToggle = document.getElementById('menuToggle');
 const navLinks = document.getElementById('navLinks');
@@ -23,7 +23,7 @@ if(menuToggle && navLinks){
 }
 
 // ==========================================
-// 2. Scroll reveal animations[cite: 3]
+// 2. Scroll reveal animations
 // ==========================================
 const revealEls = document.querySelectorAll('.reveal');
 if(revealEls.length){
@@ -39,7 +39,7 @@ if(revealEls.length){
 }
 
 // ==========================================
-// 3. Dynamic Sticky Booking Bar & Secondary Nav[cite: 4]
+// 3. Dynamic Sticky Booking Bar & Secondary Nav
 // ==========================================
 const header = document.getElementById('siteHeader');
 const bookingWrapper = document.getElementById('bookingWrapper');
@@ -92,7 +92,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 // ==========================================
-// 4. ScrollSpy Logic for Secondary Nav[cite: 4]
+// 4. ScrollSpy Logic for Secondary Nav
 // ==========================================
 const sections = [
     { id: 'fleet', link: 'link-fleet' },
@@ -139,19 +139,18 @@ document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
 });
 
 // ==========================================
-// 5. Booking Widget Time Gen & Toggle[cite: 3, 4]
+// 5. Booking Widget Time Gen & Toggle
 // ==========================================
 const pickupTime = document.getElementById('pickupTime');
 const dropoffTime = document.getElementById('dropoffTime');
 const pickupDate = document.getElementById('pickupDate');
 const dropoffDate = document.getElementById('dropoffDate');
-const differentDropoff = document.getElementById('differentDropoff');
-const differentDropoffWrap = document.getElementById('differentDropoffWrap');
-const dropoffGroup = document.getElementById('dropoffGroup');
-const dropoffLocation = document.getElementById('dropoffLocation');
 const pickupGroup = document.getElementById('pickupGroup');
 const pickupLocation = document.getElementById('pickupLocation');
 const rtButtons = document.querySelectorAll('.rt-option');
+
+const driverProvidedMessage = document.getElementById('driverProvidedMessage');
+const selfDriveOptions = document.getElementById('selfDriveOptions');
 
 const to12Hour = (h, m) => {
     const period = h >= 12 ? 'PM' : 'AM';
@@ -200,26 +199,9 @@ if(pickupDate && dropoffDate) {
     });
 }
 
-if(differentDropoff && dropoffGroup) {
-    differentDropoff.addEventListener('change', () => {
-        if(differentDropoff.checked){
-            // User wants a different drop-off location -> reveal the field
-            dropoffGroup.classList.remove('is-hidden');
-            dropoffLocation.required = true;
-        }else{
-            dropoffGroup.classList.add('is-hidden');
-            dropoffLocation.required = false;
-        }
-        // Recalculate sticky offsets since the booking card's height just changed
-        calculateOffsets();
-    });
-}
-
 // ==========================================
 // 5b. Rental Type Toggle: "Rent a Car" vs "Rent a Car with Driver"
-// Self-drive rentals never ask for pick-up/drop-off location; a
-// with-driver rental always needs both, since the driver has to know
-// where to meet the customer and where to end the trip.
+// Self-drive rentals never ask for pick-up location in this design.
 // ==========================================
 function setRentalType(type){
     const isDriver = type === 'driver';
@@ -230,17 +212,17 @@ function setRentalType(type){
         btn.setAttribute('aria-selected', active ? 'true' : 'false');
     });
 
-    pickupGroup.classList.toggle('is-hidden', !isDriver);
-    pickupLocation.required = isDriver;
-    differentDropoffWrap.classList.toggle('is-hidden', !isDriver);
-
-    if(!isDriver){
-        // Switching to self-drive: clear any driver-mode location state
+    if(isDriver){
+        pickupGroup.classList.remove('is-hidden');
+        pickupLocation.required = true;
+        driverProvidedMessage.classList.remove('is-hidden');
+        selfDriveOptions.classList.add('is-hidden');
+    } else {
+        pickupGroup.classList.add('is-hidden');
+        pickupLocation.required = false;
         pickupLocation.value = '';
-        differentDropoff.checked = false;
-        dropoffGroup.classList.add('is-hidden');
-        dropoffLocation.required = false;
-        dropoffLocation.value = '';
+        driverProvidedMessage.classList.add('is-hidden');
+        selfDriveOptions.classList.remove('is-hidden');
     }
 
     calculateOffsets();
@@ -254,7 +236,7 @@ if(rtButtons.length){
 }
 
 // ==========================================
-// 6. Search Submit -> Show Results Interface[cite: 4]
+// 6. Search Submit -> Show Results Interface
 // ==========================================
 const mainSearchForm = document.getElementById('mainSearchForm');
 const searchResultsView = document.getElementById('searchResultsView');
@@ -269,10 +251,6 @@ if(mainSearchForm) {
         }
         
         // Clear any leftover scroll-triggered sticky state from the landing page.
-        // Without this, .booking-card.is-sticky (3 classes) can out-specificity
-        // body.show-results (2 classes) and force the bottom row hidden, making
-        // the sticky bar render shorter than the results page's top padding
-        // expects — leaving a visible gap above "Recommended Offers".
         bookingCard.classList.remove('is-sticky');
         document.body.classList.remove('header-hidden');
         secondaryNav.classList.remove('is-visible');
@@ -307,7 +285,7 @@ document.querySelectorAll('.select-trigger').forEach(btn => {
 });
 
 // ==========================================
-// 7. FAQ accordion[cite: 3]
+// 7. FAQ accordion
 // ==========================================
 const faqItems = document.querySelectorAll('.faq-item');
 faqItems.forEach(item => {

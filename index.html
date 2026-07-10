@@ -75,27 +75,20 @@
                     <div class="booking-fields">
                         <div class="field-group is-hidden" id="pickupGroup">
                             <div class="field-input stacked-input">
-                                <label for="pickupLocation">Pick-up location</label>
+                                <label for="pickupLocation"><i class="fa-solid fa-location-dot"></i> Pick-up location</label>
                                 <input type="text" id="pickupLocation" placeholder="Select city, branch, or area..." autocomplete="off">
-                            </div>
-                        </div>
-
-                        <div class="field-group is-hidden" id="dropoffGroup">
-                            <div class="field-input stacked-input">
-                                <label for="dropoffLocation">Drop-off location</label>
-                                <input type="text" id="dropoffLocation" placeholder="Select drop-off location" autocomplete="off">
                             </div>
                         </div>
 
                         <div class="field-group">
                             <div class="field-input date-time-input">
                                 <div class="dt-section">
-                                    <label for="pickupDate">Pick-up time</label>
+                                    <label for="pickupDate"><i class="fa-regular fa-calendar"></i> Pick-up date</label>
                                     <input type="date" id="pickupDate" required>
                                 </div>
                                 <div class="dt-divider"></div>
                                 <div class="dt-section">
-                                    <label>&nbsp;</label>
+                                    <label for="pickupTime"><i class="fa-regular fa-clock"></i> Time</label>
                                     <select id="pickupTime" class="time-sel" required></select>
                                 </div>
                             </div>
@@ -104,12 +97,12 @@
                         <div class="field-group">
                             <div class="field-input date-time-input">
                                 <div class="dt-section">
-                                    <label for="dropoffDate">Drop-off time</label>
+                                    <label for="dropoffDate"><i class="fa-regular fa-calendar-check"></i> Drop-off date</label>
                                     <input type="date" id="dropoffDate" required>
                                 </div>
                                 <div class="dt-divider"></div>
                                 <div class="dt-section">
-                                    <label>&nbsp;</label>
+                                    <label for="dropoffTime"><i class="fa-regular fa-clock"></i> Time</label>
                                     <select id="dropoffTime" class="time-sel" required></select>
                                 </div>
                             </div>
@@ -122,18 +115,17 @@
 
                     <!-- Trip.com Style Bottom Row -->
                     <div class="booking-bottom-row">
-                        <label class="checkbox-label is-hidden" id="differentDropoffWrap">
-                            <input type="checkbox" id="differentDropoff">
-                            <span>Drop off at a different location</span>
-                        </label>
                         
-                        <div class="booking-options-right">
+                        <!-- Driver will be provided message -->
+                        <div id="driverProvidedMessage" class="driver-message is-hidden">
+                            <i class="fa-solid fa-user-tie"></i> Driver will be provided
+                        </div>
+                        
+                        <div class="booking-options-right" id="selfDriveOptions">
                             <div class="driver-option compact-hidden">
                                 <label for="driverCountry">Driver's license issuing country/region <i class="fa-solid fa-circle-info"></i></label>
                                 <select id="driverCountry">
                                     <option selected>Philippines</option>
-                                    <option>United States</option>
-                                    <option>Other</option>
                                 </select>
                             </div>
                             <div class="driver-option compact-hidden">

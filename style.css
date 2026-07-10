@@ -84,7 +84,7 @@ body.header-hidden header{ transform:translateY(-100%); }
 @keyframes heroRise{ from{ opacity:0; transform:translateY(24px); } to{ opacity:1; transform:translateY(0); } }
 
 /* =====================================================
-   BOOKING BAR WIDGET (Trip.com Layout)
+   BOOKING BAR WIDGET
 ===================================================== */
 .booking-wrapper{ position:relative; z-index:1000; min-height:180px; margin-top:-100px; margin-bottom:40px; padding:0 8%; transition:padding 0.3s var(--ease); }
 .booking-card{ background:var(--white); border-radius:16px; padding:20px 24px; box-shadow:0 20px 40px -10px rgba(15,23,42,.12), 0 0 0 1px rgba(15,23,42,.04); transition:all 0.4s var(--ease); width:100%; margin:0 auto; max-width:1240px; }
@@ -109,30 +109,31 @@ body.show-results .rental-type-toggle{ display:none; }
 
 /* Stacked inputs (Location) */
 .stacked-input { flex-direction:column; justify-content:center; align-items:flex-start; }
-.stacked-input label { font-size:11px; color:var(--slate); margin-bottom:2px; font-weight:500; cursor:pointer; }
+.stacked-input label { font-size:11px; color:var(--slate); margin-bottom:2px; font-weight:500; cursor:pointer; display: flex; align-items: center; gap: 4px; }
+.stacked-input label i { color:var(--trip-blue); }
 .stacked-input input { border:none; outline:none; width:100%; font-size:15px; font-weight:600; color:var(--ink); background:transparent; }
 .stacked-input input::placeholder { font-weight:400; color:var(--slate-light); }
 
 /* Split Date/Time Inputs */
 .date-time-input { display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:6px 14px; }
 .dt-section { display:flex; flex-direction:column; justify-content:center; flex:1; }
-.dt-section label { font-size:11px; color:var(--slate); margin-bottom:2px; font-weight:500; }
+.dt-section label { font-size:11px; color:var(--slate); margin-bottom:2px; font-weight:500; display: flex; align-items: center; gap: 5px; }
+.dt-section label i { color:var(--trip-blue); }
 .dt-section input, .dt-section select { border:none; outline:none; font-size:14px; font-weight:600; color:var(--ink); background:transparent; cursor:pointer; }
 .dt-divider { width:1px; height:30px; background:var(--line); margin:0 12px; }
 
-.is-hidden{ display:none; }
+.is-hidden{ display:none !important; }
 
 .booking-btn{ height:60px; padding:0 30px; background:var(--trip-blue); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.3s; flex-shrink:0; }
 .booking-btn:hover{ background:var(--blue-dark); }
 
 /* Bottom Row Settings */
-.booking-bottom-row { display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--line); padding-top:16px; margin-top:4px; }
+.booking-bottom-row { display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--line); padding-top:16px; margin-top:4px; min-height: 40px;}
 
-.checkbox-label { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--slate); cursor:pointer; font-weight:500; }
-.checkbox-label input { width:16px; height:16px; accent-color:var(--trip-blue); cursor:pointer; }
-.checkbox-label span { position:relative; top:1px; }
+.driver-message { display:flex; align-items:center; gap:8px; font-size:14px; color:#059669; font-weight:600; background:#D1FAE5; padding:6px 14px; border-radius:6px; }
+.driver-message i { font-size: 15px; }
 
-.booking-options-right { display:flex; gap:24px; }
+.booking-options-right { display:flex; gap:24px; margin-left: auto; }
 .driver-option { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--slate); }
 .driver-option select { border:none; background:transparent; font-weight:600; color:var(--ink); cursor:pointer; outline:none; }
 .driver-option i{ color:var(--slate-light); cursor:help; }
@@ -214,7 +215,7 @@ footer{ background:var(--navy); color:#fff; padding:60px 8% 30px; }
 .footer-links a:hover{ color:#fff; }
 
 /* =====================================================
-   SEARCH RESULTS INTERFACE (Trip.com clone)
+   SEARCH RESULTS INTERFACE 
 ===================================================== */
 body.show-results .landing-only { display:none; }
 body.show-results{ background:var(--trip-bg); }
@@ -311,7 +312,7 @@ body.show-results .booking-bottom-row { display:flex; } /* Keep bottom row visib
     .booking-btn{ width:100%; }
     .booking-fields{ gap:10px; }
     .date-time-input{ flex-wrap:wrap; }
-    .booking-options-right{ flex-direction:column; align-items:flex-start; gap:10px; }
+    .booking-options-right{ flex-direction:column; align-items:flex-start; gap:10px; margin-left:0; }
     .compact-hidden{ display:none; }
 
     .hero-top{ flex-direction:column; align-items:center; gap:16px; }
