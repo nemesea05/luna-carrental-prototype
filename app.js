@@ -226,6 +226,15 @@ if(mainSearchForm) {
             return;
         }
         
+        // Clear any leftover scroll-triggered sticky state from the landing page.
+        // Without this, .booking-card.is-sticky (3 classes) can out-specificity
+        // body.show-results (2 classes) and force the bottom row hidden, making
+        // the sticky bar render shorter than the results page's top padding
+        // expects — leaving a visible gap above "Recommended Offers".
+        bookingCard.classList.remove('is-sticky');
+        document.body.classList.remove('header-hidden');
+        secondaryNav.classList.remove('is-visible');
+
         // Transition to Results Page Interface
         document.body.classList.add('show-results');
         searchResultsView.style.display = 'block';
@@ -234,6 +243,17 @@ if(mainSearchForm) {
         window.scrollTo({ top: 0, behavior: 'instant' });
     });
 }
+
+// Logo click returns to the landing view from search results
+document.querySelectorAll('.clickable-logo').forEach(logo => {
+    logo.addEventListener('click', () => {
+        if(!document.body.classList.contains('show-results')) return;
+        document.body.classList.remove('show-results');
+        searchResultsView.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        calculateOffsets();
+    });
+});
 
 // Triggers from the fleet section to also open results
 document.querySelectorAll('.select-trigger').forEach(btn => {
