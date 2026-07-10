@@ -162,3 +162,52 @@ if(bookingForm){
     });
 
 }
+
+// ===================== Fleet -> booking widget =====================
+
+const vehicleButtons = document.querySelectorAll('.vehicle-btn');
+const vehiclePill = document.getElementById('vehiclePill');
+const vehiclePillText = document.getElementById('vehiclePillText');
+const vehiclePillClear = document.getElementById('vehiclePillClear');
+
+vehicleButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const name = btn.dataset.vehicle;
+        if(vehiclePillText) vehiclePillText.textContent = name;
+        if(vehiclePill) vehiclePill.classList.add('show');
+
+        if(bookingSection){
+            bookingSection.scrollIntoView({ behavior:'smooth', block:'center' });
+            setTimeout(() => pickupLocationInput && pickupLocationInput.focus(), 500);
+        }
+    });
+});
+
+if(vehiclePillClear){
+    vehiclePillClear.addEventListener('click', () => {
+        vehiclePill.classList.remove('show');
+    });
+}
+
+// ===================== FAQ accordion =====================
+
+const faqItems = document.querySelectorAll('.faq-item');
+
+faqItems.forEach(item => {
+    const question = item.querySelector('.faq-question');
+    const answer = item.querySelector('.faq-answer');
+
+    question.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+
+        faqItems.forEach(other => {
+            other.classList.remove('open');
+            other.querySelector('.faq-answer').style.maxHeight = null;
+        });
+
+        if(!isOpen){
+            item.classList.add('open');
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+        }
+    });
+});

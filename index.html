@@ -26,7 +26,9 @@
 
         <ul class="nav-links" id="navLinks">
             <li><a href="#">Home</a></li>
+            <li><a href="#fleet">Fleet</a></li>
             <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#faq">FAQ</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
 
@@ -105,7 +107,17 @@
                 <span class="switch-label">Return to same location</span>
             </label>
 
-            <span class="booking-hint"><i class="fa-regular fa-clock"></i> Takes less than a minute</span>
+            <div class="booking-top-right">
+
+                <span class="booking-hint" id="bookingHint"><i class="fa-regular fa-clock"></i> Takes less than a minute</span>
+
+                <span class="vehicle-pill" id="vehiclePill">
+                    <i class="fa-solid fa-car-side"></i>
+                    <span id="vehiclePillText">Xpander</span>
+                    <button type="button" id="vehiclePillClear" aria-label="Clear selected vehicle"><i class="fa-solid fa-xmark"></i></button>
+                </span>
+
+            </div>
 
         </div>
 
@@ -200,6 +212,140 @@
 
 </section>
 
+<section class="badges" id="badges">
+
+    <div class="badges-grid">
+
+        <div class="badge-card reveal" style="--delay:0s">
+            <div class="badge-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+            <h4>Free Cancellation</h4>
+            <p>Cancel or reschedule at no charge up to 24 hours before pick-up.</p>
+        </div>
+
+        <div class="badge-card reveal" style="--delay:.08s">
+            <div class="badge-icon"><i class="fa-solid fa-shield-heart"></i></div>
+            <h4>Verified &amp; Insured</h4>
+            <p>Every unit is inspected, cleaned, and insured before it's handed to you.</p>
+        </div>
+
+        <div class="badge-card reveal" style="--delay:.16s">
+            <div class="badge-icon"><i class="fa-solid fa-bolt"></i></div>
+            <h4>Fast Confirmation</h4>
+            <p>Most requests get a confirmation call back within 2 hours.</p>
+        </div>
+
+        <div class="badge-card reveal" style="--delay:.24s">
+            <div class="badge-icon"><i class="fa-solid fa-headset"></i></div>
+            <h4>Real Support</h4>
+            <p>A real person to call before, during, and after your trip.</p>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="fleet" id="fleet">
+
+    <div class="section-title reveal">
+        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>OUR FLEET</span>
+        <h2>Choose the Right Car for Your Trip</h2>
+        <p>
+            From city errands to weekend getaways, pick a vehicle that
+            matches your route and your crew.
+        </p>
+    </div>
+
+    <div class="fleet-grid">
+
+        <div class="vehicle-card reveal" style="--delay:0s">
+            <div class="vehicle-visual vehicle-visual--icon">
+                <i class="fa-solid fa-car"></i>
+            </div>
+            <div class="vehicle-body">
+                <div class="vehicle-head">
+                    <h3>Sedan</h3>
+                    <span class="vehicle-tag">Toyota Vios or similar</span>
+                </div>
+                <ul class="vehicle-specs">
+                    <li><i class="fa-solid fa-user"></i> 5 seats</li>
+                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
+                    <li><i class="fa-solid fa-suitcase"></i> 2 bags</li>
+                </ul>
+                <div class="vehicle-foot">
+                    <div class="vehicle-price"><span>From</span>₱1,800<small>/day</small></div>
+                    <button type="button" class="vehicle-btn" data-vehicle="Sedan">Reserve</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="vehicle-card vehicle-card--featured reveal" style="--delay:.1s">
+            <span class="vehicle-badge">Most Booked</span>
+            <div class="vehicle-visual">
+                <img src="1.png" alt="Mitsubishi Xpander">
+            </div>
+            <div class="vehicle-body">
+                <div class="vehicle-head">
+                    <h3>MPV</h3>
+                    <span class="vehicle-tag">Mitsubishi Xpander or similar</span>
+                </div>
+                <ul class="vehicle-specs">
+                    <li><i class="fa-solid fa-user"></i> 7 seats</li>
+                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
+                    <li><i class="fa-solid fa-suitcase"></i> 4 bags</li>
+                </ul>
+                <div class="vehicle-foot">
+                    <div class="vehicle-price"><span>From</span>₱2,500<small>/day</small></div>
+                    <button type="button" class="vehicle-btn" data-vehicle="Xpander">Reserve</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="vehicle-card reveal" style="--delay:.2s">
+            <div class="vehicle-visual vehicle-visual--icon">
+                <i class="fa-solid fa-truck-monster"></i>
+            </div>
+            <div class="vehicle-body">
+                <div class="vehicle-head">
+                    <h3>SUV</h3>
+                    <span class="vehicle-tag">Toyota Fortuner or similar</span>
+                </div>
+                <ul class="vehicle-specs">
+                    <li><i class="fa-solid fa-user"></i> 7 seats</li>
+                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
+                    <li><i class="fa-solid fa-suitcase"></i> 4 bags</li>
+                </ul>
+                <div class="vehicle-foot">
+                    <div class="vehicle-price"><span>From</span>₱3,800<small>/day</small></div>
+                    <button type="button" class="vehicle-btn" data-vehicle="SUV">Reserve</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="vehicle-card reveal" style="--delay:.3s">
+            <div class="vehicle-visual vehicle-visual--icon">
+                <i class="fa-solid fa-van-shuttle"></i>
+            </div>
+            <div class="vehicle-body">
+                <div class="vehicle-head">
+                    <h3>Van</h3>
+                    <span class="vehicle-tag">Toyota Hiace or similar</span>
+                </div>
+                <ul class="vehicle-specs">
+                    <li><i class="fa-solid fa-user"></i> 12 seats</li>
+                    <li><i class="fa-solid fa-gears"></i> Automatic</li>
+                    <li><i class="fa-solid fa-suitcase"></i> 6 bags</li>
+                </ul>
+                <div class="vehicle-foot">
+                    <div class="vehicle-price"><span>From</span>₱5,500<small>/day</small></div>
+                    <button type="button" class="vehicle-btn" data-vehicle="Van">Reserve</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
 <section class="how-it-works" id="how-it-works">
 
     <div class="section-title reveal">
@@ -274,6 +420,170 @@
 
 </section>
 
+<section class="requirements" id="requirements">
+
+    <div class="requirements-grid">
+
+        <div class="req-copy reveal">
+            <span class="eyebrow"><i class="eyebrow-dot"></i>BEFORE YOU BOOK</span>
+            <h2>What You'll Need to Rent</h2>
+            <p>
+                A little preparation makes pick-up day quick. Here's
+                everything to have ready before your confirmation call.
+            </p>
+
+            <ul class="req-list">
+                <li><i class="fa-solid fa-check"></i> Valid driver's license, held for at least 1 year</li>
+                <li><i class="fa-solid fa-check"></i> One valid government-issued ID</li>
+                <li><i class="fa-solid fa-check"></i> Credit or debit card for the security deposit</li>
+                <li><i class="fa-solid fa-check"></i> Minimum age of 21 (under-25 drivers may incur a young-driver fee)</li>
+                <li><i class="fa-solid fa-check"></i> Additional drivers must present their own valid license</li>
+            </ul>
+        </div>
+
+        <div class="tips-card reveal" style="--delay:.15s">
+            <h4><i class="fa-solid fa-lightbulb"></i> Good to Know</h4>
+            <ul class="tips-list">
+                <li>Return the car with a full tank to skip refueling fees.</li>
+                <li>Walk around the vehicle with our staff before you drive off.</li>
+                <li>Save your confirmation message — you'll need it at pick-up.</li>
+                <li>Let us know early if you need a child seat or GPS unit.</li>
+            </ul>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="testimonials" id="testimonials">
+
+    <div class="section-title reveal">
+        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>CUSTOMER STORIES</span>
+        <h2>Trusted by Everyday Drivers</h2>
+        <p>
+            Real feedback from renters who booked their trip through LUNA's.
+        </p>
+    </div>
+
+    <div class="testimonial-grid">
+
+        <div class="testimonial-card reveal" style="--delay:0s">
+            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+            <p>"Booking took less than five minutes, and the confirmation call came in under an hour. The car was spotless."</p>
+            <div class="testimonial-author">
+                <span class="avatar">AM</span>
+                <div>
+                    <strong>Andrea M.</strong>
+                    <small>Quezon City</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card reveal" style="--delay:.1s">
+            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+            <p>"We needed a van for a family trip to Tagaytay on short notice. LUNA's sorted us out the same day."</p>
+            <div class="testimonial-author">
+                <span class="avatar">PS</span>
+                <div>
+                    <strong>Paolo S.</strong>
+                    <small>Manila</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="testimonial-card reveal" style="--delay:.2s">
+            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+            <p>"Straightforward process and no hidden charges at pick-up. Exactly what was quoted online."</p>
+            <div class="testimonial-author">
+                <span class="avatar">MR</span>
+                <div>
+                    <strong>Mikka R.</strong>
+                    <small>Pasig</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<section class="faq" id="faq">
+
+    <div class="section-title reveal">
+        <span class="eyebrow eyebrow-center"><i class="eyebrow-dot"></i>FAQ</span>
+        <h2>Common Questions</h2>
+        <p>
+            Can't find what you're looking for? Reach out through the
+            contact details below.
+        </p>
+    </div>
+
+    <div class="faq-list reveal" style="--delay:.1s">
+
+        <div class="faq-item">
+            <button type="button" class="faq-question">
+                What do I need to book a car?
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+                <p>A valid driver's license, one government-issued ID, and a credit or debit card for the security deposit. You'll also need to be at least 21 years old.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question">
+                How does the confirmation process work?
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+                <p>Submit your booking request through the form above. Our team reviews it and calls you, usually within a couple of hours, to confirm your vehicle, dates, and pick-up time.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question">
+                Is a security deposit required?
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+                <p>Yes. A hold is placed on your card at pick-up and released after the car is returned in good condition.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question">
+                Can I change my pick-up or drop-off details after booking?
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+                <p>Yes, just contact our team. Changes made ahead of your pick-up time are free of charge.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question">
+                Can someone else drive the car?
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+                <p>Only drivers listed on the agreement. Any additional driver must present their own valid license at pick-up.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button type="button" class="faq-question">
+                What happens if I return the car late?
+                <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <div class="faq-answer">
+                <p>A short grace period applies, after which an hourly late fee kicks in. Call us ahead of time if you're running behind and we'll do our best to work with you.</p>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
 <footer id="contact">
 
     <div class="footer-content">
@@ -291,6 +601,19 @@
         </div>
 
         <div class="reveal" style="--delay:.1s">
+
+            <h4>Quick Links</h4>
+
+            <ul class="footer-links">
+                <li><a href="#fleet">Our Fleet</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#requirements">Requirements</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+
+        </div>
+
+        <div class="reveal" style="--delay:.2s">
 
             <h4>Contact</h4>
 
