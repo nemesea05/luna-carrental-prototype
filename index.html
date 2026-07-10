@@ -67,7 +67,7 @@
 
         <div class="hero-buttons">
 
-            <button class="primary-btn" id="openBooking">
+            <button class="primary-btn" id="openBooking" type="button">
                 <span>Book Now</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
@@ -90,6 +90,113 @@
         <div class="hero-image-blob" aria-hidden="true"></div>
         <img src="1.png" alt="Mitsubishi Xpander">
     </div>
+
+</section>
+
+<section class="booking-bar" id="booking">
+
+    <form class="booking-card" id="bookingForm" novalidate>
+
+        <div class="booking-top-row">
+
+            <label class="switch">
+                <input type="checkbox" id="sameLocation" checked>
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+                <span class="switch-label">Return to same location</span>
+            </label>
+
+            <span class="booking-hint"><i class="fa-regular fa-clock"></i> Takes less than a minute</span>
+
+        </div>
+
+        <div class="booking-fields">
+
+            <div class="field-group field-location">
+                <label class="field-label" for="pickupLocation">Pick-up Location</label>
+                <div class="field-input">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <input type="text" id="pickupLocation" placeholder="Quezon City, Philippines" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="field-group field-location field-dropoff" id="dropoffGroup">
+                <label class="field-label" for="dropoffLocation">Drop-off Location</label>
+                <div class="field-input">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <input type="text" id="dropoffLocation" placeholder="Same as pick-up" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="pickupDate">Pick-up Date</label>
+                <div class="field-input">
+                    <i class="fa-regular fa-calendar"></i>
+                    <input type="date" id="pickupDate" required>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="pickupTime">Pick-up Time</label>
+                <div class="field-input">
+                    <i class="fa-regular fa-clock"></i>
+                    <select id="pickupTime" required></select>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="dropoffDate">Drop-off Date</label>
+                <div class="field-input">
+                    <i class="fa-regular fa-calendar"></i>
+                    <input type="date" id="dropoffDate" required>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="dropoffTime">Drop-off Time</label>
+                <div class="field-input">
+                    <i class="fa-regular fa-clock"></i>
+                    <select id="dropoffTime" required></select>
+                </div>
+            </div>
+
+            <button type="submit" class="booking-btn">
+                <span>Check Availability</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+        </div>
+
+        <div class="booking-bottom-row">
+
+            <div class="driver-age">
+                <label class="field-label" for="driverAge">Driver Age</label>
+                <select id="driverAge">
+                    <option value="">Please select an age</option>
+                    <option>18–20 years old</option>
+                    <option>21–24 years old</option>
+                    <option>25 years old and above</option>
+                </select>
+            </div>
+
+            <span class="booking-note"><i class="fa-solid fa-circle-info"></i> Rates and requirements may vary by driver age.</span>
+
+        </div>
+
+        <div class="booking-error" id="bookingError">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Drop-off must be after your pick-up date and time.</span>
+        </div>
+
+        <div class="booking-success" id="bookingSuccess">
+            <i class="fa-solid fa-circle-check"></i>
+            <div>
+                <h4>Request received!</h4>
+                <p>We're reviewing your details — expect a confirmation call shortly.</p>
+            </div>
+            <button type="button" class="booking-reset" id="bookingReset">Modify Search</button>
+        </div>
+
+    </form>
 
 </section>
 
