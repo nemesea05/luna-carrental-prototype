@@ -64,7 +64,7 @@ window.addEventListener('resize', calculateOffsets);
 
 window.addEventListener('scroll', () => {
     // Structural layout skips sticky modifiers if alternative result layouts are rendering
-    if (isAltViewActive()) return;
+    if (isAltView()) return;
 
     const scrollY = window.scrollY;
 
@@ -96,7 +96,7 @@ const sections = [
 ];
 
 function handleScrollSpy() {
-    if (isAltViewActive()) return;
+    if (isAltView()) return;
     
     let currentId = '';
     const scrollY = window.scrollY + 160; 
@@ -121,7 +121,7 @@ function handleScrollSpy() {
 
 document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        if(isAltViewActive()) return;
+        if(isAltView()) return;
         e.preventDefault();
         const targetId = this.getAttribute('href').substring(1);
         const targetSection = document.getElementById(targetId);
@@ -255,6 +255,46 @@ if(rtButtons.length){
 const mainSearchForm = document.getElementById('mainSearchForm');
 const searchResultsView = document.getElementById('searchResultsView');
 const carDetailsView = document.getElementById('carDetailsView');
+const bookingConfirmationView = document.getElementById('bookingConfirmationView');
+const myBookingsView = document.getElementById('myBookingsView');
+
+// Central view registry: keeps every top-level interface (results, details,
+// confirmation, my bookings) in sync across PC and mobile so only one
+// "screen" is ever visible at a time and state stays consistent.
+const viewSections = {
+    results: searchResultsView,
+    details: carDetailsView,
+    confirmation: bookingConfirmationView,
+    mybookings: myBookingsView
+};
+const viewBodyClasses = {
+    results: 'show-results',
+    details: 'show-details-view',
+    confirmation: 'show-confirmation-view',
+    mybookings: 'show-mybookings-view'
+};
+
+function isAltView() {
+    return Object.values(viewBodyClasses).some(cls => document.body.classList.contains(cls));
+}
+
+// Switch the active top-level view. Pass null/undefined to return to the landing page.
+function showView(name) {
+    Object.values(viewBodyClasses).forEach(cls => document.body.classList.remove(cls));
+    Object.values(viewSections).forEach(sec => { if (sec) sec.style.display = 'none'; });
+
+    if (name && viewSections[name]) {
+        document.body.classList.add(viewBodyClasses[name]);
+        viewSections[name].style.display = 'block';
+    }
+
+    if (navCarServices) {
+        navCarServices.classList.toggle('highlight-active', name === 'results' || name === 'details');
+    }
+
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    calculateOffsets();
+}
 
 if(mainSearchForm) {
     mainSearchForm.addEventListener('submit', (e) => {
@@ -270,15 +310,7 @@ if(mainSearchForm) {
         secondaryNav.classList.remove('is-visible');
 
         // Render Active Results View Matrix
-        clearAltViews();
-        document.body.classList.add('show-results');
-        searchResultsView.style.display = 'block';
-        
-        if(navCarServices) {
-            navCarServices.classList.add('highlight-active');
-        }
-        
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        showView('results');
     });
 }
 
@@ -286,10 +318,10 @@ if(mainSearchForm) {
 document.querySelectorAll('.view-deal-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
-        clearAltViews();
-        document.body.classList.add('show-details-view');
-        carDetailsView.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        const row = btn.closest('.result-row-card');
+        populateCarDetails(row);
+        updateItinerarySummary();
+        showView('details');
     });
 });
 
@@ -298,26 +330,15 @@ const backToResults = document.getElementById('backToResults');
 if (backToResults) {
     backToResults.addEventListener('click', (e) => {
         e.preventDefault();
-        clearAltViews();
-        document.body.classList.add('show-results');
-        searchResultsView.style.display = 'block';
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        showView('results');
     });
 }
 
 // Complete structural navigation canvas view updates
 document.querySelectorAll('.clickable-logo').forEach(logo => {
     logo.addEventListener('click', () => {
-        if(!isAltViewActive()) return;
-        
-        clearAltViews();
-        
-        if(navCarServices) {
-            navCarServices.classList.remove('highlight-active');
-        }
-        
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        calculateOffsets();
+        if(!isAltView()) return;
+        showView(null);
     });
 });
 
@@ -352,289 +373,336 @@ faqItems.forEach(item => {
 });
 
 // ==========================================
-// 8. Alternate View State Helpers
-// (Shared plumbing used by results / details / receipt / bookings views)
+// 8. Booking Confirmation & My Bookings System
 // ==========================================
-const ALT_VIEW_CLASSES = ['show-results', 'show-details-view', 'show-receipt-view', 'show-bookings-view'];
 
-function isAltViewActive(){
-    return ALT_VIEW_CLASSES.some(cls => document.body.classList.contains(cls));
-}
+// In-memory booking store for this session (prototype only — no backend).
+let bookings = [];
 
-function clearAltViews(){
-    document.body.classList.remove(...ALT_VIEW_CLASSES);
-    if(searchResultsView) searchResultsView.style.display = 'none';
-    if(carDetailsView) carDetailsView.style.display = 'none';
-    if(bookingReceiptView) bookingReceiptView.style.display = 'none';
-    if(myBookingsView) myBookingsView.style.display = 'none';
-}
+// Tracks whichever vehicle is currently shown in the Car Details view,
+// defaulting to the markup's built-in example (Jeep Compass) until a
+// "View deal" card is clicked.
+let selectedCar = {
+    iconName: 'fa-truck-pickup',
+    name: 'Jeep Compass',
+    subtitle: 'or similar Compact SUV',
+    specsSummary: '5 Seats · 3 Suitcases · 4 Doors · Automatic',
+    perDayLabel: '₱2,000.00',
+    totalLabel: '₱6,000.00'
+};
 
-// ==========================================
-// 9. Booking Submission, Receipt & My Bookings List
-// ==========================================
+const proceedBookingBtn = document.getElementById('proceedBookingBtn');
+const driverFullName = document.getElementById('driverFullName');
+const driverMobile = document.getElementById('driverMobile');
+const driverEmail = document.getElementById('driverEmail');
 const myBookingsBtn = document.getElementById('myBookingsBtn');
-const bookingsCountBadge = document.getElementById('bookingsCountBadge');
-const checkoutSubmitBtn = document.getElementById('checkoutSubmitBtn');
-const bookingReceiptView = document.getElementById('bookingReceiptView');
-const receiptCardContent = document.getElementById('receiptCardContent');
-const receiptBackBtn = document.getElementById('receiptBackBtn');
-const receiptViewAllBtn = document.getElementById('receiptViewAllBtn');
-const myBookingsView = document.getElementById('myBookingsView');
-const bookingsListContainer = document.getElementById('bookingsListContainer');
-const bookingsTotalCount = document.getElementById('bookingsTotalCount');
-const bookingsEmptyState = document.getElementById('bookingsEmptyState');
-const emptyStateBrowseBtn = document.getElementById('emptyStateBrowseBtn');
+const confBackHomeBtn = document.getElementById('confBackHomeBtn');
+const confViewBookingsBtn = document.getElementById('confViewBookingsBtn');
+const bookAnotherBtn = document.getElementById('bookAnotherBtn');
+const emptyStateBookBtn = document.getElementById('emptyStateBookBtn');
 
-// In-memory booking list for this prototype session (no backend yet — resets on page reload)
-let bookingsStore = [];
-let bookingRefCounter = 1000;
+// ---- Formatting helpers -------------------------------------------------
 
-function generateBookingRef(){
-    bookingRefCounter += 1;
-    return `LNC-${new Date().getFullYear()}-${bookingRefCounter}`;
+function formatTimeValue(val) {
+    if (!val) return '--';
+    const [h, m] = val.split(':').map(Number);
+    return to12Hour(h, m);
 }
 
-function readText(el){
-    return el ? el.textContent.trim().replace(/\s+/g, ' ') : '';
+function formatShortDate(dateStr) {
+    if (!dateStr) return '--';
+    const d = new Date(`${dateStr}T00:00:00`);
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-function parseUSD(str){
-    return parseFloat((str || '0').replace(/[^0-9.]/g, '')) || 0;
+function formatSubmittedAt(date) {
+    return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
-// Reads the currently displayed car + search info to build a booking record.
-// Pulling from the live DOM (instead of duplicating hard-coded numbers) keeps
-// the receipt in sync with whatever the pricing/details panel is showing.
-function collectBookingFromDetailsView(){
-    const rentalTypeBtn = document.querySelector('.rt-option.active');
-    const isDriverType = !!(rentalTypeBtn && rentalTypeBtn.dataset.type === 'driver');
+function computeDurationDays(pdStr, ddStr) {
+    if (!pdStr || !ddStr) return 1;
+    const pd = new Date(`${pdStr}T00:00:00`);
+    const dd = new Date(`${ddStr}T00:00:00`);
+    const diff = Math.round((dd - pd) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : 1;
+}
 
-    // Vehicle name + subtext
-    const carTitleH2 = document.querySelector('#carDetailsView .car-title-row h2');
+function formatCurrency(num) {
+    return `₱${num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function generateBookingRef() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let ref = '';
+    for (let i = 0; i < 6; i++) ref += chars[Math.floor(Math.random() * chars.length)];
+    return `LUNA-${ref}`;
+}
+
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+// ---- Dynamic car selection (Results -> Details) --------------------------
+
+function populateCarDetails(row) {
+    if (!row) return;
+
+    const iconEl = row.querySelector('.rr-visual i');
+    const titleEl = row.querySelector('.rr-details h3');
+    const specEls = row.querySelectorAll('.rr-specs span');
+    const priceValEl = row.querySelector('.price-val');
+    const priceTotalEl = row.querySelector('.price-total');
+
+    let iconName = 'fa-truck-pickup';
+    if (iconEl) {
+        const found = [...iconEl.classList].find(c => c.startsWith('fa-') && c !== 'fa-solid' && !/^fa-\dx$/.test(c));
+        if (found) iconName = found;
+    }
+
     let carName = 'Selected Vehicle';
-    let carSubtext = '';
-    if(carTitleH2){
-        const subtextEl = carTitleH2.querySelector('.car-subtext');
-        carSubtext = subtextEl ? readText(subtextEl) : '';
-        const fullText = readText(carTitleH2);
-        carName = (carSubtext ? fullText.replace(carSubtext, '') : fullText).trim() || carName;
+    let carSubtitle = 'or similar vehicle';
+    if (titleEl) {
+        carName = titleEl.childNodes[0].textContent.trim();
+        const spanEl = titleEl.querySelector('span');
+        if (spanEl) carSubtitle = spanEl.textContent.trim();
     }
 
-    // Vehicle icon (matches whatever icon the details panel is using)
-    let vehicleIconClass = 'fa-car';
-    const iconEl = document.querySelector('#carDetailsView .car-info-visual i');
-    if(iconEl){
-        const found = Array.from(iconEl.classList).find(c => c.startsWith('fa-') && c !== 'fa-solid' && c !== 'fa-regular' && !/^fa-\d+x$/.test(c));
-        if(found) vehicleIconClass = found;
-    }
+    let seats = '5', bags = '3';
+    specEls.forEach(s => {
+        const t = s.textContent.trim();
+        const num = t.match(/\d+/);
+        if (/seat/i.test(t) && num) seats = num[0];
+        if (/bag/i.test(t) && num) bags = num[0];
+    });
 
-    // Trip dates/duration
-    let tripTimelineText = '';
-    const itTextEl = document.querySelector('#carDetailsView .it-text');
-    if(itTextEl){
-        const clone = itTextEl.cloneNode(true);
-        const pill = clone.querySelector('.duration-pill');
-        let durationText = '';
-        if(pill){ durationText = readText(pill); pill.remove(); }
-        tripTimelineText = readText(clone) + (durationText ? ` (${durationText})` : '');
-    }
+    const perDayLabel = priceValEl ? priceValEl.textContent.trim() : selectedCar.perDayLabel;
+    const totalLabel = priceTotalEl ? priceTotalEl.textContent.replace('Total:', '').trim() : selectedCar.totalLabel;
 
-    // Branch / pick-up location
-    let branchLocation = '';
-    const locTitleEl = document.querySelector('#carDetailsView .loc-title');
-    if(locTitleEl){
-        const clone = locTitleEl.cloneNode(true);
-        const link = clone.querySelector('.map-link-inline');
-        if(link) link.remove();
-        branchLocation = readText(clone);
-    }
-    const locSub = readText(document.querySelector('#carDetailsView .loc-sub'));
-
-    // Rental type extras
-    let rentalTypeLabel = 'Rent a Car (Self-drive)';
-    let extraLine = '';
-    let driverPickupAddress = '';
-    if(isDriverType){
-        rentalTypeLabel = 'Rent a Car with Driver';
-        extraLine = "Driver will be provided by LUNA's Car Rental.";
-        if(pickupLocation && pickupLocation.value) driverPickupAddress = pickupLocation.value;
-        if(diffDropoffCheck && diffDropoffCheck.checked && dropoffLocation && dropoffLocation.value){
-            extraLine += ` Drop-off at: ${dropoffLocation.value}.`;
-        }
-    } else {
-        const country = document.getElementById('driverCountry');
-        const age = document.getElementById('driverAge');
-        extraLine = `Driver's license issuing country: ${country ? country.value : 'N/A'} · Driver's age: ${age ? age.value : 'N/A'}`;
-    }
-
-    // Pricing (Prepay online + Pay at pick-up primary rows, in document order)
-    const priceRows = document.querySelectorAll('#carDetailsView .price-summary-row.primary-row .row-cost-val');
-    const prepayOnline = priceRows[0] ? readText(priceRows[0]) : 'US$0.00';
-    const payAtPickup = priceRows[1] ? readText(priceRows[1]) : 'US$0.00';
-    const grandTotal = parseUSD(prepayOnline) + parseUSD(payAtPickup);
-
-    return {
-        ref: generateBookingRef(),
-        submittedAt: new Date(),
-        rentalTypeLabel,
-        extraLine,
-        carName,
-        carSubtext,
-        vehicleIconClass,
-        tripTimelineText,
-        branchLocation,
-        locSub,
-        driverPickupAddress,
-        prepayOnline,
-        payAtPickup,
-        grandTotal,
-        status: 'pending'
+    selectedCar = {
+        iconName,
+        name: carName,
+        subtitle: carSubtitle,
+        specsSummary: `${seats} Seats · ${bags} Suitcases · 4 Doors · Automatic`,
+        perDayLabel,
+        totalLabel
     };
+
+    const targetIcon = document.querySelector('#carDetailsView .car-info-visual i');
+    if (targetIcon) targetIcon.className = `fa-solid ${iconName} fa-5x`;
+
+    const targetTitle = document.querySelector('#carDetailsView .car-title-row h2');
+    if (targetTitle) {
+        targetTitle.innerHTML = `${carName} <span class="car-subtext">${carSubtitle} <i class="fa-solid fa-circle-info"></i></span>`;
+    }
+
+    const targetPills = document.querySelector('#carDetailsView .car-pill-specs');
+    if (targetPills) {
+        targetPills.innerHTML = `
+            <span><i class="fa-solid fa-user"></i> ${seats} Seats</span>
+            <span><i class="fa-solid fa-suitcase"></i> ${bags} Suitcases</span>
+            <span><i class="fa-solid fa-door-closed"></i> 4 Doors</span>
+            <span><i class="fa-solid fa-gears"></i> Automatic</span>
+            <span><i class="fa-solid fa-gas-pump"></i> Fuel</span>
+        `;
+    }
+
+    updatePricingSidebar(totalLabel);
 }
 
-function renderReceiptCardHTML(b){
-    const submittedStr = b.submittedAt.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
-    return `
-        <div class="receipt-head-row">
-            <div class="receipt-ref">${b.ref}<small>Booking reference</small></div>
-            <div class="receipt-submitted">Submitted<strong>${submittedStr}</strong></div>
-        </div>
+function updatePricingSidebar(totalLabel) {
+    const totalNum = parseFloat((totalLabel || '').replace(/[^\d.]/g, '')) || 0;
+    if (!totalNum) return;
 
-        <div class="receipt-section">
-            <div class="receipt-section-title">Vehicle</div>
-            <div class="receipt-vehicle-row">
-                <div class="receipt-vehicle-visual"><i class="fa-solid ${b.vehicleIconClass} fa-2x"></i></div>
-                <div class="receipt-vehicle-info">
-                    <h4>${b.carName}</h4>
-                    <span>${b.carSubtext}</span>
+    const prepayCarFee = totalNum * 0.20;
+    const discount = totalNum * 0.05;
+    const prepayOnline = prepayCarFee - discount;
+    const payAtPickup = totalNum;
+
+    setText('prepayOnlineVal', formatCurrency(prepayOnline));
+    setText('prepayCarFeeVal', formatCurrency(prepayCarFee));
+    setText('discountVal1', `-${formatCurrency(discount)}`);
+    setText('discountVal2', `-${formatCurrency(discount)}`);
+    setText('payAtPickupVal', formatCurrency(payAtPickup));
+    setText('carRentalFeeVal', formatCurrency(payAtPickup));
+}
+
+// Refresh the Car Details itinerary card using whatever is currently set
+// in the main search bar (dates, times, pick-up location) so the details
+// and receipt always mirror what the person actually searched for.
+function updateItinerarySummary() {
+    const days = computeDurationDays(pickupDate?.value, dropoffDate?.value);
+    const itText = document.querySelector('#carDetailsView .it-text');
+    if (itText) {
+        const pickupStr = `${formatTimeValue(pickupTime?.value)}, ${formatShortDate(pickupDate?.value)}`;
+        const dropoffStr = `${formatTimeValue(dropoffTime?.value)}, ${formatShortDate(dropoffDate?.value)}`;
+        itText.innerHTML = `${pickupStr} - ${dropoffStr} <strong class="duration-pill">${days} day${days !== 1 ? 's' : ''}</strong>`;
+    }
+
+    const locNameEl = document.getElementById('itineraryLocationName');
+    if (locNameEl) {
+        const loc = (pickupLocation?.value || '').trim();
+        locNameEl.textContent = `${loc || 'Quezon City Headquarters'} branch`;
+    }
+}
+
+// ---- Booking submission ---------------------------------------------------
+
+if (proceedBookingBtn) {
+    proceedBookingBtn.addEventListener('click', () => {
+        const requiredFields = [driverFullName, driverMobile, driverEmail];
+        const invalidField = requiredFields.find(f => f && !f.checkValidity());
+        if (invalidField) {
+            invalidField.reportValidity();
+            document.getElementById('driverDetailsCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        const isDriverRental = document.getElementById('rtDriver')?.classList.contains('active');
+        const hasDiffDropoff = isDriverRental && !!diffDropoffCheck?.checked;
+        const days = computeDurationDays(pickupDate?.value, dropoffDate?.value);
+
+        const booking = {
+            id: generateBookingRef(),
+            submittedAt: new Date(),
+            status: 'pending',
+            car: { ...selectedCar },
+            rental: {
+                type: isDriverRental ? 'driver' : 'self',
+                pickupDate: pickupDate?.value,
+                pickupTime: pickupTime?.value,
+                dropoffDate: dropoffDate?.value,
+                dropoffTime: dropoffTime?.value,
+                days,
+                pickupLocation: (pickupLocation?.value || '').trim() || 'Quezon City Headquarters',
+                dropoffLocation: hasDiffDropoff ? (dropoffLocation?.value || '').trim() : null
+            },
+            driver: {
+                fullName: driverFullName.value.trim(),
+                mobile: driverMobile.value.trim(),
+                email: driverEmail.value.trim()
+            }
+        };
+
+        bookings.push(booking);
+        renderConfirmation(booking);
+        renderBookingsList();
+        showView('confirmation');
+    });
+}
+
+// ---- Receipt rendering ------------------------------------------------
+
+function renderConfirmation(booking) {
+    setText('confNameInline', booking.driver.fullName.split(' ')[0] || 'Guest');
+    setText('confRefNumber', booking.id);
+    setText('confSubmittedAt', formatSubmittedAt(booking.submittedAt));
+
+    const iconEl = document.getElementById('confVehicleIcon');
+    if (iconEl) iconEl.innerHTML = `<i class="fa-solid ${booking.car.iconName} fa-2x"></i>`;
+
+    const titleEl = document.getElementById('confVehicleTitle');
+    if (titleEl) titleEl.innerHTML = `${booking.car.name} <span>${booking.car.subtitle}</span>`;
+
+    setText('confVehicleSpecs', booking.car.specsSummary);
+    setText('confRentalType', booking.rental.type === 'driver' ? 'Rent a Car with Driver' : 'Rent a Car (Self-drive)');
+    setText('confPickupDateTime', `${formatShortDate(booking.rental.pickupDate)}, ${formatTimeValue(booking.rental.pickupTime)}`);
+    setText('confPickupLocation', booking.rental.pickupLocation);
+    setText('confDropoffDateTime', `${formatShortDate(booking.rental.dropoffDate)}, ${formatTimeValue(booking.rental.dropoffTime)}`);
+
+    const dropRow = document.getElementById('confDropoffLocRow');
+    if (dropRow) {
+        if (booking.rental.dropoffLocation) {
+            dropRow.style.display = 'flex';
+            setText('confDropoffLocation', booking.rental.dropoffLocation);
+        } else {
+            dropRow.style.display = 'none';
+        }
+    }
+
+    setText('confDuration', `${booking.rental.days} day${booking.rental.days !== 1 ? 's' : ''}`);
+    setText('confDriverName', booking.driver.fullName);
+    setText('confDriverMobile', booking.driver.mobile);
+    setText('confDriverEmail', booking.driver.email);
+    setText('confPricePerDay', booking.car.perDayLabel || '--');
+    setText('confTotal', booking.car.totalLabel || '--');
+}
+
+// ---- My Bookings list ---------------------------------------------------
+
+function renderBookingsList() {
+    const listEl = document.getElementById('bookingsList');
+    const emptyEl = document.getElementById('bookingsEmptyState');
+    if (!listEl || !emptyEl) return;
+
+    if (bookings.length === 0) {
+        emptyEl.style.display = 'block';
+        listEl.style.display = 'none';
+        listEl.innerHTML = '';
+        return;
+    }
+
+    emptyEl.style.display = 'none';
+    listEl.style.display = 'flex';
+
+    listEl.innerHTML = bookings.slice().reverse().map(b => `
+        <div class="booking-list-card">
+            <div class="blc-icon"><i class="fa-solid ${b.car.iconName} fa-2x"></i></div>
+            <div class="blc-body">
+                <div class="blc-top-row">
+                    <h3>${b.car.name}<span>${b.car.subtitle}</span></h3>
+                    <span class="status-pill status-pending">Pending confirmation</span>
+                </div>
+                <div class="blc-meta">
+                    <span><i class="fa-regular fa-calendar"></i> ${formatShortDate(b.rental.pickupDate)} - ${formatShortDate(b.rental.dropoffDate)}</span>
+                    <span><i class="fa-solid fa-hashtag"></i> ${b.id}</span>
+                    <span><i class="fa-regular fa-clock"></i> Submitted ${formatSubmittedAt(b.submittedAt)}</span>
                 </div>
             </div>
-        </div>
-
-        <div class="receipt-section">
-            <div class="receipt-section-title">Trip Details</div>
-            <div class="receipt-detail-line"><i class="fa-regular fa-calendar"></i> ${b.tripTimelineText || 'Dates to be confirmed'}</div>
-            <div class="receipt-detail-line"><i class="fa-solid fa-location-dot"></i> ${b.branchLocation || 'Branch to be confirmed'}${b.locSub ? `<small>${b.locSub}</small>` : ''}</div>
-            ${b.driverPickupAddress ? `<div class="receipt-detail-line"><i class="fa-solid fa-user-tie"></i> Driver pick-up address<small>${b.driverPickupAddress}</small></div>` : ''}
-            <div class="receipt-detail-line"><i class="fa-solid fa-id-card-clip"></i> ${b.rentalTypeLabel}<small>${b.extraLine}</small></div>
-        </div>
-
-        <div class="receipt-section">
-            <div class="receipt-section-title">Estimated Price</div>
-            <div class="receipt-price-row"><span>Prepay online</span><span>${b.prepayOnline}</span></div>
-            <div class="receipt-price-row"><span>Pay at pick-up</span><span>${b.payAtPickup}</span></div>
-            <div class="receipt-price-row total-row"><span>Estimated total</span><span>US$${b.grandTotal.toFixed(2)}</span></div>
-        </div>
-
-        <div class="receipt-footnote">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>This is a booking request, not a payment receipt. No charges have been made yet — our staff will reach out to confirm details and walk you through payment terms.</span>
-        </div>
-    `;
-}
-
-function renderBookingSummaryCardHTML(b){
-    return `
-        <div class="booking-summary-card" data-booking-ref="${b.ref}">
-            <div class="bsc-top">
-                <span class="status-badge status-pending"><i class="fa-solid fa-hourglass-half"></i> Pending Confirmation</span>
-                <span class="bsc-ref">#${b.ref}</span>
-            </div>
-            <div class="bsc-body">
-                <div class="bsc-visual"><i class="fa-solid ${b.vehicleIconClass} fa-2x"></i></div>
-                <div class="bsc-info">
-                    <h4>${b.carName}<span>${b.carSubtext}</span></h4>
-                    <p class="bsc-dates"><i class="fa-regular fa-calendar"></i> ${b.tripTimelineText || 'Dates to be confirmed'}</p>
-                    <p class="bsc-location"><i class="fa-solid fa-location-dot"></i> ${b.branchLocation || 'Branch to be confirmed'}</p>
-                </div>
-            </div>
-            <div class="bsc-bottom">
-                <span class="bsc-total">Est. total: <strong>US$${b.grandTotal.toFixed(2)}</strong></span>
-                <button type="button" class="view-receipt-btn" data-booking-ref="${b.ref}">View Receipt <i class="fa-solid fa-chevron-right"></i></button>
+            <div class="blc-action">
+                <div class="blc-price">${b.car.totalLabel || ''}</div>
+                <button type="button" class="view-receipt-btn" data-booking-id="${b.id}">View Receipt</button>
             </div>
         </div>
-    `;
-}
+    `).join('');
 
-function showReceiptView(booking){
-    if(!bookingReceiptView || !receiptCardContent) return;
-    receiptCardContent.innerHTML = renderReceiptCardHTML(booking);
-    clearAltViews();
-    document.body.classList.add('show-receipt-view');
-    bookingReceiptView.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'instant' });
-}
-
-function renderBookingsList(){
-    if(!bookingsListContainer) return;
-    bookingsListContainer.innerHTML = bookingsStore.slice().reverse().map(renderBookingSummaryCardHTML).join('');
-    bookingsListContainer.style.display = bookingsStore.length ? 'flex' : 'none';
-    if(bookingsTotalCount) bookingsTotalCount.textContent = `${bookingsStore.length} booking${bookingsStore.length === 1 ? '' : 's'}`;
-    if(bookingsEmptyState) bookingsEmptyState.classList.toggle('is-active', bookingsStore.length === 0);
-
-    bookingsListContainer.querySelectorAll('.view-receipt-btn').forEach(btn => {
+    listEl.querySelectorAll('.view-receipt-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const found = bookingsStore.find(b => b.ref === btn.dataset.bookingRef);
-            if(found) showReceiptView(found);
+            const booking = bookings.find(b => b.id === btn.getAttribute('data-booking-id'));
+            if (booking) {
+                renderConfirmation(booking);
+                showView('confirmation');
+            }
         });
     });
 }
 
-function showBookingsView(){
-    if(!myBookingsView) return;
-    renderBookingsList();
-    clearAltViews();
-    document.body.classList.add('show-bookings-view');
-    myBookingsView.style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'instant' });
-}
+// ---- Navigation bindings for the new views -------------------------------
 
-function updateBookingsBadge(){
-    if(!bookingsCountBadge) return;
-    if(bookingsStore.length > 0){
-        bookingsCountBadge.textContent = bookingsStore.length;
-        bookingsCountBadge.style.display = 'inline-flex';
-    } else {
-        bookingsCountBadge.style.display = 'none';
-    }
-}
-
-if(myBookingsBtn){
-    myBookingsBtn.addEventListener('click', showBookingsView);
-}
-
-if(checkoutSubmitBtn){
-    checkoutSubmitBtn.addEventListener('click', () => {
-        const booking = collectBookingFromDetailsView();
-        bookingsStore.push(booking);
-        updateBookingsBadge();
-        showReceiptView(booking);
+if (myBookingsBtn) {
+    myBookingsBtn.addEventListener('click', () => {
+        renderBookingsList();
+        showView('mybookings');
     });
 }
 
-if(receiptBackBtn){
-    receiptBackBtn.addEventListener('click', () => {
-        clearAltViews();
-        if(navCarServices) navCarServices.classList.remove('highlight-active');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        calculateOffsets();
+if (confBackHomeBtn) {
+    confBackHomeBtn.addEventListener('click', () => showView(null));
+}
+
+if (confViewBookingsBtn) {
+    confViewBookingsBtn.addEventListener('click', () => {
+        renderBookingsList();
+        showView('mybookings');
     });
 }
 
-if(receiptViewAllBtn){
-    receiptViewAllBtn.addEventListener('click', showBookingsView);
+function goBookAnotherCar() {
+    showView(null);
+    setTimeout(() => {
+        document.getElementById('fleet')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
 }
 
-if(emptyStateBrowseBtn){
-    emptyStateBrowseBtn.addEventListener('click', () => {
-        clearAltViews();
-        if(navCarServices) navCarServices.classList.remove('highlight-active');
-        calculateOffsets();
-        const fleetEl = document.getElementById('fleet');
-        if(fleetEl){
-            window.scrollTo({ top: fleetEl.offsetTop - 120, behavior: 'smooth' });
-        } else {
-            window.scrollTo({ top: 0, behavior: 'instant' });
-        }
-    });
-}
+if (bookAnotherBtn) bookAnotherBtn.addEventListener('click', goBookAnotherCar);
+if (emptyStateBookBtn) emptyStateBookBtn.addEventListener('click', goBookAnotherCar);
