@@ -64,7 +64,7 @@ window.addEventListener('resize', calculateOffsets);
 
 window.addEventListener('scroll', () => {
     // Structural layout skips sticky modifiers if alternative result layouts are rendering
-    if (document.body.classList.contains('show-results') || document.body.classList.contains('show-details-view')) return;
+    if (isAltViewActive()) return;
 
     const scrollY = window.scrollY;
 
@@ -96,7 +96,7 @@ const sections = [
 ];
 
 function handleScrollSpy() {
-    if (document.body.classList.contains('show-results') || document.body.classList.contains('show-details-view')) return;
+    if (isAltViewActive()) return;
     
     let currentId = '';
     const scrollY = window.scrollY + 160; 
@@ -121,7 +121,7 @@ function handleScrollSpy() {
 
 document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        if(document.body.classList.contains('show-results') || document.body.classList.contains('show-details-view')) return;
+        if(isAltViewActive()) return;
         e.preventDefault();
         const targetId = this.getAttribute('href').substring(1);
         const targetSection = document.getElementById(targetId);
@@ -270,7 +270,15 @@ if(mainSearchForm) {
         secondaryNav.classList.remove('is-visible');
 
         // Render Active Results View Matrix
-        switchView('results');
+        clearAltViews();
+        document.body.classList.add('show-results');
+        searchResultsView.style.display = 'block';
+        
+        if(navCarServices) {
+            navCarServices.classList.add('highlight-active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'instant' });
     });
 }
 
@@ -278,7 +286,10 @@ if(mainSearchForm) {
 document.querySelectorAll('.view-deal-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
-        switchView('details');
+        clearAltViews();
+        document.body.classList.add('show-details-view');
+        carDetailsView.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'instant' });
     });
 });
 
@@ -287,17 +298,26 @@ const backToResults = document.getElementById('backToResults');
 if (backToResults) {
     backToResults.addEventListener('click', (e) => {
         e.preventDefault();
-        switchView('results');
+        clearAltViews();
+        document.body.classList.add('show-results');
+        searchResultsView.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'instant' });
     });
 }
 
-// Complete structural navigation canvas view updates — clicking the logo always resets to home
-const ACTIVE_VIEW_CLASSES = ['show-results', 'show-details-view', 'show-checkout-view', 'show-confirmation-view', 'show-mybookings-view'];
+// Complete structural navigation canvas view updates
 document.querySelectorAll('.clickable-logo').forEach(logo => {
     logo.addEventListener('click', () => {
-        const inAltView = ACTIVE_VIEW_CLASSES.some(cls => document.body.classList.contains(cls));
-        if(!inAltView) return;
-        switchView('landing');
+        if(!isAltViewActive()) return;
+        
+        clearAltViews();
+        
+        if(navCarServices) {
+            navCarServices.classList.remove('highlight-active');
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        calculateOffsets();
     });
 });
 
@@ -310,306 +330,7 @@ document.querySelectorAll('.select-trigger').forEach(btn => {
 });
 
 // ==========================================
-// 7. Checkout -> Booking Submitted -> Receipt -> My Bookings flow
-// ==========================================
-
-// In-memory store for this prototype session (no backend yet).
-let bookingsStore = [];
-let pendingCarSummary = null; // captured from the details view right before checkout
-
-const checkoutView = document.getElementById('checkoutView');
-const confirmationView = document.getElementById('confirmationView');
-const myBookingsView = document.getElementById('myBookingsView');
-const checkoutSummaryBox = document.getElementById('checkoutSummaryBox');
-const confirmationContainer = document.getElementById('confirmationContainer');
-const myBookingsList = document.getElementById('myBookingsList');
-const checkoutForm = document.getElementById('checkoutForm');
-const fabBadge = document.getElementById('fabBadge');
-
-// Master view switcher covering every top-level interface in the app.
-const VIEW_MAP = {
-    landing:       { cls: null,                    el: null },
-    results:       { cls: 'show-results',           el: searchResultsView },
-    details:       { cls: 'show-details-view',       el: carDetailsView },
-    checkout:      { cls: 'show-checkout-view',      el: checkoutView },
-    confirmation:  { cls: 'show-confirmation-view',  el: confirmationView },
-    mybookings:    { cls: 'show-mybookings-view',    el: myBookingsView }
-};
-
-function switchView(viewName){
-    Object.values(VIEW_MAP).forEach(v => {
-        if(v.cls) document.body.classList.remove(v.cls);
-        if(v.el) v.el.style.display = 'none';
-    });
-
-    const target = VIEW_MAP[viewName];
-    if(target){
-        if(target.cls) document.body.classList.add(target.cls);
-        if(target.el) target.el.style.display = 'block';
-    }
-
-    if(navCarServices) navCarServices.classList.toggle('highlight-active', viewName === 'results');
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    calculateOffsets();
-}
-
-function escapeHtml(str){
-    const div = document.createElement('div');
-    div.textContent = str == null ? '' : str;
-    return div.innerHTML;
-}
-
-function parseMoney(str){
-    return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0;
-}
-
-function formatMoney(n){
-    return 'US$' + n.toFixed(2);
-}
-
-function genBookingId(){
-    const rand = Math.floor(1000 + Math.random() * 9000);
-    return 'LUNA-' + Date.now().toString().slice(-6) + rand;
-}
-
-// Reads the currently-displayed car details view and turns it into a plain summary object.
-function captureCarSummary(){
-    const titleEl = document.querySelector('#carDetailsView .car-title-row h2');
-    let carTitle = 'Selected Vehicle';
-    let carSubtitle = '';
-    if(titleEl){
-        carTitle = (titleEl.childNodes[0] && titleEl.childNodes[0].textContent.trim()) || carTitle;
-        const subEl = titleEl.querySelector('.car-subtext');
-        if(subEl && subEl.childNodes[0]) carSubtitle = subEl.childNodes[0].textContent.trim();
-    }
-
-    let tripText = '';
-    const itText = document.querySelector('#carDetailsView .it-text');
-    if(itText){
-        const clone = itText.cloneNode(true);
-        const pill = clone.querySelector('.duration-pill');
-        const duration = pill ? pill.textContent.trim() : '';
-        if(pill) pill.remove();
-        tripText = clone.textContent.trim();
-        if(duration) tripText += ` (${duration})`;
-    }
-
-    let pickupLocation = '';
-    const locTitleEl = document.querySelector('#carDetailsView .loc-title');
-    if(locTitleEl && locTitleEl.childNodes[0]){
-        pickupLocation = locTitleEl.childNodes[0].textContent.trim();
-    }
-
-    const priceEls = document.querySelectorAll('#carDetailsView .price-summary-row.primary-row .row-cost-val');
-    const prepay = priceEls[0] ? priceEls[0].textContent.trim() : 'US$0.00';
-    const payAtPickup = priceEls[1] ? priceEls[1].textContent.trim() : 'US$0.00';
-    const total = formatMoney(parseMoney(prepay) + parseMoney(payAtPickup));
-
-    return { carTitle, carSubtitle, tripText, pickupLocation, prepay, payAtPickup, total };
-}
-
-function renderCheckoutSummary(summary){
-    checkoutSummaryBox.innerHTML = `
-        <h3>Booking Summary</h3>
-        <div class="receipt-row"><span>Vehicle</span><span>${escapeHtml(summary.carTitle)}</span></div>
-        ${summary.carSubtitle ? `<div class="receipt-row"><span>Category</span><span>${escapeHtml(summary.carSubtitle)}</span></div>` : ''}
-        <div class="receipt-row"><span>Trip</span><span>${escapeHtml(summary.tripText)}</span></div>
-        <div class="receipt-row"><span>Pick-up</span><span>${escapeHtml(summary.pickupLocation)}</span></div>
-        <div class="divider-line"></div>
-        <div class="price-summary-row sub-row"><span class="row-title">Prepay online</span><span class="row-cost-val">${escapeHtml(summary.prepay)}</span></div>
-        <div class="price-summary-row sub-row"><span class="row-title">Pay at pick-up</span><span class="row-cost-val">${escapeHtml(summary.payAtPickup)}</span></div>
-        <div class="divider-line"></div>
-        <div class="price-summary-row primary-row"><span class="row-title">Total estimate</span><span class="row-cost-val">${escapeHtml(summary.total)}</span></div>
-        <button type="submit" form="checkoutForm" class="checkout-submit-btn">Submit Booking Request</button>
-        <p class="checkout-fineprint">By submitting, you agree to be contacted by our staff regarding availability and payment terms.</p>
-    `;
-}
-
-function renderReceipt(booking, opts){
-    const isFresh = !!(opts && opts.showSuccessBanner);
-
-    confirmationContainer.innerHTML = `
-        <div class="confirmation-hero">
-            <div class="confirmation-icon"><i class="fa-solid fa-circle-check"></i></div>
-            <h2>${isFresh ? 'Your Booking Has Been Submitted!' : 'Booking Receipt'}</h2>
-            <p>${isFresh
-                ? 'Thank you! We\u2019ve received your request. Please wait while our staff reviews it \u2014 they will contact you shortly to confirm availability and assist you with the payment terms.'
-                : 'Here are the full details of this submitted booking request.'}</p>
-            <div class="booking-ref-pill"><i class="fa-solid fa-hashtag"></i> ${escapeHtml(booking.id)}</div>
-        </div>
-
-        <div class="payment-pending-note">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <p><strong>No payment has been collected.</strong> This booking is pending confirmation. Our staff will reach out by phone or email to finalize your reservation and go over the payment terms.</p>
-        </div>
-
-        <div class="receipt-card">
-            <h3>Status <span class="status-badge pending"><i class="fa-solid fa-clock"></i> Pending Confirmation</span></h3>
-            <div class="receipt-row"><span>Submitted on</span><span>${escapeHtml(booking.createdAt)}</span></div>
-            <div class="receipt-row"><span>Rental type</span><span>${escapeHtml(booking.rentalType)}</span></div>
-        </div>
-
-        <div class="receipt-card">
-            <h3>Vehicle & Trip Details</h3>
-            <div class="receipt-row"><span>Vehicle</span><span>${escapeHtml(booking.carTitle)}</span></div>
-            ${booking.carSubtitle ? `<div class="receipt-row"><span>Category</span><span>${escapeHtml(booking.carSubtitle)}</span></div>` : ''}
-            <div class="receipt-row"><span>Trip</span><span>${escapeHtml(booking.tripText)}</span></div>
-            <div class="receipt-row"><span>Pick-up location</span><span>${escapeHtml(booking.pickupLocation)}</span></div>
-        </div>
-
-        <div class="receipt-card">
-            <h3>Guest Information</h3>
-            <div class="receipt-row"><span>Full name</span><span>${escapeHtml(booking.guestName)}</span></div>
-            <div class="receipt-row"><span>Email</span><span>${escapeHtml(booking.guestEmail)}</span></div>
-            <div class="receipt-row"><span>Mobile number</span><span>${escapeHtml(booking.guestPhone)}</span></div>
-            ${booking.guestIdType ? `<div class="receipt-row"><span>ID type</span><span>${escapeHtml(booking.guestIdType)}${booking.guestIdNumber ? ' &mdash; ' + escapeHtml(booking.guestIdNumber) : ''}</span></div>` : ''}
-            ${booking.guestNotes ? `<div class="receipt-row"><span>Special requests</span><span>${escapeHtml(booking.guestNotes)}</span></div>` : ''}
-        </div>
-
-        <div class="receipt-card">
-            <h3>Estimated Price</h3>
-            <div class="receipt-row"><span>Prepay online</span><span>${escapeHtml(booking.prepay)}</span></div>
-            <div class="receipt-row"><span>Pay at pick-up</span><span>${escapeHtml(booking.payAtPickup)}</span></div>
-            <div class="receipt-row total"><span>Total estimate</span><span>${escapeHtml(booking.total)}</span></div>
-        </div>
-
-        <div class="confirmation-actions">
-            <button type="button" class="btn-ghost" id="confBackHome"><i class="fa-solid fa-house"></i> Back to Home</button>
-            <button type="button" class="btn-primary" id="confViewBookings"><i class="fa-solid fa-clipboard-list"></i> View My Bookings</button>
-        </div>
-    `;
-
-    document.getElementById('confBackHome').addEventListener('click', () => switchView('landing'));
-    document.getElementById('confViewBookings').addEventListener('click', () => {
-        renderMyBookingsList();
-        switchView('mybookings');
-    });
-}
-
-function renderMyBookingsList(){
-    if(!bookingsStore.length){
-        myBookingsList.innerHTML = `
-            <div class="empty-bookings-state">
-                <i class="fa-solid fa-clipboard-list"></i>
-                <h3>No bookings yet</h3>
-                <p>Once you submit a booking request, it will show up here with its status and full receipt.</p>
-                <button type="button" class="btn-primary" id="emptyBookHomeBtn"><i class="fa-solid fa-car"></i> Browse Vehicles</button>
-            </div>`;
-        const emptyBtn = document.getElementById('emptyBookHomeBtn');
-        if(emptyBtn) emptyBtn.addEventListener('click', () => switchView('landing'));
-        return;
-    }
-
-    myBookingsList.innerHTML = bookingsStore.slice().reverse().map(b => `
-        <div class="booking-list-card">
-            <div class="blc-left">
-                <span class="blc-car">${escapeHtml(b.carTitle)}</span>
-                <div class="blc-meta">
-                    <span><i class="fa-solid fa-hashtag"></i> ${escapeHtml(b.id)}</span>
-                    <span><i class="fa-regular fa-calendar"></i> ${escapeHtml(b.tripText)}</span>
-                    <span class="status-badge pending"><i class="fa-solid fa-clock"></i> Pending</span>
-                </div>
-            </div>
-            <div class="blc-right">
-                <span class="blc-price">${escapeHtml(b.total)}</span>
-                <button type="button" class="view-receipt-btn" data-id="${escapeHtml(b.id)}">View Receipt</button>
-            </div>
-        </div>
-    `).join('');
-
-    myBookingsList.querySelectorAll('.view-receipt-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const booking = bookingsStore.find(b => b.id === btn.dataset.id);
-            if(booking){
-                renderReceipt(booking, { showSuccessBanner: false });
-                switchView('confirmation');
-            }
-        });
-    });
-}
-
-function updateFabBadge(){
-    const n = bookingsStore.length;
-    if(fabBadge){
-        fabBadge.textContent = n;
-        fabBadge.style.display = n > 0 ? 'flex' : 'none';
-    }
-}
-
-// "Proceed to Booking" on the car details pricing panel -> open guest checkout form
-const proceedToBookingBtn = document.getElementById('proceedToBookingBtn');
-if(proceedToBookingBtn){
-    proceedToBookingBtn.addEventListener('click', () => {
-        pendingCarSummary = captureCarSummary();
-        renderCheckoutSummary(pendingCarSummary);
-        if(checkoutForm) checkoutForm.reset();
-        switchView('checkout');
-    });
-}
-
-// Guest checkout form submission -> create the booking, show the submitted receipt
-if(checkoutForm){
-    checkoutForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if(!checkoutForm.checkValidity()){
-            checkoutForm.reportValidity();
-            return;
-        }
-        if(!pendingCarSummary) pendingCarSummary = captureCarSummary();
-
-        const isDriverActive = document.getElementById('rtDriver') && document.getElementById('rtDriver').classList.contains('active');
-
-        const booking = {
-            id: genBookingId(),
-            createdAt: new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
-            rentalType: isDriverActive ? 'Rent a Car with Driver' : 'Self-drive',
-            ...pendingCarSummary,
-            guestName: document.getElementById('guestFullName').value.trim(),
-            guestEmail: document.getElementById('guestEmail').value.trim(),
-            guestPhone: document.getElementById('guestPhone').value.trim(),
-            guestIdType: document.getElementById('guestIdType').value,
-            guestIdNumber: document.getElementById('guestIdNumber').value.trim(),
-            guestNotes: document.getElementById('guestNotes').value.trim()
-        };
-
-        bookingsStore.push(booking);
-        updateFabBadge();
-        renderReceipt(booking, { showSuccessBanner: true });
-        switchView('confirmation');
-    });
-}
-
-// Back link: checkout -> car details
-const backToDetailsFromCheckout = document.getElementById('backToDetailsFromCheckout');
-if(backToDetailsFromCheckout){
-    backToDetailsFromCheckout.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('details');
-    });
-}
-
-// Back link: my bookings -> home
-const backHomeFromBookings = document.getElementById('backHomeFromBookings');
-if(backHomeFromBookings){
-    backHomeFromBookings.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('landing');
-    });
-}
-
-// Quick access to "My Bookings" — identical entry points on desktop and mobile
-[document.getElementById('heroMyBookingsBtn'), document.getElementById('floatingBookingsBtn')].forEach(btn => {
-    if(!btn) return;
-    btn.addEventListener('click', () => {
-        renderMyBookingsList();
-        switchView('mybookings');
-    });
-});
-
-updateFabBadge();
-
-// ==========================================
-// 8. Accordion Dropdown Functions
+// 7. Accordion Dropdown Functions
 // ==========================================
 const faqItems = document.querySelectorAll('.faq-item');
 faqItems.forEach(item => {
@@ -629,3 +350,291 @@ faqItems.forEach(item => {
         }
     });
 });
+
+// ==========================================
+// 8. Alternate View State Helpers
+// (Shared plumbing used by results / details / receipt / bookings views)
+// ==========================================
+const ALT_VIEW_CLASSES = ['show-results', 'show-details-view', 'show-receipt-view', 'show-bookings-view'];
+
+function isAltViewActive(){
+    return ALT_VIEW_CLASSES.some(cls => document.body.classList.contains(cls));
+}
+
+function clearAltViews(){
+    document.body.classList.remove(...ALT_VIEW_CLASSES);
+    if(searchResultsView) searchResultsView.style.display = 'none';
+    if(carDetailsView) carDetailsView.style.display = 'none';
+    if(bookingReceiptView) bookingReceiptView.style.display = 'none';
+    if(myBookingsView) myBookingsView.style.display = 'none';
+}
+
+// ==========================================
+// 9. Booking Submission, Receipt & My Bookings List
+// ==========================================
+const myBookingsBtn = document.getElementById('myBookingsBtn');
+const bookingsCountBadge = document.getElementById('bookingsCountBadge');
+const checkoutSubmitBtn = document.getElementById('checkoutSubmitBtn');
+const bookingReceiptView = document.getElementById('bookingReceiptView');
+const receiptCardContent = document.getElementById('receiptCardContent');
+const receiptBackBtn = document.getElementById('receiptBackBtn');
+const receiptViewAllBtn = document.getElementById('receiptViewAllBtn');
+const myBookingsView = document.getElementById('myBookingsView');
+const bookingsListContainer = document.getElementById('bookingsListContainer');
+const bookingsTotalCount = document.getElementById('bookingsTotalCount');
+const bookingsEmptyState = document.getElementById('bookingsEmptyState');
+const emptyStateBrowseBtn = document.getElementById('emptyStateBrowseBtn');
+
+// In-memory booking list for this prototype session (no backend yet — resets on page reload)
+let bookingsStore = [];
+let bookingRefCounter = 1000;
+
+function generateBookingRef(){
+    bookingRefCounter += 1;
+    return `LNC-${new Date().getFullYear()}-${bookingRefCounter}`;
+}
+
+function readText(el){
+    return el ? el.textContent.trim().replace(/\s+/g, ' ') : '';
+}
+
+function parseUSD(str){
+    return parseFloat((str || '0').replace(/[^0-9.]/g, '')) || 0;
+}
+
+// Reads the currently displayed car + search info to build a booking record.
+// Pulling from the live DOM (instead of duplicating hard-coded numbers) keeps
+// the receipt in sync with whatever the pricing/details panel is showing.
+function collectBookingFromDetailsView(){
+    const rentalTypeBtn = document.querySelector('.rt-option.active');
+    const isDriverType = !!(rentalTypeBtn && rentalTypeBtn.dataset.type === 'driver');
+
+    // Vehicle name + subtext
+    const carTitleH2 = document.querySelector('#carDetailsView .car-title-row h2');
+    let carName = 'Selected Vehicle';
+    let carSubtext = '';
+    if(carTitleH2){
+        const subtextEl = carTitleH2.querySelector('.car-subtext');
+        carSubtext = subtextEl ? readText(subtextEl) : '';
+        const fullText = readText(carTitleH2);
+        carName = (carSubtext ? fullText.replace(carSubtext, '') : fullText).trim() || carName;
+    }
+
+    // Vehicle icon (matches whatever icon the details panel is using)
+    let vehicleIconClass = 'fa-car';
+    const iconEl = document.querySelector('#carDetailsView .car-info-visual i');
+    if(iconEl){
+        const found = Array.from(iconEl.classList).find(c => c.startsWith('fa-') && c !== 'fa-solid' && c !== 'fa-regular' && !/^fa-\d+x$/.test(c));
+        if(found) vehicleIconClass = found;
+    }
+
+    // Trip dates/duration
+    let tripTimelineText = '';
+    const itTextEl = document.querySelector('#carDetailsView .it-text');
+    if(itTextEl){
+        const clone = itTextEl.cloneNode(true);
+        const pill = clone.querySelector('.duration-pill');
+        let durationText = '';
+        if(pill){ durationText = readText(pill); pill.remove(); }
+        tripTimelineText = readText(clone) + (durationText ? ` (${durationText})` : '');
+    }
+
+    // Branch / pick-up location
+    let branchLocation = '';
+    const locTitleEl = document.querySelector('#carDetailsView .loc-title');
+    if(locTitleEl){
+        const clone = locTitleEl.cloneNode(true);
+        const link = clone.querySelector('.map-link-inline');
+        if(link) link.remove();
+        branchLocation = readText(clone);
+    }
+    const locSub = readText(document.querySelector('#carDetailsView .loc-sub'));
+
+    // Rental type extras
+    let rentalTypeLabel = 'Rent a Car (Self-drive)';
+    let extraLine = '';
+    let driverPickupAddress = '';
+    if(isDriverType){
+        rentalTypeLabel = 'Rent a Car with Driver';
+        extraLine = "Driver will be provided by LUNA's Car Rental.";
+        if(pickupLocation && pickupLocation.value) driverPickupAddress = pickupLocation.value;
+        if(diffDropoffCheck && diffDropoffCheck.checked && dropoffLocation && dropoffLocation.value){
+            extraLine += ` Drop-off at: ${dropoffLocation.value}.`;
+        }
+    } else {
+        const country = document.getElementById('driverCountry');
+        const age = document.getElementById('driverAge');
+        extraLine = `Driver's license issuing country: ${country ? country.value : 'N/A'} · Driver's age: ${age ? age.value : 'N/A'}`;
+    }
+
+    // Pricing (Prepay online + Pay at pick-up primary rows, in document order)
+    const priceRows = document.querySelectorAll('#carDetailsView .price-summary-row.primary-row .row-cost-val');
+    const prepayOnline = priceRows[0] ? readText(priceRows[0]) : 'US$0.00';
+    const payAtPickup = priceRows[1] ? readText(priceRows[1]) : 'US$0.00';
+    const grandTotal = parseUSD(prepayOnline) + parseUSD(payAtPickup);
+
+    return {
+        ref: generateBookingRef(),
+        submittedAt: new Date(),
+        rentalTypeLabel,
+        extraLine,
+        carName,
+        carSubtext,
+        vehicleIconClass,
+        tripTimelineText,
+        branchLocation,
+        locSub,
+        driverPickupAddress,
+        prepayOnline,
+        payAtPickup,
+        grandTotal,
+        status: 'pending'
+    };
+}
+
+function renderReceiptCardHTML(b){
+    const submittedStr = b.submittedAt.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    return `
+        <div class="receipt-head-row">
+            <div class="receipt-ref">${b.ref}<small>Booking reference</small></div>
+            <div class="receipt-submitted">Submitted<strong>${submittedStr}</strong></div>
+        </div>
+
+        <div class="receipt-section">
+            <div class="receipt-section-title">Vehicle</div>
+            <div class="receipt-vehicle-row">
+                <div class="receipt-vehicle-visual"><i class="fa-solid ${b.vehicleIconClass} fa-2x"></i></div>
+                <div class="receipt-vehicle-info">
+                    <h4>${b.carName}</h4>
+                    <span>${b.carSubtext}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="receipt-section">
+            <div class="receipt-section-title">Trip Details</div>
+            <div class="receipt-detail-line"><i class="fa-regular fa-calendar"></i> ${b.tripTimelineText || 'Dates to be confirmed'}</div>
+            <div class="receipt-detail-line"><i class="fa-solid fa-location-dot"></i> ${b.branchLocation || 'Branch to be confirmed'}${b.locSub ? `<small>${b.locSub}</small>` : ''}</div>
+            ${b.driverPickupAddress ? `<div class="receipt-detail-line"><i class="fa-solid fa-user-tie"></i> Driver pick-up address<small>${b.driverPickupAddress}</small></div>` : ''}
+            <div class="receipt-detail-line"><i class="fa-solid fa-id-card-clip"></i> ${b.rentalTypeLabel}<small>${b.extraLine}</small></div>
+        </div>
+
+        <div class="receipt-section">
+            <div class="receipt-section-title">Estimated Price</div>
+            <div class="receipt-price-row"><span>Prepay online</span><span>${b.prepayOnline}</span></div>
+            <div class="receipt-price-row"><span>Pay at pick-up</span><span>${b.payAtPickup}</span></div>
+            <div class="receipt-price-row total-row"><span>Estimated total</span><span>US$${b.grandTotal.toFixed(2)}</span></div>
+        </div>
+
+        <div class="receipt-footnote">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>This is a booking request, not a payment receipt. No charges have been made yet — our staff will reach out to confirm details and walk you through payment terms.</span>
+        </div>
+    `;
+}
+
+function renderBookingSummaryCardHTML(b){
+    return `
+        <div class="booking-summary-card" data-booking-ref="${b.ref}">
+            <div class="bsc-top">
+                <span class="status-badge status-pending"><i class="fa-solid fa-hourglass-half"></i> Pending Confirmation</span>
+                <span class="bsc-ref">#${b.ref}</span>
+            </div>
+            <div class="bsc-body">
+                <div class="bsc-visual"><i class="fa-solid ${b.vehicleIconClass} fa-2x"></i></div>
+                <div class="bsc-info">
+                    <h4>${b.carName}<span>${b.carSubtext}</span></h4>
+                    <p class="bsc-dates"><i class="fa-regular fa-calendar"></i> ${b.tripTimelineText || 'Dates to be confirmed'}</p>
+                    <p class="bsc-location"><i class="fa-solid fa-location-dot"></i> ${b.branchLocation || 'Branch to be confirmed'}</p>
+                </div>
+            </div>
+            <div class="bsc-bottom">
+                <span class="bsc-total">Est. total: <strong>US$${b.grandTotal.toFixed(2)}</strong></span>
+                <button type="button" class="view-receipt-btn" data-booking-ref="${b.ref}">View Receipt <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        </div>
+    `;
+}
+
+function showReceiptView(booking){
+    if(!bookingReceiptView || !receiptCardContent) return;
+    receiptCardContent.innerHTML = renderReceiptCardHTML(booking);
+    clearAltViews();
+    document.body.classList.add('show-receipt-view');
+    bookingReceiptView.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function renderBookingsList(){
+    if(!bookingsListContainer) return;
+    bookingsListContainer.innerHTML = bookingsStore.slice().reverse().map(renderBookingSummaryCardHTML).join('');
+    bookingsListContainer.style.display = bookingsStore.length ? 'flex' : 'none';
+    if(bookingsTotalCount) bookingsTotalCount.textContent = `${bookingsStore.length} booking${bookingsStore.length === 1 ? '' : 's'}`;
+    if(bookingsEmptyState) bookingsEmptyState.classList.toggle('is-active', bookingsStore.length === 0);
+
+    bookingsListContainer.querySelectorAll('.view-receipt-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const found = bookingsStore.find(b => b.ref === btn.dataset.bookingRef);
+            if(found) showReceiptView(found);
+        });
+    });
+}
+
+function showBookingsView(){
+    if(!myBookingsView) return;
+    renderBookingsList();
+    clearAltViews();
+    document.body.classList.add('show-bookings-view');
+    myBookingsView.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function updateBookingsBadge(){
+    if(!bookingsCountBadge) return;
+    if(bookingsStore.length > 0){
+        bookingsCountBadge.textContent = bookingsStore.length;
+        bookingsCountBadge.style.display = 'inline-flex';
+    } else {
+        bookingsCountBadge.style.display = 'none';
+    }
+}
+
+if(myBookingsBtn){
+    myBookingsBtn.addEventListener('click', showBookingsView);
+}
+
+if(checkoutSubmitBtn){
+    checkoutSubmitBtn.addEventListener('click', () => {
+        const booking = collectBookingFromDetailsView();
+        bookingsStore.push(booking);
+        updateBookingsBadge();
+        showReceiptView(booking);
+    });
+}
+
+if(receiptBackBtn){
+    receiptBackBtn.addEventListener('click', () => {
+        clearAltViews();
+        if(navCarServices) navCarServices.classList.remove('highlight-active');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        calculateOffsets();
+    });
+}
+
+if(receiptViewAllBtn){
+    receiptViewAllBtn.addEventListener('click', showBookingsView);
+}
+
+if(emptyStateBrowseBtn){
+    emptyStateBrowseBtn.addEventListener('click', () => {
+        clearAltViews();
+        if(navCarServices) navCarServices.classList.remove('highlight-active');
+        calculateOffsets();
+        const fleetEl = document.getElementById('fleet');
+        if(fleetEl){
+            window.scrollTo({ top: fleetEl.offsetTop - 120, behavior: 'smooth' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+    });
+}
