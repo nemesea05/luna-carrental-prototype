@@ -39,7 +39,7 @@
 
 <main id="mainContent">
 
-    <!-- Landing Page View -->
+    <!-- Landing Page & Shared Booking Widgets Wrapper -->
     <div id="landingView">
         
         <section class="hero landing-only">
@@ -71,12 +71,20 @@
                         </button>
                     </div>
                     
-                    <!-- Trip.com Style Top Row -->
+                    <!-- Form Fields Grid Container -->
                     <div class="booking-fields">
                         <div class="field-group is-hidden" id="pickupGroup">
                             <div class="field-input stacked-input">
                                 <label for="pickupLocation"><i class="fa-solid fa-location-dot"></i> Pick-up location</label>
                                 <input type="text" id="pickupLocation" placeholder="Select city, branch, or area..." autocomplete="off">
+                            </div>
+                        </div>
+
+                        <!-- Conditionally Toggled Drop-off Location Input Block -->
+                        <div class="field-group is-hidden" id="dropoffGroup">
+                            <div class="field-input stacked-input">
+                                <label for="dropoffLocation"><i class="fa-solid fa-map-pin"></i> Drop-off location</label>
+                                <input type="text" id="dropoffLocation" placeholder="Select different drop-off location..." autocomplete="off">
                             </div>
                         </div>
 
@@ -113,12 +121,17 @@
                         </button>
                     </div>
 
-                    <!-- Trip.com Style Bottom Row -->
+                    <!-- Layout Bottom Controls Row -->
                     <div class="booking-bottom-row">
                         
-                        <!-- Driver will be provided message -->
-                        <div id="driverProvidedMessage" class="driver-message is-hidden">
-                            <i class="fa-solid fa-user-tie"></i> Driver will be provided
+                        <div id="driverProvidedMessage" class="driver-message-container is-hidden">
+                            <div class="driver-message">
+                                <i class="fa-solid fa-user-tie"></i> Driver will be provided
+                            </div>
+                            <label class="diff-dropoff-checkbox">
+                                <input type="checkbox" id="diffDropoffCheck">
+                                <span>Drop off at a different location</span>
+                            </label>
                         </div>
                         
                         <div class="booking-options-right" id="selfDriveOptions">
@@ -155,7 +168,7 @@
             </div>
         </div>
 
-        <!-- Landing Page Content -->
+        <!-- Landing Page Content Layout Panels -->
         <div class="landing-only">
             
             <section class="badges" id="badges">
@@ -214,7 +227,7 @@
                             <h3>Mitsubishi Xpander or Similar</h3>
                         </div>
                         <div class="vehicle-visual">
-                            <img src="1.png" alt="Mitsubishi Xpander">
+                            <i class="fa-solid fa-car-side fa-4x" style="color:var(--trip-blue)"></i>
                         </div>
                         <ul class="vehicle-specs">
                             <li><i class="fa-solid fa-user"></i> 7</li>
@@ -338,9 +351,8 @@
         </div>
     </div>
 
-    <!-- Interface: Search Results View -->
+    <!-- Interface: Search Results View Layout Frame -->
     <div id="searchResultsView" class="results-interface" style="display: none;">
-        
         <div class="results-layout">
             
             <!-- Sidebar Filters -->
@@ -367,11 +379,10 @@
                 </div>
 
                 <div class="results-list">
-                    
                     <!-- Result 1 -->
                     <div class="result-row-card">
                         <div class="rr-visual">
-                            <img src="1.png" alt="Mitsubishi Xpander">
+                            <i class="fa-solid fa-car-side fa-4x" style="color:var(--trip-blue)"></i>
                         </div>
                         <div class="rr-details">
                             <span class="top-choice-badge"><i class="fa-solid fa-thumbs-up"></i> Top choice</span>
@@ -392,14 +403,14 @@
                                 <div class="price-val">₱1,950.00</div>
                                 <div class="price-total">Total: ₱5,850.00</div>
                             </div>
-                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                            <button type="button" class="view-deal-btn">View deal</button>
                         </div>
                     </div>
 
                     <!-- Result 2 -->
                     <div class="result-row-card">
                         <div class="rr-visual">
-                            <i class="fa-solid fa-car fa-5x" style="color:var(--slate-light)"></i>
+                            <i class="fa-solid fa-car fa-4x" style="color:var(--slate-light)"></i>
                         </div>
                         <div class="rr-details">
                             <h3>Toyota Vios <span>or similar Compact Car</span></h3>
@@ -418,14 +429,14 @@
                                 <div class="price-val">₱1,700.00</div>
                                 <div class="price-total">Total: ₱5,100.00</div>
                             </div>
-                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                            <button type="button" class="view-deal-btn">View deal</button>
                         </div>
                     </div>
 
                     <!-- Result 3 -->
                     <div class="result-row-card">
                         <div class="rr-visual">
-                            <i class="fa-solid fa-truck-monster fa-5x" style="color:var(--slate-light)"></i>
+                            <i class="fa-solid fa-truck-monster fa-4x" style="color:var(--slate-light)"></i>
                         </div>
                         <div class="rr-details">
                             <h3>Toyota Fortuner <span>or similar Intermediate SUV</span></h3>
@@ -441,14 +452,14 @@
                                 <div class="price-val">₱2,400.00</div>
                                 <div class="price-total">Total: ₱7,200.00</div>
                             </div>
-                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                            <button type="button" class="view-deal-btn">View deal</button>
                         </div>
                     </div>
 
                     <!-- Result 4 -->
                     <div class="result-row-card">
                         <div class="rr-visual">
-                            <i class="fa-solid fa-van-shuttle fa-5x" style="color:var(--slate-light)"></i>
+                            <i class="fa-solid fa-van-shuttle fa-4x" style="color:var(--slate-light)"></i>
                         </div>
                         <div class="rr-details">
                             <h3>Toyota Hiace <span>or similar Van</span></h3>
@@ -464,13 +475,175 @@
                                 <div class="price-val">₱2,750.00</div>
                                 <div class="price-total">Total: ₱8,250.00</div>
                             </div>
-                            <button class="view-deal-btn" onclick="alert('Proceeding to Checkout...')">View deal</button>
+                            <button type="button" class="view-deal-btn">View deal</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Interface: Premium Car Details View Section (Matches image_34e9fe.png) -->
+    <div id="carDetailsView" class="details-interface" style="display: none;">
+        <div class="details-container">
+            
+            <!-- Breadcrumb Navigation Link -->
+            <div class="details-back-link">
+                <a href="#" id="backToResults"><i class="fa-solid fa-chevron-left"></i> All models</a>
+            </div>
+
+            <!-- Promotion Bar Widget -->
+            <div class="promo-banner">
+                <div class="promo-left">
+                    <span class="promo-badge"><i class="fa-solid fa-percent"></i></span>
+                    <span class="promo-title">Promo codes</span>
+                    <span class="promo-tag">8% Off</span>
+                </div>
+                <div class="promo-right">
+                    <button class="promo-view-btn">View</button>
+                    <button class="promo-claim-btn">Claim all</button>
+                </div>
+            </div>
+
+            <!-- Two-Column Product Matrix Layout Grid -->
+            <div class="details-grid-layout">
+                
+                <!-- Left Content Main Body Stack -->
+                <div class="details-main-stack">
+                    
+                    <!-- Core Car Summary Card Block -->
+                    <div class="car-info-card">
+                        <div class="car-info-body">
+                            <div class="car-info-visual">
+                                <i class="fa-solid fa-truck-pickup fa-5x" style="color:var(--trip-blue)"></i>
+                            </div>
+                            <div class="car-info-content">
+                                <div class="car-title-row">
+                                    <h2>Jeep Compass <span class="car-subtext">or similar Compact SUV <i class="fa-solid fa-circle-info"></i></span></h2>
+                                </div>
+                                <div class="car-pill-specs">
+                                    <span><i class="fa-solid fa-user"></i> 5 Seats</span>
+                                    <span><i class="fa-solid fa-suitcase"></i> 3 Suitcases</span>
+                                    <span><i class="fa-solid fa-door-closed"></i> 4 Doors</span>
+                                    <span><i class="fa-solid fa-gears"></i> Automatic</span>
+                                    <span><i class="fa-solid fa-gas-pump"></i> Fuel</span>
+                                </div>
+                                <div class="supplier-rating-row">
+                                    <span class="supplier-brand"><i class="fa-solid fa-shield-halved"></i> Global Chain</span>
+                                    <div class="rating-badge-group">
+                                        <span class="score-badge">8.2 / 10</span>
+                                        <span class="rating-text">Very good</span>
+                                        <a href="#" class="reviews-link">501 reviews</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Included Policies & Perks Subsection Links Column -->
+                        <div class="car-perks-section">
+                            <div class="cancellation-timeline">
+                                <span class="perk-green-text"><i class="fa-solid fa-circle-check"></i> Free cancellation before 10:00, Jul 12 (local time)</span>
+                                <i class="fa-solid fa-chevron-right arrow-indicator"></i>
+                            </div>
+                            <div class="bullet-perks-grid">
+                                <div class="b-perk"><i class="fa-solid fa-check"></i> Unlimited mileage</div>
+                                <div class="b-perk"><i class="fa-solid fa-check"></i> Includes Additional Liability Insurance</div>
+                                <div class="b-perk"><i class="fa-solid fa-check"></i> Full to full fuel policy</div>
+                                <div class="b-perk"><i class="fa-solid fa-bolt"></i> Instant confirmation</div>
+                                <div class="b-perk"><i class="fa-solid fa-check"></i> 0 excess damage policy</div>
+                                <div class="b-perk"><i class="fa-solid fa-qrcode"></i> E-voucher support</div>
+                            </div>
+                            <div class="limited-tag-row">
+                                <span class="lit-badge">Limited-time offer</span>
+                            </div>
                         </div>
                     </div>
 
-                </div>
-            </main>
+                    <!-- Pickup and Dropoff Overview Card Block -->
+                    <div class="itinerary-card">
+                        <h3>Pick-up & drop-off</h3>
+                        
+                        <div class="itinerary-timeline-row">
+                            <div class="itinerary-time-summary">
+                                <span class="it-icon"><i class="fa-regular fa-calendar"></i></span>
+                                <span class="it-text">10:00, Sun, Jul 12 - 10:00, Wed, Jul 15 <strong class="duration-pill">3 days</strong></span>
+                            </div>
+                        </div>
 
+                        <div class="itinerary-location-row">
+                            <div class="itinerary-location-body">
+                                <span class="it-icon"><i class="fa-solid fa-location-dot"></i></span>
+                                <div class="location-details-block">
+                                    <span class="loc-title">Los Angeles International Airport branch <a href="#" class="map-link-inline">Map & instructions <i class="fa-solid fa-chevron-right"></i></a></span>
+                                    <p class="loc-sub">Outside terminal, free shuttle (approx. 10 mins)</p>
+                                    <p class="loc-hours">Business hours: 00:00 - 00:30, 05:00 - 23:59</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="itinerary-footer-note">Note: All times are in local time</p>
+                    </div>
+
+                </div>
+
+                <!-- Right Sidebar Layout Column: Pricing Calculator Panel -->
+                <aside class="details-pricing-sidebar">
+                    <div class="pricing-sticky-box">
+                        <h3>Price details</h3>
+                        
+                        <!-- Prepay section -->
+                        <div class="price-summary-row primary-row">
+                            <span class="row-title">Prepay online</span>
+                            <span class="row-cost-val">US$25.47</span>
+                        </div>
+                        
+                        <div class="price-summary-row sub-row">
+                            <span class="row-title">Prepay car rental fee</span>
+                            <span class="row-cost-val">US$33.81</span>
+                        </div>
+                        
+                        <div class="price-summary-row sub-row discount-row">
+                            <span class="row-title">Discounts</span>
+                            <span class="row-cost-val">-US$8.34</span>
+                        </div>
+                        
+                        <div class="price-summary-row sub-row discount-badge-row">
+                            <span class="lit-badge">Limited-time offer</span>
+                            <span class="row-cost-val">-US$8.34</span>
+                        </div>
+
+                        <div class="divider-line"></div>
+
+                        <!-- Pay at counter section -->
+                        <div class="price-summary-row primary-row">
+                            <span class="row-title">Pay at pick-up</span>
+                            <span class="row-cost-val">US$141.19</span>
+                        </div>
+                        
+                        <div class="collapsible-pricing-item">
+                            <div class="collapsible-header-trigger">
+                                <span>Car rental fee <i class="fa-solid fa-chevron-up"></i></span>
+                                <span>US$141.19</span>
+                            </div>
+                            <div class="collapsible-body-content">
+                                <div class="breakdown-line"><span>Basic car rental fee</span><span>Included</span></div>
+                                <div class="breakdown-line"><span>Unlimited mileage</span><span>Included</span></div>
+                                <div class="breakdown-line"><span>Super Loss Damage Waiver <small>Excess: US$0</small></span><span>Included</span></div>
+                                <div class="breakdown-line"><span>Supplemental Liability Insurance <small>Excess: US$0</small></span><span>Included</span></div>
+                            </div>
+                        </div>
+
+                        <div class="collapsible-pricing-item">
+                            <div class="collapsible-header-trigger">
+                                <span>Taxes & fees <i class="fa-solid fa-chevron-down"></i></span>
+                                <span>including</span>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="checkout-submit-btn" onclick="alert('Booking Submitted Successfully!')">Proceed to Booking</button>
+                    </div>
+                </aside>
+
+            </div>
         </div>
     </div>
 

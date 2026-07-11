@@ -1,5 +1,5 @@
 // ==========================================
-// 1. Mobile menu toggle
+// 1. Mobile navigation panel toggle listeners
 // ==========================================
 const menuToggle = document.getElementById('menuToggle');
 const navLinks = document.getElementById('navLinks');
@@ -23,7 +23,7 @@ if(menuToggle && navLinks){
 }
 
 // ==========================================
-// 2. Scroll reveal animations
+// 2. Scroll intersection animation frames
 // ==========================================
 const revealEls = document.querySelectorAll('.reveal');
 if(revealEls.length){
@@ -39,7 +39,7 @@ if(revealEls.length){
 }
 
 // ==========================================
-// 3. Dynamic Sticky Booking Bar & Secondary Nav
+// 3. Dynamic Sticky Booking Bar Logic
 // ==========================================
 const header = document.getElementById('siteHeader');
 const bookingWrapper = document.getElementById('bookingWrapper');
@@ -48,7 +48,6 @@ const secondaryNav = document.getElementById('secondaryNav');
 const fleetSection = document.getElementById('fleet');
 const navCarServices = document.getElementById('navCarServices');
 
-// Store dynamic offsets
 let stickyOffset = 0;
 let fleetOffset = 0;
 
@@ -64,12 +63,11 @@ window.addEventListener('load', calculateOffsets);
 window.addEventListener('resize', calculateOffsets);
 
 window.addEventListener('scroll', () => {
-    // If we are in results view, navigation visibility mapping bypasses scroll state triggers
-    if (document.body.classList.contains('show-results')) return;
+    // Structural layout skips sticky modifiers if alternative result layouts are rendering
+    if (document.body.classList.contains('show-results') || document.body.classList.contains('show-details-view')) return;
 
     const scrollY = window.scrollY;
 
-    // 1. Hide main header and make Booking card sticky
     if (scrollY >= stickyOffset) {
         document.body.classList.add('header-hidden');
         bookingCard.classList.add('is-sticky');
@@ -78,19 +76,17 @@ window.addEventListener('scroll', () => {
         bookingCard.classList.remove('is-sticky');
     }
 
-    // 2. Show Secondary Nav when hitting Fleet section
     if (scrollY >= fleetOffset && scrollY >= stickyOffset) {
         secondaryNav.classList.add('is-visible');
     } else {
         secondaryNav.classList.remove('is-visible');
     }
     
-    // 3. ScrollSpy for Secondary Nav
     handleScrollSpy();
 }, { passive: true });
 
 // ==========================================
-// 4. ScrollSpy Logic for Secondary Nav
+// 4. ScrollSpy Indicators Mapping
 // ==========================================
 const sections = [
     { id: 'fleet', link: 'link-fleet' },
@@ -100,7 +96,7 @@ const sections = [
 ];
 
 function handleScrollSpy() {
-    if (document.body.classList.contains('show-results')) return;
+    if (document.body.classList.contains('show-results') || document.body.classList.contains('show-details-view')) return;
     
     let currentId = '';
     const scrollY = window.scrollY + 160; 
@@ -123,10 +119,9 @@ function handleScrollSpy() {
     }
 }
 
-// Smooth scrolling for links
 document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        if(document.body.classList.contains('show-results')) return; // Fallback handled by view resets
+        if(document.body.classList.contains('show-results') || document.body.classList.contains('show-details-view')) return;
         e.preventDefault();
         const targetId = this.getAttribute('href').substring(1);
         const targetSection = document.getElementById(targetId);
@@ -140,14 +135,17 @@ document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
 });
 
 // ==========================================
-// 5. Booking Widget Time Gen & Toggle
+// 5. Time Select Option Generation
 // ==========================================
 const pickupTime = document.getElementById('pickupTime');
 const dropoffTime = document.getElementById('dropoffTime');
 const pickupDate = document.getElementById('pickupDate');
 const dropoffDate = document.getElementById('dropoffDate');
 const pickupGroup = document.getElementById('pickupGroup');
+const dropoffGroup = document.getElementById('dropoffGroup');
 const pickupLocation = document.getElementById('pickupLocation');
+const dropoffLocation = document.getElementById('dropoffLocation');
+const diffDropoffCheck = document.getElementById('diffDropoffCheck');
 const rtButtons = document.querySelectorAll('.rt-option');
 
 const driverProvidedMessage = document.getElementById('driverProvidedMessage');
@@ -181,7 +179,6 @@ const buildTimeOptions = (select, defaultValue) => {
 buildTimeOptions(pickupTime, '10:00');
 buildTimeOptions(dropoffTime, '10:00');
 
-// Dates setup
 const toInputDate = (d) => d.toISOString().split('T')[0];
 const today = new Date();
 const tomorrow = new Date();
@@ -198,6 +195,26 @@ if(pickupDate && dropoffDate) {
             dropoffDate.value = pickupDate.value;
         }
     });
+}
+
+// Requirement 3 Fix: Handle the drop-off checkbox toggle functionality explicitly
+if (diffDropoffCheck) {
+    diffDropoffCheck.addEventListener('change', () => {
+        handleDropoffFieldVisibility();
+    });
+}
+
+function handleDropoffFieldVisibility() {
+    const isDriverActive = document.getElementById('rtDriver').classList.contains('active');
+    if (isDriverActive && diffDropoffCheck && diffDropoffCheck.checked) {
+        dropoffGroup.classList.remove('is-hidden');
+        dropoffLocation.required = true;
+    } else {
+        dropoffGroup.classList.add('is-hidden');
+        dropoffLocation.required = false;
+        dropoffLocation.value = '';
+    }
+    calculateOffsets();
 }
 
 function setRentalType(type){
@@ -217,12 +234,12 @@ function setRentalType(type){
     } else {
         pickupGroup.classList.add('is-hidden');
         pickupLocation.required = false;
-        pickupLocation.value = '';
         driverProvidedMessage.classList.add('is-hidden');
         selfDriveOptions.classList.remove('is-hidden');
+        if(diffDropoffCheck) diffDropoffCheck.checked = false;
     }
 
-    calculateOffsets();
+    handleDropoffFieldVisibility();
 }
 
 if(rtButtons.length){
@@ -233,10 +250,11 @@ if(rtButtons.length){
 }
 
 // ==========================================
-// 6. Search Submit -> Show Results Interface
+// 6. Search Submit Interface Handlers
 // ==========================================
 const mainSearchForm = document.getElementById('mainSearchForm');
 const searchResultsView = document.getElementById('searchResultsView');
+const carDetailsView = document.getElementById('carDetailsView');
 
 if(mainSearchForm) {
     mainSearchForm.addEventListener('submit', (e) => {
@@ -251,11 +269,12 @@ if(mainSearchForm) {
         document.body.classList.remove('header-hidden');
         secondaryNav.classList.remove('is-visible');
 
-        // Transition to Results Page Interface
+        // Render Active Results View Matrix
+        document.body.classList.remove('show-details-view');
         document.body.classList.add('show-results');
         searchResultsView.style.display = 'block';
+        carDetailsView.style.display = 'none';
         
-        // Highlight the "Car Services" top navigation item explicitly
         if(navCarServices) {
             navCarServices.classList.add('highlight-active');
         }
@@ -264,15 +283,40 @@ if(mainSearchForm) {
     });
 }
 
-// Return to home state view when the LUNA's logo is clicked
+// Requirement 4 Fix: Bind Deal selection interactions to premium product breakdown modal rows
+document.querySelectorAll('.view-deal-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.body.classList.remove('show-results');
+        document.body.classList.add('show-details-view');
+        searchResultsView.style.display = 'none';
+        carDetailsView.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    });
+});
+
+// Breadcrumb modeling links behavior reset
+const backToResults = document.getElementById('backToResults');
+if (backToResults) {
+    backToResults.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.body.classList.remove('show-details-view');
+        document.body.classList.add('show-results');
+        searchResultsView.style.display = 'block';
+        carDetailsView.style.display = 'none';
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    });
+}
+
+// Complete structural navigation canvas view updates
 document.querySelectorAll('.clickable-logo').forEach(logo => {
     logo.addEventListener('click', () => {
-        if(!document.body.classList.contains('show-results')) return;
+        if(!document.body.classList.contains('show-results') && !document.body.classList.contains('show-details-view')) return;
         
-        document.body.classList.remove('show-results');
+        document.body.classList.remove('show-results', 'show-details-view');
         searchResultsView.style.display = 'none';
+        carDetailsView.style.display = 'none';
         
-        // Remove active highlighters
         if(navCarServices) {
             navCarServices.classList.remove('highlight-active');
         }
@@ -282,7 +326,7 @@ document.querySelectorAll('.clickable-logo').forEach(logo => {
     });
 });
 
-// Grid deal item actions mapping
+// Grid landing deals shortcuts modifiers mapping
 document.querySelectorAll('.select-trigger').forEach(btn => {
     btn.addEventListener('click', () => {
         document.getElementById('pickupLocation').value = "Quezon City Headquarters";
@@ -291,7 +335,7 @@ document.querySelectorAll('.select-trigger').forEach(btn => {
 });
 
 // ==========================================
-// 7. FAQ accordion
+// 7. Accordion Dropdown Functions
 // ==========================================
 const faqItems = document.querySelectorAll('.faq-item');
 faqItems.forEach(item => {

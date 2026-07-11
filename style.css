@@ -19,7 +19,7 @@
     --font-body:'Poppins',sans-serif;
     --ease:cubic-bezier(.4,0,.2,1);
     
-    /* Trip.com inspired elements */
+    /* Trip.com inspired elements colors */
     --trip-blue: #3264ff; 
     --trip-bg: #f5f7fa;
 }
@@ -36,15 +36,15 @@ h1,h2,h3,h4{ font-family:var(--font-display); }
 .clickable-logo { cursor: pointer; }
 
 /* =====================================================
-   SCROLL REVEAL
+   SCROLL REVEAL ANIMATION STATES
 ===================================================== */
 .reveal{ opacity:0; transform:translateY(28px); transition:opacity .7s var(--ease), transform .7s var(--ease); transition-delay:var(--delay,0s); }
 .reveal.in-view{ opacity:1; transform:translateY(0); }
 
 /* =====================================================
-   HEADER / NAVBAR (Matches image_33976a.png)
+   HEADER NAVIGATION CONTAINER
 ===================================================== */
-header{ position:fixed; top:0; left:0; width:100%; z-index:1001; }
+header{ position:fixed; top:0; left:0; width:100%; z-index:1015; }
 .navbar{ position:relative; width:100%; height:75px; display:flex; justify-content:space-between; align-items:center; padding:0 8%; background:rgba(255,255,255,.98); backdrop-filter:blur(10px); border-bottom:1px solid rgba(15,23,42,.06); transition:transform .35s var(--ease); }
 .logo{ font-family:var(--font-display); font-size:1.6rem; font-weight:700; color:var(--ink); user-select:none; }
 .logo-dot{ color:var(--amber); }
@@ -60,13 +60,12 @@ header{ position:fixed; top:0; left:0; width:100%; z-index:1001; }
 .login-btn:hover{ color: var(--blue-dark); }
 .signup-btn{ background:var(--navy); color:#fff; padding:10px 24px; border-radius:50px; font-size:14px; font-weight:600; transition:background .3s; }
 .signup-btn:hover{ background:var(--trip-blue); }
-.menu-toggle{ display:none; font-size:22px; cursor:pointer; color:var(--ink); z-index:1002; }
+.menu-toggle{ display:none; font-size:22px; cursor:pointer; color:var(--ink); z-index:1025; }
 
-/* Hide top header contextually only on specific scroll sequences */
 body.header-hidden header{ transform:translateY(-100%); }
 
 /* =====================================================
-   HERO
+   HERO SECTIONS
 ===================================================== */
 .hero{ position:relative; min-height:56vh; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding-top:150px; padding-bottom:170px; background:radial-gradient(65% 65% at 88% 15%, rgba(245,158,11,.20), transparent 60%), linear-gradient(135deg,#0B1220 0%, #16213E 45%, #1D2C6B 100%); overflow:hidden; }
 .hero-glow{ position:absolute; inset:0; background:radial-gradient(45% 45% at 15% 85%, rgba(37,99,235,.30), transparent 70%); pointer-events:none; z-index:1; }
@@ -85,36 +84,32 @@ body.header-hidden header{ transform:translateY(-100%); }
 @keyframes heroRise{ from{ opacity:0; transform:translateY(24px); } to{ opacity:1; transform:translateY(0); } }
 
 /* =====================================================
-   BOOKING BAR WIDGET
+   BOOKING BAR WIDGET LAYOUTS
 ===================================================== */
 .booking-wrapper{ position:relative; z-index:1000; min-height:180px; margin-top:-100px; margin-bottom:40px; padding:0 8%; transition:padding 0.3s var(--ease); }
 .booking-card{ background:var(--white); border-radius:16px; padding:20px 24px; box-shadow:0 20px 40px -10px rgba(15,23,42,.12), 0 0 0 1px rgba(15,23,42,.04); transition:all 0.4s var(--ease); width:100%; margin:0 auto; max-width:1240px; }
 
-/* Rental Type Toggle */
+/* Rental Type Toggle selectors code */
 .rental-type-toggle{ display:inline-flex; gap:4px; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:4px; margin-bottom:16px; }
 .rt-option{ display:flex; align-items:center; gap:8px; border:none; background:transparent; color:var(--slate); font-family:var(--font-body); font-size:14px; font-weight:600; padding:9px 18px; border-radius:7px; cursor:pointer; transition:background .25s var(--ease), color .25s var(--ease); }
 .rt-option i{ font-size:13px; }
 .rt-option:hover{ color:var(--ink); }
 .rt-option.active{ background:var(--trip-blue); color:#fff; box-shadow:0 4px 10px rgba(50,100,255,.25); }
-.rt-option.active:hover{ color:#fff; }
-
-.booking-card.is-sticky .rental-type-toggle{ display:none; }
-body.show-results .rental-type-toggle{ display:none; }
 
 .booking-fields{ display:flex; gap:12px; align-items:center; margin-bottom:16px; }
-.field-group{ flex:1; }
+.field-group{ flex:1; transition: all 0.3s ease; }
 
 .field-input { border:1px solid var(--line); border-radius:8px; background:#fff; transition:0.3s; padding:6px 14px; height:60px; display:flex; align-items:center; }
 .field-input:focus-within{ border-color:var(--trip-blue); box-shadow:0 0 0 3px rgba(50,100,255,.1); }
 
-/* Stacked inputs (Location) */
+/* Stacked input fields styling configurations */
 .stacked-input { flex-direction:column; justify-content:center; align-items:flex-start; }
 .stacked-input label { font-size:11px; color:var(--slate); margin-bottom:2px; font-weight:500; cursor:pointer; display: flex; align-items: center; gap: 4px; }
 .stacked-input label i { color:var(--trip-blue); }
 .stacked-input input { border:none; outline:none; width:100%; font-size:15px; font-weight:600; color:var(--ink); background:transparent; }
 .stacked-input input::placeholder { font-weight:400; color:var(--slate-light); }
 
-/* Split Date/Time Inputs */
+/* Split Date & Time Pickers layout values */
 .date-time-input { display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:6px 14px; }
 .dt-section { display:flex; flex-direction:column; justify-content:center; flex:1; }
 .dt-section label { font-size:11px; color:var(--slate); margin-bottom:2px; font-weight:500; display: flex; align-items: center; gap: 5px; }
@@ -127,27 +122,30 @@ body.show-results .rental-type-toggle{ display:none; }
 .booking-btn{ height:60px; padding:0 30px; background:var(--trip-blue); color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.3s; flex-shrink:0; }
 .booking-btn:hover{ background:var(--blue-dark); }
 
-/* Bottom Row Settings */
+/* Bottom Row Settings controls styling rules */
 .booking-bottom-row { display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--line); padding-top:16px; margin-top:4px; min-height: 40px;}
 
+.driver-message-container { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .driver-message { display:flex; align-items:center; gap:8px; font-size:14px; color:#059669; font-weight:600; background:#D1FAE5; padding:6px 14px; border-radius:6px; }
-.driver-message i { font-size: 15px; }
+.diff-dropoff-checkbox { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500; color: var(--slate); cursor: pointer; user-select: none; }
+.diff-dropoff-checkbox input { width: 16px; height: 16px; accent-color: var(--trip-blue); cursor: pointer; }
+.diff-dropoff-checkbox:hover span { color: var(--ink); }
 
 .booking-options-right { display:flex; gap:24px; margin-left: auto; }
 .driver-option { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--slate); }
 .driver-option select { border:none; background:transparent; font-weight:600; color:var(--ink); cursor:pointer; outline:none; }
 .driver-option i{ color:var(--slate-light); cursor:help; }
 
-/* Sticky State overrides (Normal landing scroll) */
+/* Sticky State overrides scroll codes */
 .booking-card.is-sticky{ position:fixed; top:0; left:0; width:100%; max-width:100%; border-radius:0; padding:12px 8%; box-shadow:0 4px 15px rgba(0,0,0,0.08); background:#fff; z-index:1000; }
 .booking-card.is-sticky #mainSearchForm{ width:100%; max-width:1240px; margin:0 auto; }
 .booking-card.is-sticky .booking-bottom-row { display:none; } 
 .booking-card.is-sticky .booking-fields{ margin-bottom:0; }
 
 /* =====================================================
-   SECONDARY STICKY NAV
+   SECONDARY NAVIGATION STICKY CODE
 ===================================================== */
-.secondary-nav{ position:fixed; top:84px; left:0; width:100%; background:#fff; border-bottom:1px solid var(--line); z-index:999; transform:translateY(-100%); opacity:0; transition:all 0.4s var(--ease); pointer-events:none; }
+.secondary-nav{ position:fixed; top:75px; left:0; width:100%; background:#fff; border-bottom:1px solid var(--line); z-index:999; transform:translateY(-100%); opacity:0; transition:all 0.4s var(--ease); pointer-events:none; }
 .secondary-nav.is-visible{ transform:translateY(0); opacity:1; pointer-events:all; }
 .sec-nav-container{ max-width:1240px; margin:0 auto; padding:0 8%; display:flex; align-items:center; gap:40px; height:50px; }
 .sec-logo{ font-family:var(--font-display); font-weight:700; font-size:1.2rem; color:var(--ink); }
@@ -158,7 +156,7 @@ body.show-results .rental-type-toggle{ display:none; }
 .sec-nav-item.active::after{ content:""; position:absolute; bottom:0; left:0; width:100%; height:3px; background:var(--trip-blue); border-radius:3px 3px 0 0; }
 
 /* =====================================================
-   LANDING SECTIONS 
+   LANDING VIEW COMPONENTS 
 ===================================================== */
 .section-title h2{ font-size:2.2rem; font-weight:700; margin-bottom:40px; color:var(--ink); }
 
@@ -176,7 +174,6 @@ body.show-results .rental-type-toggle{ display:none; }
 .vehicle-head .v-type{ font-size:12px; color:var(--slate); background:#E2E8F0; padding:3px 8px; border-radius:4px; display:inline-block; margin-bottom:8px; }
 .vehicle-head h3{ font-size:1.1rem; font-weight:600; margin-bottom:16px; min-height:48px; }
 .vehicle-visual{ height:120px; display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
-.vehicle-visual img{ max-height:100%; width:auto; object-fit:contain; }
 .vehicle-specs{ display:flex; gap:12px; margin-bottom:20px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:12px 0; }
 .vehicle-specs li{ font-size:13px; color:var(--slate); display:flex; align-items:center; gap:5px; }
 .vehicle-foot{ display:flex; justify-content:space-between; align-items:flex-end; margin-top:auto; }
@@ -215,23 +212,26 @@ footer{ background:var(--navy); color:#fff; padding:60px 8% 30px; }
 .footer-links a:hover{ color:#fff; }
 
 /* =====================================================
-   SEARCH RESULTS VIEW MODIFICATIONS (Matches image_339732.png)
+   SEARCH ACTIVE VIEW SYSTEM CONSTRAINTS
 ===================================================== */
 body.show-results .landing-only { display:none; }
 body.show-results { background:var(--trip-bg); }
 
-/* Keep main navigation bar fixed at top during searching layout */
-body.show-results header { transform:translateY(0) !important; position:fixed; top:0; left:0; width:100%; z-index:1010; }
+/* Requirement 1 Fix: Hide the 4 navigation links contextually during searches */
+body.show-results .nav-links { display: none !important; }
+
+/* Maintain layout headers alignment coordinates code */
+body.show-results header { transform:translateY(0) !important; position:fixed; top:0; left:0; width:100%; z-index:1020; }
 body.show-results #secondaryNav { display:none !important; }
 
-/* Search filter box floats directly underneath the main layout navigation */
+/* Requirement 2 Fix: Keep rental selectors visible inside floating top header bar view */
 body.show-results .booking-wrapper { height: auto; margin-top:0; padding:0; }
-body.show-results .booking-card { position:fixed; top:75px; left:0; width:100%; max-width:100%; border-radius:0; padding:14px 8% 10px; box-shadow:0 4px 14px rgba(15,23,42,.05); background:#fff; z-index:1005; }
+body.show-results .booking-card { position:fixed; top:75px; left:0; width:100%; max-width:100%; border-radius:0; padding:14px 8% 10px; box-shadow:0 4px 14px rgba(15,23,42,.05); background:#fff; z-index:1010; }
 body.show-results #mainSearchForm { width:100%; max-width:1240px; margin:0 auto; }
 body.show-results .booking-bottom-row { display:flex; border-top: none; padding-top: 4px; margin-top: 0; }
 
-/* Content padding offset accounts for main navigation + floating search filter bar combined height */
-.results-interface{ padding:195px 8% 60px; max-width:1240px; margin:0 auto; }
+/* Content padding offset views */
+.results-interface{ padding:210px 8% 60px; max-width:1240px; margin:0 auto; }
 .results-layout{ display:grid; grid-template-columns:260px 1fr; gap:24px; align-items:start; }
 
 .results-sidebar{ background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
@@ -250,7 +250,6 @@ body.show-results .booking-bottom-row { display:flex; border-top: none; padding-
 .result-row-card{ background:#fff; border-radius:8px; padding:20px; display:grid; grid-template-columns:220px 1fr 200px; gap:24px; box-shadow:0 2px 8px rgba(0,0,0,0.04); transition:0.3s; border:1px solid transparent; }
 .result-row-card:hover{ border-color:var(--trip-blue); box-shadow:0 6px 16px rgba(50,100,255,0.1); }
 .rr-visual{ display:flex; align-items:center; justify-content:center; background:var(--bg); border-radius:8px; padding:10px; height:140px; }
-.rr-visual img{ max-height:100%; object-fit:contain; }
 
 .top-choice-badge{ display:inline-block; background:#FEF3C7; color:#B45309; font-size:11px; font-weight:700; padding:4px 8px; border-radius:4px; margin-bottom:8px; text-transform:uppercase; }
 .rr-details h3{ font-size:1.3rem; font-weight:700; margin-bottom:10px; display:flex; flex-direction:column; }
@@ -267,21 +266,122 @@ body.show-results .booking-bottom-row { display:flex; border-top: none; padding-
 .price-label{ font-size:12px; color:var(--slate); display:block; margin-bottom:4px; }
 .price-val{ font-family:var(--font-display); font-size:1.8rem; font-weight:700; color:var(--trip-blue); line-height:1; margin-bottom:6px; }
 .price-total{ font-size:12.5px; color:var(--slate); font-weight:500; }
-.view-deal-btn{ background:var(--trip-blue); color:#fff; border:none; padding:12px; width:100%; border-radius:6px; font-size:14.5px; font-weight:600; cursor:pointer; margin-top:auto; transition:0.3s; }
+.view-deal-btn{ background:var(--trip-blue); color:#fff; border:none; padding:12px; width:100%; border-radius:6px; font-size:14.5px; font-weight:600; cursor:pointer; margin-top:auto; transition:0.3s; text-align: center; }
 .view-deal-btn:hover{ background:var(--blue-dark); }
 
 /* =====================================================
-   RESPONSIVE
+   Requirement 4: PREMIUM DETAILS CAR PANEL VIEW (image_34e9fe.png)
+===================================================== */
+body.show-details-view { background: var(--trip-bg); }
+body.show-details-view .landing-only { display: none !important; }
+body.show-details-view #searchResultsView { display: none !important; }
+body.show-details-view .booking-card { display: none !important; }
+body.show-details-view .nav-links { display: none !important; }
+body.show-details-view header { transform:translateY(0) !important; position:fixed; top:0; left:0; width:100%; z-index:1020; }
+
+.details-interface { padding: 105px 8% 60px; max-width: 1240px; margin: 0 auto; }
+.details-back-link { margin-bottom: 16px; }
+.details-back-link a { color: var(--trip-blue); font-size: 14.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.details-back-link a:hover { color: var(--blue-dark); }
+
+/* Promo Block code */
+.promo-banner { background: #FFF0F0; border-radius: 8px; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #FFD1D1; }
+.promo-left { display: flex; align-items: center; gap: 10px; }
+.promo-badge { background: #FF4D4D; color: #fff; width: 22px; height: 22px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 11px; }
+.promo-title { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+.promo-tag { background: #FFE3E3; color: #FF4D4D; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+.promo-right { display: flex; gap: 12px; }
+.promo-view-btn { border: 1px solid #FF4D4D; background: transparent; color: #FF4D4D; padding: 6px 16px; font-weight: 600; font-size: 13px; border-radius: 20px; cursor: pointer; }
+.promo-claim-btn { background: #FF4D4D; border: none; color: #fff; padding: 6px 16px; font-weight: 600; font-size: 13px; border-radius: 20px; cursor: pointer; }
+
+/* Grid Splitting Structure code */
+.details-grid-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+.details-main-stack { display: flex; flex-direction: column; gap: 20px; }
+
+.car-info-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); padding: 24px; }
+.car-info-body { display: flex; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.car-info-visual { background: var(--bg); border-radius: 6px; padding: 12px; width: 160px; height: 110px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.car-info-content { flex: 1; }
+.car-title-row h2 { font-size: 1.6rem; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+.car-subtext { font-size: 13px; font-weight: 400; color: var(--slate); font-family: var(--font-body); margin-left: 8px; }
+.car-subtext i { color: var(--slate-light); cursor: help; }
+
+.car-pill-specs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.car-pill-specs span { background: var(--bg); font-size: 12px; color: var(--slate); font-weight: 500; padding: 4px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px; }
+
+.supplier-rating-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.supplier-brand { font-size: 13px; font-weight: 600; color: var(--slate); display: inline-flex; align-items: center; gap: 6px; }
+.supplier-brand i { color: #10B981; }
+.rating-badge-group { display: flex; align-items: center; gap: 10px; }
+.score-badge { background: var(--trip-blue); color: #fff; font-weight: 700; font-size: 13px; padding: 3px 8px; border-radius: 4px; }
+.rating-text { font-size: 13px; font-weight: 600; color: var(--trip-blue); }
+.reviews-link { font-size: 12.5px; color: var(--slate); text-decoration: underline; }
+
+.car-perks-section { padding-top: 20px; }
+.cancellation-timeline { display: flex; justify-content: space-between; align-items: center; background: #E6F7ED; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; cursor: pointer; }
+.perk-green-text { font-size: 13.5px; font-weight: 600; color: #059669; display: flex; align-items: center; gap: 8px; }
+.arrow-indicator { color: #059669; font-size: 12px; }
+
+.bullet-perks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.b-perk { font-size: 13px; color: var(--ink); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.b-perk i { color: #10B981; }
+
+.limited-tag-row { display: flex; }
+.lit-badge { background: #FFF1F2; color: #E11D48; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+
+/* Itinerary Details card components */
+.itinerary-card { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+.itinerary-card h3 { font-size: 1.25rem; margin-bottom: 20px; font-weight: 700; }
+.itinerary-timeline-row { padding-bottom: 16px; border-bottom: 1px dashed var(--line); margin-bottom: 16px; }
+.itinerary-time-summary { display: flex; align-items: center; gap: 14px; }
+.it-icon { width: 32px; height: 32px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--trip-blue); font-shrink: 0; }
+.it-text { font-size: 14px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 12px; }
+.duration-pill { background: #E0E7FF; color: #4338CA; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+
+.itinerary-location-row { display: flex; flex-direction: column; gap: 16px; }
+.itinerary-location-body { display: flex; gap: 14px; }
+.location-details-block { flex: 1; }
+.loc-title { font-size: 14.5px; font-weight: 700; display: block; color: var(--ink); margin-bottom: 4px; }
+.map-link-inline { color: var(--trip-blue); font-size: 12.5px; font-weight: 600; margin-left: 8px; }
+.loc-sub { font-size: 13px; color: var(--slate); margin-bottom: 4px; }
+.loc-hours { font-size: 12px; color: var(--slate-light); }
+.itinerary-footer-note { font-size: 12px; color: var(--slate-light); margin-top: 14px; }
+
+/* Pricing Sidebar Panels */
+.pricing-sticky-box { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); position: sticky; top: 100px; }
+.pricing-sticky-box h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+
+.price-summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.price-summary-row.primary-row { font-size: 16px; font-weight: 700; color: var(--ink); margin-top: 8px; }
+.price-summary-row.primary-row .row-cost-val { font-size: 1.4rem; font-family: var(--font-display); }
+.price-summary-row.sub-row { font-size: 13.5px; color: var(--slate); padding-left: 10px; }
+.price-summary-row.discount-row .row-cost-val { color: #E11D48; font-weight: 600; }
+.price-summary-row.discount-badge-row { padding-left: 10px; margin-top: -6px; }
+.price-summary-row.discount-badge-row .row-cost-val { color: #E11D48; font-weight: 600; font-size: 13px; }
+
+.divider-line { height: 1px; background: var(--line); margin: 16px 0; }
+
+.collapsible-pricing-item { border-top: 1px solid #F1F5F9; padding: 12px 0 4px; }
+.collapsible-header-trigger { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.collapsible-header-trigger i { color: var(--slate-light); font-size: 11px; }
+.collapsible-body-content { background: var(--bg); border-radius: 6px; padding: 10px; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.breakdown-line { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--slate); line-height: 1.4; }
+.breakdown-line small { display: block; color: var(--slate-light); font-size: 10.5px; }
+
+.checkout-submit-btn { width: 100%; background: #FF7A00; color: #fff; font-family: var(--font-body); font-size: 15px; font-weight: 700; border: none; padding: 14px; border-radius: 6px; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 12px rgba(255,122,0,0.2); transition: 0.2s; }
+.checkout-submit-btn:hover { background: #E66E00; transform: translateY(-1px); }
+
+/* =====================================================
+   RESPONSIVE LAYOUT BREAKPOINTS
 ===================================================== */
 @media(max-width:992px){
     body.show-results .results-interface { padding-top: 250px; }
-    .results-layout{ grid-template-columns:1fr; }
+    .results-layout, .details-grid-layout{ grid-template-columns:1fr; }
     .result-row-card{ grid-template-columns:1fr; text-align:center; }
     .rr-action{ border-left:none; border-top:1px dashed var(--line); padding-left:0; padding-top:20px; text-align:center; }
     .rr-specs{ justify-content:center; }
     .badges-grid, .fleet-grid{ grid-template-columns:repeat(2,1fr); }
-    .steps{ grid-template-columns:1fr; }
-    .testimonial-grid{ grid-template-columns:1fr; }
+    .steps, .testimonial-grid{ grid-template-columns:1fr; }
     .booking-fields{ flex-wrap:wrap; }
     .field-group{ flex-basis:calc(50% - 6px); }
     .sec-nav-links{ display:none; } 
@@ -291,6 +391,7 @@ body.show-results .booking-bottom-row { display:flex; border-top: none; padding-
     .hero-content p{ margin-left:auto; margin-right:auto; }
     .hero-content h1{ font-size:2.8rem; }
     .footer-content{ grid-template-columns:1fr 1fr; }
+    .bullet-perks-grid { grid-template-columns: 1fr; }
 }
 
 @media(max-width:768px){
@@ -303,7 +404,7 @@ body.show-results .booking-bottom-row { display:flex; border-top: none; padding-
         max-height:0; overflow:hidden;
         box-shadow:0 12px 20px rgba(15,23,42,.08);
         transition:max-height .4s var(--ease);
-        z-index:1020;
+        z-index:1025;
     }
     .nav-links.active{ max-height:400px; }
     .nav-links li{ width:100%; }
@@ -329,6 +430,9 @@ body.show-results .booking-bottom-row { display:flex; border-top: none; padding-
     body.show-results .booking-card { top: 75px; padding: 12px 6%; }
     body.show-results .results-interface { padding-top: 360px; }
     .booking-card.is-sticky{ padding:12px 6%; }
+    .car-info-body { flex-direction: column; align-items: center; text-align: center; }
+    .car-pill-specs { justify-content: center; }
+    .supplier-rating-row { justify-content: center; }
 }
 
 @media(max-width:480px){
