@@ -46,7 +46,7 @@
             <div class="hero-glow" aria-hidden="true"></div>
             <div class="hero-top">
                 <span class="eyebrow"><i class="eyebrow-dot"></i>CAR RENTAL SERVICE</span>
-                <button type="button" class="my-bookings-btn" onclick="alert('No bookings yet — reserve a car to see it here!')">
+                <button type="button" class="my-bookings-btn" id="heroMyBookingsBtn">
                     <i class="fa-solid fa-clipboard-list"></i> My Bookings
                 </button>
             </div>
@@ -639,7 +639,7 @@
                             </div>
                         </div>
                         
-                        <button type="button" class="checkout-submit-btn" onclick="alert('Booking Submitted Successfully!')">Proceed to Booking</button>
+                        <button type="button" class="checkout-submit-btn" id="proceedToBookingBtn">Proceed to Booking</button>
                     </div>
                 </aside>
 
@@ -647,7 +647,100 @@
         </div>
     </div>
 
+    <!-- Interface: Guest Checkout / Details Collection View -->
+    <div id="checkoutView" class="checkout-interface" style="display: none;">
+        <div class="checkout-back-link details-back-link">
+            <a href="#" id="backToDetailsFromCheckout"><i class="fa-solid fa-chevron-left"></i> Back to car details</a>
+        </div>
+
+        <div class="checkout-grid-layout">
+            <!-- Left: Guest Information Form -->
+            <div class="checkout-main-stack">
+                <div class="checkout-form-card">
+                    <h3>Guest Information</h3>
+                    <p class="checkout-subtext">Tell us who's picking up the car. Our staff will use these details to reach out and confirm your reservation — no payment is required at this step.</p>
+
+                    <form id="checkoutForm" novalidate>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="guestFullName">Full name <span class="req">*</span></label>
+                                <input type="text" id="guestFullName" placeholder="Juan Dela Cruz" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row two-col">
+                            <div class="form-field">
+                                <label for="guestEmail">Email address <span class="req">*</span></label>
+                                <input type="email" id="guestEmail" placeholder="you@example.com" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="guestPhone">Mobile number <span class="req">*</span></label>
+                                <input type="tel" id="guestPhone" placeholder="09XX XXX XXXX" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row two-col">
+                            <div class="form-field">
+                                <label for="guestIdType">Valid ID type</label>
+                                <select id="guestIdType">
+                                    <option>Driver's License</option>
+                                    <option>Passport</option>
+                                    <option>UMID</option>
+                                    <option>National ID</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="guestIdNumber">ID number <span class="opt">(optional)</span></label>
+                                <input type="text" id="guestIdNumber" placeholder="e.g. N01-23-456789">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="guestNotes">Special requests <span class="opt">(optional)</span></label>
+                                <textarea id="guestNotes" rows="3" placeholder="Child seat, GPS unit, early pick-up, etc."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="checkout-disclaimer">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <p>No payment will be collected right now. Once you submit this request, our staff will review it and contact you directly to confirm availability and go over the payment terms.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: Sticky Order Summary -->
+            <aside class="checkout-summary-sidebar">
+                <div class="pricing-sticky-box" id="checkoutSummaryBox"></div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Interface: Booking Submitted / Receipt View -->
+    <div id="confirmationView" class="confirmation-interface" style="display: none;">
+        <div class="confirmation-container" id="confirmationContainer"></div>
+    </div>
+
+    <!-- Interface: My Bookings List View -->
+    <div id="myBookingsView" class="mybookings-interface" style="display: none;">
+        <div class="mybookings-back-link details-back-link">
+            <a href="#" id="backHomeFromBookings"><i class="fa-solid fa-chevron-left"></i> Back to home</a>
+        </div>
+        <div class="mybookings-header">
+            <h2>My Bookings</h2>
+            <p>Track the status of your submitted rental requests.</p>
+        </div>
+        <div id="myBookingsList" class="mybookings-list"></div>
+    </div>
+
 </main>
+
+<!-- Floating quick-access button: consistent across every view, PC and mobile -->
+<button type="button" id="floatingBookingsBtn" class="floating-bookings-btn" aria-label="My Bookings">
+    <i class="fa-solid fa-clipboard-list"></i>
+    <span class="fab-badge" id="fabBadge" style="display:none;">0</span>
+</button>
 
 <footer id="contact" class="landing-only">
     <div class="footer-content">
