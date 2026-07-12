@@ -36,7 +36,7 @@ let bookings = JSON.parse(localStorage.getItem('luna_bookings') || '[]');
 /* =====================================================
    VIEW ROUTING
 ===================================================== */
-const VIEW_IDS = ['home','chooseType','selectDateTime','selectDates','searchResults','vehicleDetails','bookingSummary','checkout','confirmation','myBookings'];
+const VIEW_IDS = ['home','chooseType','selectDateTime','selectDates','searchResults','vehicleDetails','bookingSummary','checkout','confirmation','myBookings','allVehicles','about','contact'];
 const historyStack = [];
 
 function showView(name, opts = {}) {
@@ -47,10 +47,15 @@ function showView(name, opts = {}) {
         if (el) el.style.display = (id === name) ? 'block' : 'none';
     });
 
-    const isHome = name === 'home';
-    document.getElementById('mainHeader').style.display = isHome ? 'block' : 'none';
-    document.getElementById('flowHeader').style.display = isHome ? 'none' : 'block';
-    document.getElementById('siteFooter').style.display = isHome ? 'block' : 'none';
+    const primaryPages = ['home','allVehicles','about','contact'];
+    const usesMainHeader = primaryPages.includes(name);
+    document.getElementById('mainHeader').style.display = usesMainHeader ? 'block' : 'none';
+    document.getElementById('flowHeader').style.display = usesMainHeader ? 'none' : 'block';
+    document.getElementById('siteFooter').style.display = usesMainHeader ? 'block' : 'none';
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.toggle('active', link.getAttribute('data-go') === name);
+    });
 
     window.scrollTo({ top:0, behavior:'instant' });
 
@@ -61,6 +66,7 @@ function showView(name, opts = {}) {
     if (name === 'vehicleDetails') renderVehicleDetails();
     if (name === 'bookingSummary') renderBookingSummary();
     if (name === 'myBookings') renderMyBookings();
+    if (name === 'allVehicles') renderAllVehicles();
 }
 
 function goBack() {
@@ -75,6 +81,8 @@ document.querySelectorAll('[data-go]').forEach(el => {
     el.addEventListener('click', (e) => {
         e.preventDefault();
         showView(el.getAttribute('data-go'));
+        const nav = document.querySelector('.main-nav');
+        if (nav) nav.style.display = '';
     });
 });
 
@@ -134,11 +142,6 @@ function renderPopularVehicles(){
     });
 }
 renderPopularVehicles();
-
-document.getElementById('viewAllVehiclesLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('fleet').scrollIntoView({ behavior:'smooth', block:'start' });
-});
 
 /* =====================================================
    QUICK SEARCH FORM (HOME)
@@ -596,6 +599,202 @@ function renderMyBookings(){
         </div>
     `).join('');
 }
+
+/* =====================================================
+   ALL VEHICLES (with filters)
+===================================================== */
+const filterState = { type:[], transmission:[], fuel:[], seats:[], maxPrice:5000 };
+
+function readFiltersFromDOM(){
+    filterState.type = [...document.querySelectorAll('.f-type:checked')].map(el => el.value);
+    filterState.transmission = [...document.querySelectorAll('.f-transmission:checked')].map(el => el.value);
+    filterState.fuel = [...document.querySelectorAll('.f-fuel:checked')].map(el => el.value);
+    filterState.seats = [...document.querySelectorAll('.f-seats:checked')].map(el => Number(el.value));
+    filterState.maxPrice = Number(document.getElementById('priceRangeInput').value);
+}
+
+function applyFilters(vehicles){
+    return vehicles.filter(v => {
+        if (filterState.type.length && !filterState.type.includes(v.type)) return false;
+        if (filterState.transmission.length && !filterState.transmission.includes(v.transmission)) return false;
+        if (filterState.fuel.length && !filterState.fuel.includes(v.fuel)) return false;
+        if (filterState.seats.length && !filterState.seats.includes(v.seats)) return false;
+        if (v.price12 > filterState.maxPrice) return false;
+        return true;
+    });
+}
+
+function renderAllVehicles(){
+    readFiltersFromDOM();
+    document.getElementById('priceRangeValue').textContent = formatCurrency(filterState.maxPrice);
+
+    const sort = document.getElementById('allVehiclesSortSelect').value;
+    let vehicles = applyFilters(VEHICLES);
+    vehicles.sort((a,b) => sort === 'low' ? a.price12 - b.price12 : b.price12 - a.price12);
+
+    document.getElementById('allVehiclesCountLabel').textContent = `${vehicles.length} Vehicle${vehicles.length !== 1 ? 's' : ''}`;
+
+    const listEl = document.getElementById('allVehiclesList');
+    const emptyEl = document.getElementById('filtersEmptyState');
+
+    if (!vehicles.length) {
+        listEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        return;
+    }
+    listEl.style.display = 'flex';
+    emptyEl.style.display = 'none';
+
+    listEl.innerHTML = vehicles.map(v => `
+        <div class="result-card">
+            <div class="result-card-media"><i class="fa-solid ${v.icon}"></i></div>
+            <div class="result-card-body">
+                <h3>${v.name}</h3>
+                <p class="rc-type">${v.type} · ${v.transmission}</p>
+                <div class="rc-specs">
+                    <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
+                    <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+                    <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
+                </div>
+            </div>
+            <div class="result-card-action">
+                <div class="rc-price">${formatCurrency(v.price12)}<small>per 12 hrs</small></div>
+                <button type="button" class="view-details-btn" data-vehicle="${v.id}">View Details</button>
+            </div>
+        </div>
+    `).join('');
+
+    listEl.querySelectorAll('.view-details-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.vehicle = VEHICLES.find(v => v.id === btn.getAttribute('data-vehicle'));
+            if (!state.rentalType) state.rentalType = '12hour';
+            showView('vehicleDetails');
+        });
+    });
+}
+
+document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats').forEach(el => {
+    el.addEventListener('change', renderAllVehicles);
+});
+document.getElementById('priceRangeInput').addEventListener('input', renderAllVehicles);
+document.getElementById('allVehiclesSortSelect').addEventListener('change', renderAllVehicles);
+document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+    document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats').forEach(el => el.checked = false);
+    document.getElementById('priceRangeInput').value = 5000;
+    renderAllVehicles();
+});
+
+/* =====================================================
+   CONTACT FORM
+===================================================== */
+document.getElementById('contactForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    document.getElementById('contactSuccessMsg').style.display = 'flex';
+    form.reset();
+    setTimeout(() => {
+        document.getElementById('contactSuccessMsg').style.display = 'none';
+    }, 5000);
+});
+
+/* =====================================================
+   AUTH — LOGIN / SIGNUP MODALS
+===================================================== */
+let currentUser = JSON.parse(localStorage.getItem('luna_user') || 'null');
+
+function openModal(id){ document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+function closeModal(id){ document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; }
+
+document.getElementById('headerLoginLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    openModal('loginModalOverlay');
+});
+document.getElementById('loginModalClose').addEventListener('click', () => closeModal('loginModalOverlay'));
+document.getElementById('signupModalClose').addEventListener('click', () => closeModal('signupModalOverlay'));
+
+document.getElementById('switchToSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeModal('loginModalOverlay');
+    openModal('signupModalOverlay');
+});
+document.getElementById('switchToLogin').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeModal('signupModalOverlay');
+    openModal('loginModalOverlay');
+});
+
+// Close modal when clicking the dark overlay itself (not the card)
+['loginModalOverlay','signupModalOverlay'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+        if (e.target.id === id) closeModal(id);
+    });
+});
+
+function setLoggedInUser(user){
+    currentUser = user;
+    localStorage.setItem('luna_user', JSON.stringify(user));
+    updateHeaderAuthUI();
+    closeModal('loginModalOverlay');
+    closeModal('signupModalOverlay');
+}
+
+function updateHeaderAuthUI(){
+    const loginLink = document.getElementById('headerLoginLink');
+    const chip = document.getElementById('headerUserChip');
+    if (currentUser) {
+        loginLink.style.display = 'none';
+        chip.style.display = 'flex';
+        document.getElementById('userChipName').textContent = currentUser.name.split(' ')[0];
+        document.getElementById('userChipAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+    } else {
+        loginLink.style.display = 'inline';
+        chip.style.display = 'none';
+    }
+}
+
+document.getElementById('userChipLogout').addEventListener('click', () => {
+    currentUser = null;
+    localStorage.removeItem('luna_user');
+    updateHeaderAuthUI();
+});
+
+// Mock social sign-in (no backend available — simulates the round trip)
+function mockSocialAuth(btn, provider){
+    btn.classList.add('loading');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Connecting to ${provider}...`;
+    setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.innerHTML = originalHTML;
+        setLoggedInUser({ name: provider === 'Google' ? 'Juan Dela Cruz' : 'Juan D. Cruz', email: provider === 'Google' ? 'juandelacruz@gmail.com' : 'juandelacruz@facebook.com', provider });
+    }, 900);
+}
+
+document.getElementById('googleLoginBtn').addEventListener('click', (e) => mockSocialAuth(e.currentTarget, 'Google'));
+document.getElementById('facebookLoginBtn').addEventListener('click', (e) => mockSocialAuth(e.currentTarget, 'Facebook'));
+document.getElementById('googleSignupBtn').addEventListener('click', (e) => mockSocialAuth(e.currentTarget, 'Google'));
+document.getElementById('facebookSignupBtn').addEventListener('click', (e) => mockSocialAuth(e.currentTarget, 'Facebook'));
+
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const email = document.getElementById('loginEmail').value.trim();
+    setLoggedInUser({ name: email.split('@')[0].replace(/[._]/g,' '), email, provider: 'email' });
+});
+
+document.getElementById('signupForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    setLoggedInUser({ name, email, provider: 'email' });
+});
+
+updateHeaderAuthUI();
 
 /* =====================================================
    MOBILE MENU
