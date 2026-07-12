@@ -1,708 +1,612 @@
-// ==========================================
-// 1. Mobile navigation panel toggle listeners
-// ==========================================
-const menuToggle = document.getElementById('menuToggle');
-const navLinks = document.getElementById('navLinks');
-
-if(menuToggle && navLinks){
-    menuToggle.addEventListener('click', () => {
-        navLinks.classList.toggle('active');
-        const icon = menuToggle.querySelector('i');
-        icon.classList.toggle('fa-bars');
-        icon.classList.toggle('fa-xmark');
-    });
-
-    navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('active');
-            const icon = menuToggle.querySelector('i');
-            icon.classList.add('fa-bars');
-            icon.classList.remove('fa-xmark');
-        });
-    });
-}
-
-// ==========================================
-// 2. Scroll intersection animation frames
-// ==========================================
-const revealEls = document.querySelectorAll('.reveal');
-if(revealEls.length){
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if(entry.isIntersecting){
-                entry.target.classList.add('in-view');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.15 });
-    revealEls.forEach(el => observer.observe(el));
-}
-
-// ==========================================
-// 3. Dynamic Sticky Booking Bar Logic
-// ==========================================
-const header = document.getElementById('siteHeader');
-const bookingWrapper = document.getElementById('bookingWrapper');
-const bookingCard = document.getElementById('bookingCard');
-const secondaryNav = document.getElementById('secondaryNav');
-const fleetSection = document.getElementById('fleet');
-const navCarServices = document.getElementById('navCarServices');
-
-let stickyOffset = 0;
-let fleetOffset = 0;
-
-function calculateOffsets() {
-    if(!bookingWrapper || !fleetSection) return;
-    const scrollPos = window.scrollY || window.pageYOffset;
-    stickyOffset = bookingWrapper.getBoundingClientRect().top + scrollPos - 20; 
-    fleetOffset = fleetSection.getBoundingClientRect().top + scrollPos - 150; 
-}
-
-calculateOffsets();
-window.addEventListener('load', calculateOffsets);
-window.addEventListener('resize', calculateOffsets);
-
-window.addEventListener('scroll', () => {
-    // Structural layout skips sticky modifiers if alternative result layouts are rendering
-    if (isAltView()) return;
-
-    const scrollY = window.scrollY;
-
-    if (scrollY >= stickyOffset) {
-        document.body.classList.add('header-hidden');
-        bookingCard.classList.add('is-sticky');
-    } else {
-        document.body.classList.remove('header-hidden');
-        bookingCard.classList.remove('is-sticky');
-    }
-
-    if (scrollY >= fleetOffset && scrollY >= stickyOffset) {
-        secondaryNav.classList.add('is-visible');
-    } else {
-        secondaryNav.classList.remove('is-visible');
-    }
-    
-    handleScrollSpy();
-}, { passive: true });
-
-// ==========================================
-// 4. ScrollSpy Indicators Mapping
-// ==========================================
-const sections = [
-    { id: 'fleet', link: 'link-fleet' },
-    { id: 'testimonials', link: 'link-testimonials' },
-    { id: 'faq', link: 'link-faq' },
-    { id: 'how-it-works', link: 'link-how-it-works' }
+/* =====================================================
+   DATA
+===================================================== */
+const VEHICLES = [
+    { id:'vios', name:'Toyota Vios', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', price12:2500, priceDay:5000 },
+    { id:'city', name:'Honda City', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', price12:2700, priceDay:5400 },
+    { id:'xpander', name:'Mitsubishi Xpander', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', price12:3000, priceDay:6000 },
+    { id:'fortuner', name:'Toyota Fortuner', type:'SUV', transmission:'Automatic', fuel:'Diesel', seats:7, bags:4, doors:5, icon:'fa-car-side', price12:5000, priceDay:9000 }
 ];
 
-function handleScrollSpy() {
-    if (isAltView()) return;
-    
-    let currentId = '';
-    const scrollY = window.scrollY + 160; 
+const TIME_SLOTS = [
+    { start:'7:00 AM', end:'7:00 PM' },
+    { start:'10:00 PM', end:'10:00 AM' },
+    { start:'1:00 PM', end:'1:00 AM' },
+    { start:'4:00 AM', end:'4:00 PM' }
+];
 
-    sections.forEach(sec => {
-        const el = document.getElementById(sec.id);
-        if (el) {
-            const elTop = el.offsetTop;
-            const elHeight = el.offsetHeight;
-            if (scrollY >= elTop && scrollY < elTop + elHeight) {
-                currentId = sec.id;
-            }
-        }
+const LOCATIONS = ['Quezon City, Metro Manila', 'Makati City, Metro Manila', 'Pasig City, Metro Manila', 'Taguig City, Metro Manila'];
+
+/* =====================================================
+   STATE
+===================================================== */
+const state = {
+    rentalType: null,      // '12hour' | 'wholeday'
+    location: LOCATIONS[0],
+    date: null,             // 'YYYY-MM-DD' single date (12hr)
+    timeSlot: null,          // { start, end }
+    rangeStart: null,        // 'YYYY-MM-DD' (whole day)
+    rangeEnd: null,
+    vehicle: null,
+    sort: 'low'
+};
+
+let bookings = JSON.parse(localStorage.getItem('luna_bookings') || '[]');
+
+/* =====================================================
+   VIEW ROUTING
+===================================================== */
+const VIEW_IDS = ['home','chooseType','selectDateTime','selectDates','searchResults','vehicleDetails','bookingSummary','checkout','confirmation','myBookings'];
+const historyStack = [];
+
+function showView(name, opts = {}) {
+    if (!opts.fromBack) historyStack.push(name);
+
+    VIEW_IDS.forEach(id => {
+        const el = document.getElementById(`view-${id}`);
+        if (el) el.style.display = (id === name) ? 'block' : 'none';
     });
 
-    if (currentId) {
-        document.querySelectorAll('.sec-nav-item').forEach(a => a.classList.remove('active'));
-        const activeLink = document.getElementById(`link-${currentId}`);
-        if(activeLink) activeLink.classList.add('active');
-    }
+    const isHome = name === 'home';
+    document.getElementById('mainHeader').style.display = isHome ? 'block' : 'none';
+    document.getElementById('flowHeader').style.display = isHome ? 'none' : 'block';
+    document.getElementById('siteFooter').style.display = isHome ? 'block' : 'none';
+
+    window.scrollTo({ top:0, behavior:'instant' });
+
+    if (name === 'chooseType') renderChooseType();
+    if (name === 'selectDateTime') renderDateTimeView();
+    if (name === 'selectDates') renderDatesView();
+    if (name === 'searchResults') renderSearchResults();
+    if (name === 'vehicleDetails') renderVehicleDetails();
+    if (name === 'bookingSummary') renderBookingSummary();
+    if (name === 'myBookings') renderMyBookings();
 }
 
-document.querySelectorAll('.scroll-link, .sec-nav-item').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        if(isAltView()) return;
+function goBack() {
+    historyStack.pop(); // remove current
+    const prev = historyStack.pop() || 'home';
+    showView(prev);
+}
+
+document.getElementById('flowBackBtn').addEventListener('click', goBack);
+
+document.querySelectorAll('[data-go]').forEach(el => {
+    el.addEventListener('click', (e) => {
         e.preventDefault();
-        const targetId = this.getAttribute('href').substring(1);
-        const targetSection = document.getElementById(targetId);
-        if (targetSection) {
-            window.scrollTo({
-                top: targetSection.offsetTop - 120, 
-                behavior: 'smooth'
-            });
+        showView(el.getAttribute('data-go'));
+    });
+});
+
+document.querySelectorAll('.scroll-link').forEach(el => {
+    el.addEventListener('click', (e) => {
+        const targetId = el.getAttribute('data-scroll') || (el.getAttribute('href') || '').replace('#','');
+        const target = document.getElementById(targetId);
+        if (target) {
+            e.preventDefault();
+            showView('home');
+            setTimeout(() => target.scrollIntoView({ behavior:'smooth', block:'start' }), 30);
         }
     });
 });
 
-// ==========================================
-// 5. Time Select Option Generation
-// ==========================================
-const pickupTime = document.getElementById('pickupTime');
-const dropoffTime = document.getElementById('dropoffTime');
-const pickupDate = document.getElementById('pickupDate');
-const dropoffDate = document.getElementById('dropoffDate');
-const pickupGroup = document.getElementById('pickupGroup');
-const dropoffGroup = document.getElementById('dropoffGroup');
-const pickupLocation = document.getElementById('pickupLocation');
-const dropoffLocation = document.getElementById('dropoffLocation');
-const diffDropoffCheck = document.getElementById('diffDropoffCheck');
-const rtButtons = document.querySelectorAll('.rt-option');
-
-const driverProvidedMessage = document.getElementById('driverProvidedMessage');
-const selfDriveOptions = document.getElementById('selfDriveOptions');
-
-const to12Hour = (h, m) => {
-    const period = h >= 12 ? 'PM' : 'AM';
-    let hour12 = h % 12;
-    if(hour12 === 0) hour12 = 12;
-    const mm = String(m).padStart(2, '0');
-    return `${hour12}:${mm} ${period}`;
-};
-
-const buildTimeOptions = (select, defaultValue) => {
-    if(!select) return;
-    select.innerHTML = '';
-    for(let h = 6; h <= 23; h++){
-        for(let m of [0, 30]){
-            const hh = String(h).padStart(2, '0');
-            const mm = String(m).padStart(2, '0');
-            const value = `${hh}:${mm}`; 
-            const opt = document.createElement('option');
-            opt.value = value;
-            opt.textContent = to12Hour(h, m); 
-            if(value === defaultValue) opt.selected = true;
-            select.appendChild(opt);
-        }
-    }
-};
-
-buildTimeOptions(pickupTime, '10:00');
-buildTimeOptions(dropoffTime, '10:00');
-
-const toInputDate = (d) => d.toISOString().split('T')[0];
-const today = new Date();
-const tomorrow = new Date();
-tomorrow.setDate(today.getDate() + 3); 
-
-if(pickupDate && dropoffDate) {
-    pickupDate.value = toInputDate(today);
-    dropoffDate.value = toInputDate(tomorrow);
-    pickupDate.min = toInputDate(today);
-    
-    pickupDate.addEventListener('change', () => {
-        dropoffDate.min = pickupDate.value;
-        if(dropoffDate.value < pickupDate.value){
-            dropoffDate.value = pickupDate.value;
-        }
-    });
+/* =====================================================
+   FORMAT HELPERS
+===================================================== */
+function formatCurrency(n){ return `₱${n.toLocaleString('en-PH')}`; }
+function pad(n){ return String(n).padStart(2,'0'); }
+function toDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function parseDateStr(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function formatShortDate(s){
+    if(!s) return '--';
+    return parseDateStr(s).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+}
+function generateBookingId(){
+    const digits = () => Math.floor(100000 + Math.random()*900000);
+    return `LUNA-${digits()}`;
 }
 
-// Requirement 3 Fix: Handle the drop-off checkbox toggle functionality explicitly
-if (diffDropoffCheck) {
-    diffDropoffCheck.addEventListener('change', () => {
-        handleDropoffFieldVisibility();
-    });
-}
-
-function handleDropoffFieldVisibility() {
-    const isDriverActive = document.getElementById('rtDriver').classList.contains('active');
-    if (isDriverActive && diffDropoffCheck && diffDropoffCheck.checked) {
-        dropoffGroup.classList.remove('is-hidden');
-        dropoffLocation.required = true;
-    } else {
-        dropoffGroup.classList.add('is-hidden');
-        dropoffLocation.required = false;
-        dropoffLocation.value = '';
-    }
-    calculateOffsets();
-}
-
-function setRentalType(type){
-    const isDriver = type === 'driver';
-
-    rtButtons.forEach(btn => {
-        const active = btn.dataset.type === type;
-        btn.classList.toggle('active', active);
-        btn.setAttribute('aria-selected', active ? 'true' : 'false');
-    });
-
-    if(isDriver){
-        pickupGroup.classList.remove('is-hidden');
-        pickupLocation.required = true;
-        driverProvidedMessage.classList.remove('is-hidden');
-        selfDriveOptions.classList.add('is-hidden');
-    } else {
-        pickupGroup.classList.add('is-hidden');
-        pickupLocation.required = false;
-        driverProvidedMessage.classList.add('is-hidden');
-        selfDriveOptions.classList.remove('is-hidden');
-        if(diffDropoffCheck) diffDropoffCheck.checked = false;
-    }
-
-    handleDropoffFieldVisibility();
-}
-
-if(rtButtons.length){
-    rtButtons.forEach(btn => {
-        btn.addEventListener('click', () => setRentalType(btn.dataset.type));
-    });
-    setRentalType('self'); 
-}
-
-// ==========================================
-// 6. Search Submit Interface Handlers
-// ==========================================
-const mainSearchForm = document.getElementById('mainSearchForm');
-const searchResultsView = document.getElementById('searchResultsView');
-const carDetailsView = document.getElementById('carDetailsView');
-const bookingConfirmationView = document.getElementById('bookingConfirmationView');
-const myBookingsView = document.getElementById('myBookingsView');
-
-// Central view registry: keeps every top-level interface (results, details,
-// confirmation, my bookings) in sync across PC and mobile so only one
-// "screen" is ever visible at a time and state stays consistent.
-const viewSections = {
-    results: searchResultsView,
-    details: carDetailsView,
-    confirmation: bookingConfirmationView,
-    mybookings: myBookingsView
-};
-const viewBodyClasses = {
-    results: 'show-results',
-    details: 'show-details-view',
-    confirmation: 'show-confirmation-view',
-    mybookings: 'show-mybookings-view'
-};
-
-function isAltView() {
-    return Object.values(viewBodyClasses).some(cls => document.body.classList.contains(cls));
-}
-
-// Switch the active top-level view. Pass null/undefined to return to the landing page.
-function showView(name) {
-    Object.values(viewBodyClasses).forEach(cls => document.body.classList.remove(cls));
-    Object.values(viewSections).forEach(sec => { if (sec) sec.style.display = 'none'; });
-
-    if (name && viewSections[name]) {
-        document.body.classList.add(viewBodyClasses[name]);
-        viewSections[name].style.display = 'block';
-    }
-
-    if (navCarServices) {
-        navCarServices.classList.toggle('highlight-active', name === 'results' || name === 'details');
-    }
-
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    calculateOffsets();
-}
-
-if(mainSearchForm) {
-    mainSearchForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        if(!mainSearchForm.checkValidity()){
-            mainSearchForm.reportValidity();
-            return;
-        }
-        
-        bookingCard.classList.remove('is-sticky');
-        document.body.classList.remove('header-hidden');
-        secondaryNav.classList.remove('is-visible');
-
-        // Render Active Results View Matrix
-        showView('results');
-    });
-}
-
-// Requirement 4 Fix: Bind Deal selection interactions to premium product breakdown modal rows
-document.querySelectorAll('.view-deal-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const row = btn.closest('.result-row-card');
-        populateCarDetails(row);
-        updateItinerarySummary();
-        showView('details');
-    });
-});
-
-// Breadcrumb modeling links behavior reset
-const backToResults = document.getElementById('backToResults');
-if (backToResults) {
-    backToResults.addEventListener('click', (e) => {
-        e.preventDefault();
-        showView('results');
-    });
-}
-
-// Complete structural navigation canvas view updates
-document.querySelectorAll('.clickable-logo').forEach(logo => {
-    logo.addEventListener('click', () => {
-        if(!isAltView()) return;
-        showView(null);
-    });
-});
-
-// Grid landing deals shortcuts modifiers mapping
-document.querySelectorAll('.select-trigger').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.getElementById('pickupLocation').value = "Quezon City Headquarters";
-        mainSearchForm.dispatchEvent(new Event('submit'));
-    });
-});
-
-// ==========================================
-// 7. Accordion Dropdown Functions
-// ==========================================
-const faqItems = document.querySelectorAll('.faq-item');
-faqItems.forEach(item => {
-    const question = item.querySelector('.faq-question');
-    const answer = item.querySelector('.faq-answer');
-
-    question.addEventListener('click', () => {
-        const isOpen = item.classList.contains('open');
-        faqItems.forEach(other => {
-            other.classList.remove('open');
-            other.querySelector('.faq-answer').style.maxHeight = null;
-        });
-
-        if(!isOpen){
-            item.classList.add('open');
-            answer.style.maxHeight = answer.scrollHeight + 'px';
-        }
-    });
-});
-
-// ==========================================
-// 8. Booking Confirmation & My Bookings System
-// ==========================================
-
-// In-memory booking store for this session (prototype only — no backend).
-let bookings = [];
-
-// Tracks whichever vehicle is currently shown in the Car Details view,
-// defaulting to the markup's built-in example (Jeep Compass) until a
-// "View deal" card is clicked.
-let selectedCar = {
-    iconName: 'fa-truck-pickup',
-    name: 'Jeep Compass',
-    subtitle: 'or similar Compact SUV',
-    specsSummary: '5 Seats · 3 Suitcases · 4 Doors · Automatic',
-    perDayLabel: '₱2,000.00',
-    totalLabel: '₱6,000.00'
-};
-
-const proceedBookingBtn = document.getElementById('proceedBookingBtn');
-const driverFullName = document.getElementById('driverFullName');
-const driverMobile = document.getElementById('driverMobile');
-const driverEmail = document.getElementById('driverEmail');
-const myBookingsBtn = document.getElementById('myBookingsBtn');
-const confBackHomeBtn = document.getElementById('confBackHomeBtn');
-const confViewBookingsBtn = document.getElementById('confViewBookingsBtn');
-const bookAnotherBtn = document.getElementById('bookAnotherBtn');
-const emptyStateBookBtn = document.getElementById('emptyStateBookBtn');
-
-// ---- Formatting helpers -------------------------------------------------
-
-function formatTimeValue(val) {
-    if (!val) return '--';
-    const [h, m] = val.split(':').map(Number);
-    return to12Hour(h, m);
-}
-
-function formatShortDate(dateStr) {
-    if (!dateStr) return '--';
-    const d = new Date(`${dateStr}T00:00:00`);
-    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-}
-
-function formatSubmittedAt(date) {
-    return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
-
-function computeDurationDays(pdStr, ddStr) {
-    if (!pdStr || !ddStr) return 1;
-    const pd = new Date(`${pdStr}T00:00:00`);
-    const dd = new Date(`${ddStr}T00:00:00`);
-    const diff = Math.round((dd - pd) / (1000 * 60 * 60 * 24));
-    return diff > 0 ? diff : 1;
-}
-
-function formatCurrency(num) {
-    return `₱${num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function generateBookingRef() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let ref = '';
-    for (let i = 0; i < 6; i++) ref += chars[Math.floor(Math.random() * chars.length)];
-    return `LUNA-${ref}`;
-}
-
-function setText(id, text) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
-}
-
-// ---- Dynamic car selection (Results -> Details) --------------------------
-
-function populateCarDetails(row) {
-    if (!row) return;
-
-    const iconEl = row.querySelector('.rr-visual i');
-    const titleEl = row.querySelector('.rr-details h3');
-    const specEls = row.querySelectorAll('.rr-specs span');
-    const priceValEl = row.querySelector('.price-val');
-    const priceTotalEl = row.querySelector('.price-total');
-
-    let iconName = 'fa-truck-pickup';
-    if (iconEl) {
-        const found = [...iconEl.classList].find(c => c.startsWith('fa-') && c !== 'fa-solid' && !/^fa-\dx$/.test(c));
-        if (found) iconName = found;
-    }
-
-    let carName = 'Selected Vehicle';
-    let carSubtitle = 'or similar vehicle';
-    if (titleEl) {
-        carName = titleEl.childNodes[0].textContent.trim();
-        const spanEl = titleEl.querySelector('span');
-        if (spanEl) carSubtitle = spanEl.textContent.trim();
-    }
-
-    let seats = '5', bags = '3';
-    specEls.forEach(s => {
-        const t = s.textContent.trim();
-        const num = t.match(/\d+/);
-        if (/seat/i.test(t) && num) seats = num[0];
-        if (/bag/i.test(t) && num) bags = num[0];
-    });
-
-    const perDayLabel = priceValEl ? priceValEl.textContent.trim() : selectedCar.perDayLabel;
-    const totalLabel = priceTotalEl ? priceTotalEl.textContent.replace('Total:', '').trim() : selectedCar.totalLabel;
-
-    selectedCar = {
-        iconName,
-        name: carName,
-        subtitle: carSubtitle,
-        specsSummary: `${seats} Seats · ${bags} Suitcases · 4 Doors · Automatic`,
-        perDayLabel,
-        totalLabel
-    };
-
-    const targetIcon = document.querySelector('#carDetailsView .car-info-visual i');
-    if (targetIcon) targetIcon.className = `fa-solid ${iconName} fa-5x`;
-
-    const targetTitle = document.querySelector('#carDetailsView .car-title-row h2');
-    if (targetTitle) {
-        targetTitle.innerHTML = `${carName} <span class="car-subtext">${carSubtitle} <i class="fa-solid fa-circle-info"></i></span>`;
-    }
-
-    const targetPills = document.querySelector('#carDetailsView .car-pill-specs');
-    if (targetPills) {
-        targetPills.innerHTML = `
-            <span><i class="fa-solid fa-user"></i> ${seats} Seats</span>
-            <span><i class="fa-solid fa-suitcase"></i> ${bags} Suitcases</span>
-            <span><i class="fa-solid fa-door-closed"></i> 4 Doors</span>
-            <span><i class="fa-solid fa-gears"></i> Automatic</span>
-            <span><i class="fa-solid fa-gas-pump"></i> Fuel</span>
-        `;
-    }
-
-    updatePricingSidebar(totalLabel);
-}
-
-function updatePricingSidebar(totalLabel) {
-    const totalNum = parseFloat((totalLabel || '').replace(/[^\d.]/g, '')) || 0;
-    if (!totalNum) return;
-
-    const prepayCarFee = totalNum * 0.20;
-    const discount = totalNum * 0.05;
-    const prepayOnline = prepayCarFee - discount;
-    const payAtPickup = totalNum;
-
-    setText('prepayOnlineVal', formatCurrency(prepayOnline));
-    setText('prepayCarFeeVal', formatCurrency(prepayCarFee));
-    setText('discountVal1', `-${formatCurrency(discount)}`);
-    setText('discountVal2', `-${formatCurrency(discount)}`);
-    setText('payAtPickupVal', formatCurrency(payAtPickup));
-    setText('carRentalFeeVal', formatCurrency(payAtPickup));
-}
-
-// Refresh the Car Details itinerary card using whatever is currently set
-// in the main search bar (dates, times, pick-up location) so the details
-// and receipt always mirror what the person actually searched for.
-function updateItinerarySummary() {
-    const days = computeDurationDays(pickupDate?.value, dropoffDate?.value);
-    const itText = document.querySelector('#carDetailsView .it-text');
-    if (itText) {
-        const pickupStr = `${formatTimeValue(pickupTime?.value)}, ${formatShortDate(pickupDate?.value)}`;
-        const dropoffStr = `${formatTimeValue(dropoffTime?.value)}, ${formatShortDate(dropoffDate?.value)}`;
-        itText.innerHTML = `${pickupStr} - ${dropoffStr} <strong class="duration-pill">${days} day${days !== 1 ? 's' : ''}</strong>`;
-    }
-
-    const locNameEl = document.getElementById('itineraryLocationName');
-    if (locNameEl) {
-        const loc = (pickupLocation?.value || '').trim();
-        locNameEl.textContent = `${loc || 'Quezon City Headquarters'} branch`;
-    }
-}
-
-// ---- Booking submission ---------------------------------------------------
-
-if (proceedBookingBtn) {
-    proceedBookingBtn.addEventListener('click', () => {
-        const requiredFields = [driverFullName, driverMobile, driverEmail];
-        const invalidField = requiredFields.find(f => f && !f.checkValidity());
-        if (invalidField) {
-            invalidField.reportValidity();
-            document.getElementById('driverDetailsCard')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
-
-        const isDriverRental = document.getElementById('rtDriver')?.classList.contains('active');
-        const hasDiffDropoff = isDriverRental && !!diffDropoffCheck?.checked;
-        const days = computeDurationDays(pickupDate?.value, dropoffDate?.value);
-
-        const booking = {
-            id: generateBookingRef(),
-            submittedAt: new Date(),
-            status: 'pending',
-            car: { ...selectedCar },
-            rental: {
-                type: isDriverRental ? 'driver' : 'self',
-                pickupDate: pickupDate?.value,
-                pickupTime: pickupTime?.value,
-                dropoffDate: dropoffDate?.value,
-                dropoffTime: dropoffTime?.value,
-                days,
-                pickupLocation: (pickupLocation?.value || '').trim() || 'Quezon City Headquarters',
-                dropoffLocation: hasDiffDropoff ? (dropoffLocation?.value || '').trim() : null
-            },
-            driver: {
-                fullName: driverFullName.value.trim(),
-                mobile: driverMobile.value.trim(),
-                email: driverEmail.value.trim()
-            }
-        };
-
-        bookings.push(booking);
-        renderConfirmation(booking);
-        renderBookingsList();
-        showView('confirmation');
-    });
-}
-
-// ---- Receipt rendering ------------------------------------------------
-
-function renderConfirmation(booking) {
-    setText('confNameInline', booking.driver.fullName.split(' ')[0] || 'Guest');
-    setText('confRefNumber', booking.id);
-    setText('confSubmittedAt', formatSubmittedAt(booking.submittedAt));
-
-    const iconEl = document.getElementById('confVehicleIcon');
-    if (iconEl) iconEl.innerHTML = `<i class="fa-solid ${booking.car.iconName} fa-2x"></i>`;
-
-    const titleEl = document.getElementById('confVehicleTitle');
-    if (titleEl) titleEl.innerHTML = `${booking.car.name} <span>${booking.car.subtitle}</span>`;
-
-    setText('confVehicleSpecs', booking.car.specsSummary);
-    setText('confRentalType', booking.rental.type === 'driver' ? 'Rent a Car with Driver' : 'Rent a Car (Self-drive)');
-    setText('confPickupDateTime', `${formatShortDate(booking.rental.pickupDate)}, ${formatTimeValue(booking.rental.pickupTime)}`);
-    setText('confPickupLocation', booking.rental.pickupLocation);
-    setText('confDropoffDateTime', `${formatShortDate(booking.rental.dropoffDate)}, ${formatTimeValue(booking.rental.dropoffTime)}`);
-
-    const dropRow = document.getElementById('confDropoffLocRow');
-    if (dropRow) {
-        if (booking.rental.dropoffLocation) {
-            dropRow.style.display = 'flex';
-            setText('confDropoffLocation', booking.rental.dropoffLocation);
-        } else {
-            dropRow.style.display = 'none';
-        }
-    }
-
-    setText('confDuration', `${booking.rental.days} day${booking.rental.days !== 1 ? 's' : ''}`);
-    setText('confDriverName', booking.driver.fullName);
-    setText('confDriverMobile', booking.driver.mobile);
-    setText('confDriverEmail', booking.driver.email);
-    setText('confPricePerDay', booking.car.perDayLabel || '--');
-    setText('confTotal', booking.car.totalLabel || '--');
-}
-
-// ---- My Bookings list ---------------------------------------------------
-
-function renderBookingsList() {
-    const listEl = document.getElementById('bookingsList');
-    const emptyEl = document.getElementById('bookingsEmptyState');
-    if (!listEl || !emptyEl) return;
-
-    if (bookings.length === 0) {
-        emptyEl.style.display = 'block';
-        listEl.style.display = 'none';
-        listEl.innerHTML = '';
-        return;
-    }
-
-    emptyEl.style.display = 'none';
-    listEl.style.display = 'flex';
-
-    listEl.innerHTML = bookings.slice().reverse().map(b => `
-        <div class="booking-list-card">
-            <div class="blc-icon"><i class="fa-solid ${b.car.iconName} fa-2x"></i></div>
-            <div class="blc-body">
-                <div class="blc-top-row">
-                    <h3>${b.car.name}<span>${b.car.subtitle}</span></h3>
-                    <span class="status-pill status-pending">Pending confirmation</span>
+/* =====================================================
+   POPULAR VEHICLES (HOME)
+===================================================== */
+function renderPopularVehicles(){
+    const grid = document.getElementById('popularVehicleGrid');
+    grid.innerHTML = VEHICLES.map(v => `
+        <div class="vehicle-card">
+            <div class="vehicle-card-media"><i class="fa-solid ${v.icon}"></i></div>
+            <div class="vehicle-card-body">
+                <h3>${v.name}</h3>
+                <p class="vc-type">${v.type} · ${v.transmission}</p>
+                <div class="vc-bottom-row">
+                    <div class="vc-price">${formatCurrency(v.price12)} <small>/12 hrs</small></div>
+                    <button type="button" class="vc-view-btn" data-vehicle="${v.id}">View Details</button>
                 </div>
-                <div class="blc-meta">
-                    <span><i class="fa-regular fa-calendar"></i> ${formatShortDate(b.rental.pickupDate)} - ${formatShortDate(b.rental.dropoffDate)}</span>
-                    <span><i class="fa-solid fa-hashtag"></i> ${b.id}</span>
-                    <span><i class="fa-regular fa-clock"></i> Submitted ${formatSubmittedAt(b.submittedAt)}</span>
-                </div>
-            </div>
-            <div class="blc-action">
-                <div class="blc-price">${b.car.totalLabel || ''}</div>
-                <button type="button" class="view-receipt-btn" data-booking-id="${b.id}">View Receipt</button>
             </div>
         </div>
     `).join('');
 
-    listEl.querySelectorAll('.view-receipt-btn').forEach(btn => {
+    grid.querySelectorAll('.vc-view-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            const booking = bookings.find(b => b.id === btn.getAttribute('data-booking-id'));
-            if (booking) {
-                renderConfirmation(booking);
-                showView('confirmation');
+            state.vehicle = VEHICLES.find(v => v.id === btn.getAttribute('data-vehicle'));
+            if (!state.rentalType) state.rentalType = '12hour';
+            showView('vehicleDetails');
+        });
+    });
+}
+renderPopularVehicles();
+
+document.getElementById('viewAllVehiclesLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('fleet').scrollIntoView({ behavior:'smooth', block:'start' });
+});
+
+/* =====================================================
+   QUICK SEARCH FORM (HOME)
+===================================================== */
+const qsDate = document.getElementById('qsDate');
+(function initQsDate(){
+    const today = new Date();
+    qsDate.min = toDateStr(today);
+    qsDate.value = toDateStr(today);
+})();
+
+document.getElementById('quickSearchForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    state.location = document.getElementById('qsLocation').value;
+    const type = document.getElementById('qsType').value;
+    const dateVal = qsDate.value;
+
+    if (type) {
+        state.rentalType = type;
+        if (dateVal) { state.date = dateVal; state.rangeStart = dateVal; }
+        showView(type === '12hour' ? 'selectDateTime' : 'selectDates');
+    } else {
+        showView('chooseType');
+    }
+});
+
+/* =====================================================
+   CHOOSE RENTAL TYPE
+===================================================== */
+function renderChooseType(){
+    document.querySelectorAll('.rental-type-card').forEach(card => {
+        card.classList.toggle('active', card.getAttribute('data-type') === state.rentalType);
+    });
+    updateInfoBox();
+}
+
+function updateInfoBox(){
+    const title = document.getElementById('infoBoxTitle');
+    const text = document.getElementById('infoBoxText');
+    if (state.rentalType === 'wholeday') {
+        title.textContent = 'About Whole Day Rental';
+        text.textContent = 'Whole Day Rental gives you the vehicle for a full 24 hours from your pickup time to the same time the next day, ideal for out-of-town trips.';
+    } else {
+        title.textContent = 'About 12-Hour Rental';
+        text.textContent = 'Each 12-hour rental includes a 3-hour preparation gap between bookings for cleaning, inspection, and refueling between rentals.';
+    }
+}
+
+document.querySelectorAll('.rental-type-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const type = card.getAttribute('data-type');
+        state.rentalType = type;
+        document.querySelectorAll('.rental-type-card').forEach(c => c.classList.toggle('active', c === card));
+        updateInfoBox();
+        setTimeout(() => {
+            showView(type === '12hour' ? 'selectDateTime' : 'selectDates');
+        }, 180);
+    });
+});
+
+/* =====================================================
+   CALENDAR ENGINE
+===================================================== */
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function buildCalendarGrid(gridEl, viewDate, opts){
+    // opts: { minDate, isSelected(dateStr) -> class list, onSelect(dateStr) }
+    gridEl.innerHTML = '';
+    DOW.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'cal-dow';
+        el.textContent = d;
+        gridEl.appendChild(el);
+    });
+
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const startOffset = firstDay.getDay();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const todayStr = toDateStr(new Date());
+
+    for (let i=0; i<startOffset; i++){
+        const blank = document.createElement('div');
+        blank.className = 'cal-day cal-day-blank';
+        gridEl.appendChild(blank);
+    }
+
+    for (let day=1; day<=daysInMonth; day++){
+        const d = new Date(year, month, day);
+        const dateStr = toDateStr(d);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cal-day';
+        btn.textContent = day;
+
+        if (dateStr === todayStr) btn.classList.add('today');
+
+        const extraClass = opts.getClass ? opts.getClass(dateStr) : '';
+        if (extraClass) btn.classList.add(...extraClass.split(' ').filter(Boolean));
+
+        const disabled = opts.minDate && dateStr < opts.minDate;
+        if (disabled) {
+            btn.disabled = true;
+        } else {
+            btn.addEventListener('click', () => opts.onSelect(dateStr));
+        }
+
+        gridEl.appendChild(btn);
+    }
+}
+
+/* ---- 12-Hour rental date/time picker ---- */
+let calView12 = new Date();
+
+function renderDateTimeView(){
+    const gridEl = document.getElementById('calGrid12');
+    const labelEl = document.getElementById('calLabel12');
+    const todayStr = toDateStr(new Date());
+
+    if (!state.date) state.date = todayStr;
+
+    labelEl.textContent = `${MONTH_NAMES[calView12.getMonth()]} ${calView12.getFullYear()}`;
+
+    buildCalendarGrid(gridEl, calView12, {
+        minDate: todayStr,
+        getClass: (dateStr) => dateStr === state.date ? 'selected' : '',
+        onSelect: (dateStr) => {
+            state.date = dateStr;
+            state.timeSlot = null;
+            renderDateTimeView();
+        }
+    });
+
+    document.getElementById('slotsDateLabel').textContent = formatShortDate(state.date);
+
+    const list = document.getElementById('timeSlotList');
+    list.innerHTML = TIME_SLOTS.map((slot, i) => `
+        <button type="button" class="time-slot ${state.timeSlot && state.timeSlot.start === slot.start ? 'selected' : ''}" data-idx="${i}">
+            <span>${slot.start} - ${slot.end}</span>
+            <span>${formatCurrency(2500)}</span>
+        </button>
+    `).join('');
+
+    list.querySelectorAll('.time-slot').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.timeSlot = TIME_SLOTS[Number(btn.getAttribute('data-idx'))];
+            renderDateTimeView();
+        });
+    });
+
+    document.getElementById('continue12Btn').disabled = !(state.date && state.timeSlot);
+}
+
+document.getElementById('calPrev12').addEventListener('click', () => {
+    calView12 = new Date(calView12.getFullYear(), calView12.getMonth()-1, 1);
+    renderDateTimeView();
+});
+document.getElementById('calNext12').addEventListener('click', () => {
+    calView12 = new Date(calView12.getFullYear(), calView12.getMonth()+1, 1);
+    renderDateTimeView();
+});
+document.getElementById('continue12Btn').addEventListener('click', () => {
+    if (state.date && state.timeSlot) showView('searchResults');
+});
+
+/* ---- Whole day rental range picker ---- */
+let calViewDay = new Date();
+
+function renderDatesView(){
+    const gridEl = document.getElementById('calGridDay');
+    const labelEl = document.getElementById('calLabelDay');
+    const todayStr = toDateStr(new Date());
+
+    labelEl.textContent = `${MONTH_NAMES[calViewDay.getMonth()]} ${calViewDay.getFullYear()}`;
+
+    buildCalendarGrid(gridEl, calViewDay, {
+        minDate: todayStr,
+        getClass: (dateStr) => {
+            if (state.rangeStart && dateStr === state.rangeStart && (!state.rangeEnd || state.rangeEnd === state.rangeStart)) return 'range-start range-end';
+            if (state.rangeStart && dateStr === state.rangeStart) return 'range-start';
+            if (state.rangeEnd && dateStr === state.rangeEnd) return 'range-end';
+            if (state.rangeStart && state.rangeEnd && dateStr > state.rangeStart && dateStr < state.rangeEnd) return 'in-range';
+            return '';
+        },
+        onSelect: (dateStr) => {
+            if (!state.rangeStart || (state.rangeStart && state.rangeEnd)) {
+                state.rangeStart = dateStr;
+                state.rangeEnd = null;
+            } else if (dateStr < state.rangeStart) {
+                state.rangeStart = dateStr;
+                state.rangeEnd = null;
+            } else {
+                state.rangeEnd = dateStr;
             }
+            renderDatesView();
+        }
+    });
+
+    document.getElementById('rangePickupLabel').textContent = state.rangeStart ? formatShortDate(state.rangeStart) : 'Select a date';
+    document.getElementById('rangeReturnLabel').textContent = state.rangeEnd ? formatShortDate(state.rangeEnd) : 'Select a date';
+
+    const durationBox = document.getElementById('rangeDurationBox');
+    if (state.rangeStart && state.rangeEnd) {
+        const days = Math.round((parseDateStr(state.rangeEnd) - parseDateStr(state.rangeStart)) / 86400000);
+        durationBox.style.display = 'flex';
+        document.getElementById('rangeDurationLabel').textContent = `${days} Day${days !== 1 ? 's' : ''}`;
+    } else {
+        durationBox.style.display = 'none';
+    }
+
+    document.getElementById('continueDayBtn').disabled = !(state.rangeStart && state.rangeEnd);
+}
+
+document.getElementById('calPrevDay').addEventListener('click', () => {
+    calViewDay = new Date(calViewDay.getFullYear(), calViewDay.getMonth()-1, 1);
+    renderDatesView();
+});
+document.getElementById('calNextDay').addEventListener('click', () => {
+    calViewDay = new Date(calViewDay.getFullYear(), calViewDay.getMonth()+1, 1);
+    renderDatesView();
+});
+document.getElementById('continueDayBtn').addEventListener('click', () => {
+    if (state.rangeStart && state.rangeEnd) showView('searchResults');
+});
+
+/* =====================================================
+   SEARCH RESULTS
+===================================================== */
+function getDurationDays(){
+    if (state.rentalType === 'wholeday' && state.rangeStart && state.rangeEnd) {
+        return Math.round((parseDateStr(state.rangeEnd) - parseDateStr(state.rangeStart)) / 86400000);
+    }
+    return 1;
+}
+
+function getVehiclePrice(v){
+    if (state.rentalType === 'wholeday') return v.priceDay * getDurationDays();
+    return v.price12;
+}
+
+function renderSearchResults(){
+    const isWholeDay = state.rentalType === 'wholeday';
+
+    document.getElementById('ssRentalType').textContent = isWholeDay ? 'Whole Day Rental' : '12-Hour Rental';
+    document.getElementById('ssPickupDate').textContent = isWholeDay ? formatShortDate(state.rangeStart) : formatShortDate(state.date);
+    document.getElementById('ssLocation').textContent = state.location;
+
+    document.getElementById('ssTimeSlotRow').style.display = isWholeDay ? 'none' : 'flex';
+    document.getElementById('ssReturnDateRow').style.display = isWholeDay ? 'flex' : 'none';
+    if (!isWholeDay) document.getElementById('ssTimeSlot').textContent = state.timeSlot ? `${state.timeSlot.start} - ${state.timeSlot.end}` : '--';
+    if (isWholeDay) document.getElementById('ssReturnDate').textContent = formatShortDate(state.rangeEnd);
+
+    renderResultList();
+}
+
+function renderResultList(){
+    const sort = document.getElementById('sortSelect').value;
+    state.sort = sort;
+
+    let vehicles = [...VEHICLES];
+    vehicles.sort((a,b) => {
+        const pa = getVehiclePrice(a), pb = getVehiclePrice(b);
+        return sort === 'low' ? pa - pb : pb - pa;
+    });
+
+    document.getElementById('resultsCountLabel').textContent = `${vehicles.length} vehicles available for your selected schedule`;
+
+    const listEl = document.getElementById('resultVehicleList');
+    listEl.innerHTML = vehicles.map(v => `
+        <div class="result-card">
+            <div class="result-card-media"><i class="fa-solid ${v.icon}"></i></div>
+            <div class="result-card-body">
+                <h3>${v.name}</h3>
+                <p class="rc-type">${v.type} · ${v.transmission}</p>
+                <div class="rc-specs">
+                    <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
+                    <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+                    <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
+                </div>
+            </div>
+            <div class="result-card-action">
+                <div class="rc-price">${formatCurrency(getVehiclePrice(v))}<small>${state.rentalType === 'wholeday' ? `for ${getDurationDays()} day${getDurationDays() !== 1 ? 's' : ''}` : 'per 12 hrs'}</small></div>
+                <button type="button" class="view-details-btn" data-vehicle="${v.id}">View Details</button>
+            </div>
+        </div>
+    `).join('');
+
+    listEl.querySelectorAll('.view-details-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.vehicle = VEHICLES.find(v => v.id === btn.getAttribute('data-vehicle'));
+            showView('vehicleDetails');
         });
     });
 }
 
-// ---- Navigation bindings for the new views -------------------------------
+document.getElementById('sortSelect').addEventListener('change', renderResultList);
+document.getElementById('changeSearchBtn').addEventListener('click', () => {
+    showView(state.rentalType === 'wholeday' ? 'selectDates' : 'selectDateTime');
+});
 
-if (myBookingsBtn) {
-    myBookingsBtn.addEventListener('click', () => {
-        renderBookingsList();
-        showView('mybookings');
-    });
+/* =====================================================
+   VEHICLE DETAILS
+===================================================== */
+function renderVehicleDetails(){
+    const v = state.vehicle || VEHICLES[0];
+    state.vehicle = v;
+
+    document.getElementById('vdPhotoMain').innerHTML = `<i class="fa-solid ${v.icon}"></i>`;
+    document.getElementById('vdName').textContent = v.name;
+    document.getElementById('vdType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
+
+    document.getElementById('vdSpecs').innerHTML = `
+        <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
+        <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
+        <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+        <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
+        <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
+        <span><i class="fa-solid fa-snowflake"></i> Air Conditioning</span>
+    `;
+
+    document.getElementById('vdPhotoStrip').innerHTML = [1,2,3,4].map((n,i) => `
+        <div class="strip-thumb ${i === 0 ? 'active' : ''}"><i class="fa-solid ${v.icon}"></i></div>
+    `).join('');
+
+    const isWholeDay = state.rentalType === 'wholeday';
+    document.getElementById('vdRentalTypeLabel').textContent = isWholeDay ? 'Whole Day Rental' : '12-Hour Rental';
+    document.getElementById('vdPriceAmount').textContent = formatCurrency(getVehiclePrice(v));
+
+    if (isWholeDay) {
+        document.getElementById('vdPriceSub').textContent = state.rangeStart && state.rangeEnd
+            ? `${formatShortDate(state.rangeStart)} - ${formatShortDate(state.rangeEnd)}`
+            : 'Select your dates';
+    } else {
+        document.getElementById('vdPriceSub').textContent = state.timeSlot
+            ? `${state.timeSlot.start} - ${state.timeSlot.end}`
+            : 'Select a time slot';
+    }
 }
 
-if (confBackHomeBtn) {
-    confBackHomeBtn.addEventListener('click', () => showView(null));
+document.getElementById('selectVehicleBtn').addEventListener('click', () => {
+    if (!state.rentalType) { showView('chooseType'); return; }
+    if (state.rentalType === '12hour' && !(state.date && state.timeSlot)) { showView('selectDateTime'); return; }
+    if (state.rentalType === 'wholeday' && !(state.rangeStart && state.rangeEnd)) { showView('selectDates'); return; }
+    showView('bookingSummary');
+});
+
+/* =====================================================
+   BOOKING SUMMARY
+===================================================== */
+function renderBookingSummary(){
+    const v = state.vehicle;
+    const isWholeDay = state.rentalType === 'wholeday';
+    const price = getVehiclePrice(v);
+
+    document.getElementById('bsVehicleIcon').innerHTML = `<i class="fa-solid ${v.icon}"></i>`;
+    document.getElementById('bsVehicleName').textContent = v.name;
+    document.getElementById('bsVehicleType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
+
+    document.getElementById('bsRentalType').textContent = isWholeDay ? 'Whole Day Rental' : '12-Hour Rental';
+    document.getElementById('bsPickupDate').textContent = isWholeDay ? formatShortDate(state.rangeStart) : formatShortDate(state.date);
+    document.getElementById('bsLocation').textContent = state.location;
+
+    document.getElementById('bsTimeSlotRow').style.display = isWholeDay ? 'none' : 'flex';
+    document.getElementById('bsReturnDateRow').style.display = isWholeDay ? 'flex' : 'none';
+    if (!isWholeDay) document.getElementById('bsTimeSlot').textContent = `${state.timeSlot.start} - ${state.timeSlot.end}`;
+    if (isWholeDay) document.getElementById('bsReturnDate').textContent = formatShortDate(state.rangeEnd);
+
+    document.getElementById('bsPrice').textContent = formatCurrency(price);
+    document.getElementById('bsTotal').textContent = formatCurrency(price);
 }
 
-if (confViewBookingsBtn) {
-    confViewBookingsBtn.addEventListener('click', () => {
-        renderBookingsList();
-        showView('mybookings');
-    });
+document.getElementById('continueCheckoutBtn').addEventListener('click', () => showView('checkout'));
+
+/* =====================================================
+   CHECKOUT
+===================================================== */
+document.getElementById('checkoutForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+
+    const v = state.vehicle;
+    const isWholeDay = state.rentalType === 'wholeday';
+    const price = getVehiclePrice(v);
+    const payMethod = form.querySelector('input[name="payMethod"]:checked').value;
+
+    const booking = {
+        id: generateBookingId(),
+        submittedAt: new Date().toISOString(),
+        status: 'pending',
+        vehicle: { id:v.id, name:v.name, type:v.type, transmission:v.transmission, icon:v.icon },
+        rentalType: state.rentalType,
+        location: state.location,
+        pickup: isWholeDay ? state.rangeStart : state.date,
+        pickupTimeSlot: isWholeDay ? null : state.timeSlot,
+        returnDate: isWholeDay ? state.rangeEnd : state.date,
+        total: price,
+        contact: {
+            name: document.getElementById('ckName').value.trim(),
+            email: document.getElementById('ckEmail').value.trim(),
+            phone: document.getElementById('ckPhone').value.trim()
+        },
+        payMethod
+    };
+
+    bookings.push(booking);
+    localStorage.setItem('luna_bookings', JSON.stringify(bookings));
+
+    renderConfirmation(booking);
+    showView('confirmation');
+});
+
+/* =====================================================
+   CONFIRMATION
+===================================================== */
+function renderConfirmation(booking){
+    document.getElementById('cfBookingId').textContent = booking.id;
+    document.getElementById('cfVehicle').textContent = booking.vehicle.name;
+    document.getElementById('cfPickup').textContent = booking.rentalType === 'wholeday'
+        ? formatShortDate(booking.pickup)
+        : `${formatShortDate(booking.pickup)}, ${booking.pickupTimeSlot.start}`;
+    document.getElementById('cfReturn').textContent = booking.rentalType === 'wholeday'
+        ? formatShortDate(booking.returnDate)
+        : `${formatShortDate(booking.pickup)}, ${booking.pickupTimeSlot.end}`;
 }
 
-function goBookAnotherCar() {
-    showView(null);
-    setTimeout(() => {
-        document.getElementById('fleet')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+document.getElementById('goToBookingsBtn').addEventListener('click', () => showView('myBookings'));
+
+/* =====================================================
+   MY BOOKINGS
+===================================================== */
+function renderMyBookings(){
+    const listEl = document.getElementById('myBookingsList');
+    const emptyEl = document.getElementById('myBookingsEmpty');
+
+    if (!bookings.length) {
+        listEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        return;
+    }
+
+    listEl.style.display = 'flex';
+    emptyEl.style.display = 'none';
+
+    listEl.innerHTML = bookings.slice().reverse().map(b => `
+        <div class="booking-item-card">
+            <div class="bi-icon"><i class="fa-solid ${b.vehicle.icon}"></i></div>
+            <div class="bi-body">
+                <strong>${b.vehicle.name}</strong>
+                <span>${b.id} · ${formatShortDate(b.pickup)}</span>
+            </div>
+            <div class="status-pending">Pending</div>
+        </div>
+    `).join('');
 }
 
-if (bookAnotherBtn) bookAnotherBtn.addEventListener('click', goBookAnotherCar);
-if (emptyStateBookBtn) emptyStateBookBtn.addEventListener('click', goBookAnotherCar);
+/* =====================================================
+   MOBILE MENU
+===================================================== */
+document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+    const nav = document.querySelector('.main-nav');
+    nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+    nav.style.cssText += 'position:absolute; top:76px; left:0; width:100%; background:#fff; flex-direction:column; padding:20px 6%; border-bottom:1px solid var(--line); gap:16px;';
+});
+
+/* =====================================================
+   INIT
+===================================================== */
+showView('home');
