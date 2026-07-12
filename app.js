@@ -1,12 +1,21 @@
 /* =====================================================
    DATA
 ===================================================== */
+/* Vehicle preview photos live in assets/vehicles/, named by code (TV, HC, MX, TF).
+   Drop your images in there using these exact filenames and they'll appear automatically.
+   Until a file exists, the layout falls back to the icon placeholder below. */
 const VEHICLES = [
-    { id:'vios', name:'Toyota Vios', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', price12:2500, priceDay:5000 },
-    { id:'city', name:'Honda City', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', price12:2700, priceDay:5400 },
-    { id:'xpander', name:'Mitsubishi Xpander', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', price12:3000, priceDay:6000 },
-    { id:'fortuner', name:'Toyota Fortuner', type:'SUV', transmission:'Automatic', fuel:'Diesel', seats:7, bags:4, doors:5, icon:'fa-car-side', price12:5000, priceDay:9000 }
+    { id:'vios', code:'TV', name:'Toyota Vios', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/TV.jpg', price12:2500, priceDay:5000 },
+    { id:'city', code:'HC', name:'Honda City', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/HC.jpg', price12:2700, priceDay:5400 },
+    { id:'xpander', code:'MX', name:'Mitsubishi Xpander', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000 },
+    { id:'fortuner', code:'TF', name:'Toyota Fortuner', type:'SUV', transmission:'Automatic', fuel:'Diesel', seats:7, bags:4, doors:5, icon:'fa-car-side', image:'assets/vehicles/TF.jpg', price12:5000, priceDay:9000 }
 ];
+
+// Returns an <img> tag that quietly falls back to the gradient + icon placeholder
+// (already present as a sibling in the same media container) if the asset is missing.
+function vehiclePhotoTag(v){
+    return `<img src="${v.image}" alt="${v.name}" class="vehicle-photo" onerror="this.style.display='none'">`;
+}
 
 const TIME_SLOTS = [
     { start:'7:00 AM', end:'7:00 PM' },
@@ -28,7 +37,8 @@ const state = {
     rangeStart: null,        // 'YYYY-MM-DD' (whole day)
     rangeEnd: null,
     vehicle: null,
-    sort: 'low'
+    sort: 'low',
+    editingBookingId: null   // set when editing an existing pending booking
 };
 
 let bookings = JSON.parse(localStorage.getItem('luna_bookings') || '[]');
@@ -59,7 +69,7 @@ function showView(name, opts = {}) {
 
     window.scrollTo({ top:0, behavior:'instant' });
 
-    if (name === 'chooseType') renderChooseType();
+    if (name === 'chooseType') { state.editingBookingId = null; renderChooseType(); }
     if (name === 'selectDateTime') renderDateTimeView();
     if (name === 'selectDates') renderDatesView();
     if (name === 'searchResults') renderSearchResults();
@@ -121,7 +131,7 @@ function renderPopularVehicles(){
     const grid = document.getElementById('popularVehicleGrid');
     grid.innerHTML = VEHICLES.map(v => `
         <div class="vehicle-card">
-            <div class="vehicle-card-media"><i class="fa-solid ${v.icon}"></i></div>
+            <div class="vehicle-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
             <div class="vehicle-card-body">
                 <h3>${v.name}</h3>
                 <p class="vc-type">${v.type} · ${v.transmission}</p>
@@ -175,6 +185,7 @@ function renderChooseType(){
     document.querySelectorAll('.rental-type-card').forEach(card => {
         card.classList.toggle('active', card.getAttribute('data-type') === state.rentalType);
     });
+    document.getElementById('confirmTypeBtn').disabled = !state.rentalType;
     updateInfoBox();
 }
 
@@ -196,10 +207,13 @@ document.querySelectorAll('.rental-type-card').forEach(card => {
         state.rentalType = type;
         document.querySelectorAll('.rental-type-card').forEach(c => c.classList.toggle('active', c === card));
         updateInfoBox();
-        setTimeout(() => {
-            showView(type === '12hour' ? 'selectDateTime' : 'selectDates');
-        }, 180);
+        document.getElementById('confirmTypeBtn').disabled = false;
     });
+});
+
+document.getElementById('confirmTypeBtn').addEventListener('click', () => {
+    if (!state.rentalType) return;
+    showView(state.rentalType === '12hour' ? 'selectDateTime' : 'selectDates');
 });
 
 /* =====================================================
@@ -306,7 +320,7 @@ document.getElementById('calNext12').addEventListener('click', () => {
     renderDateTimeView();
 });
 document.getElementById('continue12Btn').addEventListener('click', () => {
-    if (state.date && state.timeSlot) showView('searchResults');
+    if (state.date && state.timeSlot) showView(state.editingBookingId ? 'bookingSummary' : 'searchResults');
 });
 
 /* ---- Whole day rental range picker ---- */
@@ -366,7 +380,7 @@ document.getElementById('calNextDay').addEventListener('click', () => {
     renderDatesView();
 });
 document.getElementById('continueDayBtn').addEventListener('click', () => {
-    if (state.rangeStart && state.rangeEnd) showView('searchResults');
+    if (state.rangeStart && state.rangeEnd) showView(state.editingBookingId ? 'bookingSummary' : 'searchResults');
 });
 
 /* =====================================================
@@ -414,7 +428,7 @@ function renderResultList(){
     const listEl = document.getElementById('resultVehicleList');
     listEl.innerHTML = vehicles.map(v => `
         <div class="result-card">
-            <div class="result-card-media"><i class="fa-solid ${v.icon}"></i></div>
+            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
             <div class="result-card-body">
                 <h3>${v.name}</h3>
                 <p class="rc-type">${v.type} · ${v.transmission}</p>
@@ -451,7 +465,7 @@ function renderVehicleDetails(){
     const v = state.vehicle || VEHICLES[0];
     state.vehicle = v;
 
-    document.getElementById('vdPhotoMain').innerHTML = `<i class="fa-solid ${v.icon}"></i>`;
+    document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>`;
     document.getElementById('vdName').textContent = v.name;
     document.getElementById('vdType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
 
@@ -513,9 +527,37 @@ function renderBookingSummary(){
 
     document.getElementById('bsPrice').textContent = formatCurrency(price);
     document.getElementById('bsTotal').textContent = formatCurrency(price);
+
+    const continueBtn = document.getElementById('continueCheckoutBtn');
+    continueBtn.textContent = state.editingBookingId ? 'Save Changes' : 'Continue to Checkout';
 }
 
-document.getElementById('continueCheckoutBtn').addEventListener('click', () => showView('checkout'));
+document.getElementById('continueCheckoutBtn').addEventListener('click', () => {
+    if (state.editingBookingId) {
+        saveBookingEdits();
+    } else {
+        showView('checkout');
+    }
+});
+
+function saveBookingEdits(){
+    const booking = bookings.find(b => b.id === state.editingBookingId);
+    if (!booking) { showView('myBookings'); return; }
+
+    const isWholeDay = state.rentalType === 'wholeday';
+    booking.vehicle = { id: state.vehicle.id, code: state.vehicle.code, name: state.vehicle.name, type: state.vehicle.type, transmission: state.vehicle.transmission, icon: state.vehicle.icon };
+    booking.rentalType = state.rentalType;
+    booking.location = state.location;
+    booking.pickup = isWholeDay ? state.rangeStart : state.date;
+    booking.pickupTimeSlot = isWholeDay ? null : state.timeSlot;
+    booking.returnDate = isWholeDay ? state.rangeEnd : state.date;
+    booking.total = getVehiclePrice(state.vehicle);
+
+    localStorage.setItem('luna_bookings', JSON.stringify(bookings));
+    state.editingBookingId = null;
+    updateBookingsBadge();
+    showView('myBookings');
+}
 
 /* =====================================================
    CHECKOUT
@@ -534,7 +576,7 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
         id: generateBookingId(),
         submittedAt: new Date().toISOString(),
         status: 'pending',
-        vehicle: { id:v.id, name:v.name, type:v.type, transmission:v.transmission, icon:v.icon },
+        vehicle: { id:v.id, code:v.code, name:v.name, type:v.type, transmission:v.transmission, icon:v.icon },
         rentalType: state.rentalType,
         location: state.location,
         pickup: isWholeDay ? state.rangeStart : state.date,
@@ -551,6 +593,7 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
 
     bookings.push(booking);
     localStorage.setItem('luna_bookings', JSON.stringify(bookings));
+    updateBookingsBadge();
 
     renderConfirmation(booking);
     showView('confirmation');
@@ -575,29 +618,113 @@ document.getElementById('goToBookingsBtn').addEventListener('click', () => showV
 /* =====================================================
    MY BOOKINGS
 ===================================================== */
+// Status flow: pending -> confirmed -> completed, with cancelled as an
+// alternate end state. Only staff/admin (outside this customer-facing app)
+// move a booking from pending onward or cancel it once confirmed — the
+// customer can only view, edit, or cancel while it's still pending.
+const STATUS_META = {
+    pending:   { label:'Pending',   class:'status-pending' },
+    confirmed: { label:'Confirmed', class:'status-confirmed' },
+    completed: { label:'Completed', class:'status-completed' },
+    cancelled: { label:'Cancelled', class:'status-cancelled' }
+};
+
+let bookingsFilter = 'all';
+
+function updateBookingsBadge(){
+    const badge = document.getElementById('bookingsCountBadge');
+    badge.textContent = bookings.length;
+    badge.classList.toggle('is-empty', bookings.length === 0);
+}
+
+document.querySelectorAll('.booking-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        bookingsFilter = tab.getAttribute('data-filter');
+        document.querySelectorAll('.booking-tab').forEach(t => t.classList.toggle('active', t === tab));
+        renderMyBookings();
+    });
+});
+
 function renderMyBookings(){
+    document.querySelectorAll('.booking-tab').forEach(t => t.classList.toggle('active', t.getAttribute('data-filter') === bookingsFilter));
+
     const listEl = document.getElementById('myBookingsList');
     const emptyEl = document.getElementById('myBookingsEmpty');
 
-    if (!bookings.length) {
+    const filtered = bookingsFilter === 'all' ? bookings : bookings.filter(b => b.status === bookingsFilter);
+
+    if (!filtered.length) {
         listEl.style.display = 'none';
         emptyEl.style.display = 'block';
+        emptyEl.querySelector('h3').textContent = bookingsFilter === 'all' ? 'No bookings yet' : `No ${STATUS_META[bookingsFilter].label.toLowerCase()} bookings`;
+        emptyEl.querySelector('p').textContent = bookingsFilter === 'all' ? 'Reserve a car to see your booking request here.' : 'Bookings will show up here once they reach this status.';
         return;
     }
 
     listEl.style.display = 'flex';
     emptyEl.style.display = 'none';
 
-    listEl.innerHTML = bookings.slice().reverse().map(b => `
+    listEl.innerHTML = filtered.slice().reverse().map(b => {
+        const meta = STATUS_META[b.status] || STATUS_META.pending;
+        const isWholeDay = b.rentalType === 'wholeday';
+        const dateLabel = isWholeDay
+            ? `${formatShortDate(b.pickup)} - ${formatShortDate(b.returnDate)}`
+            : `${formatShortDate(b.pickup)}, ${b.pickupTimeSlot.start} - ${b.pickupTimeSlot.end}`;
+
+        // Only a pending booking can still be changed by the customer.
+        const actions = b.status === 'pending' ? `
+                <button type="button" class="bi-action-btn" data-edit="${b.id}">Edit</button>
+                <button type="button" class="bi-action-btn cancel-btn" data-cancel="${b.id}">Cancel Booking</button>
+            ` : '';
+
+        return `
         <div class="booking-item-card">
-            <div class="bi-icon"><i class="fa-solid ${b.vehicle.icon}"></i></div>
-            <div class="bi-body">
-                <strong>${b.vehicle.name}</strong>
-                <span>${b.id} · ${formatShortDate(b.pickup)}</span>
+            <div class="bi-top-row">
+                <div class="bi-icon"><i class="fa-solid ${b.vehicle.icon}"></i></div>
+                <div class="bi-body">
+                    <strong>${b.vehicle.name}</strong>
+                    <span>${b.id} · ${dateLabel}</span>
+                </div>
+                <div class="bi-status"><span class="status-badge ${meta.class}">${meta.label}</span></div>
             </div>
-            <div class="status-pending">Pending</div>
-        </div>
-    `).join('');
+            ${actions ? `<div class="bi-actions">${actions}</div>` : ''}
+        </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => editBooking(btn.getAttribute('data-edit')));
+    });
+    listEl.querySelectorAll('[data-cancel]').forEach(btn => {
+        btn.addEventListener('click', () => cancelBooking(btn.getAttribute('data-cancel')));
+    });
+}
+
+function editBooking(id){
+    const booking = bookings.find(b => b.id === id);
+    if (!booking || booking.status !== 'pending') return;
+
+    state.rentalType = booking.rentalType;
+    state.location = booking.location;
+    state.vehicle = VEHICLES.find(v => v.id === booking.vehicle.id) || state.vehicle;
+    if (booking.rentalType === 'wholeday') {
+        state.rangeStart = booking.pickup;
+        state.rangeEnd = booking.returnDate;
+    } else {
+        state.date = booking.pickup;
+        state.timeSlot = booking.pickupTimeSlot;
+    }
+    state.editingBookingId = booking.id;
+
+    showView(booking.rentalType === 'wholeday' ? 'selectDates' : 'selectDateTime');
+}
+
+function cancelBooking(id){
+    const booking = bookings.find(b => b.id === id);
+    if (!booking || booking.status !== 'pending') return;
+    if (!confirm(`Cancel booking ${booking.id} for ${booking.vehicle.name}? This can't be undone.`)) return;
+    booking.status = 'cancelled';
+    localStorage.setItem('luna_bookings', JSON.stringify(bookings));
+    renderMyBookings();
 }
 
 /* =====================================================
@@ -647,7 +774,7 @@ function renderAllVehicles(){
 
     listEl.innerHTML = vehicles.map(v => `
         <div class="result-card">
-            <div class="result-card-media"><i class="fa-solid ${v.icon}"></i></div>
+            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
             <div class="result-card-body">
                 <h3>${v.name}</h3>
                 <p class="rc-type">${v.type} · ${v.transmission}</p>
@@ -808,4 +935,5 @@ document.getElementById('mobileMenuToggle').addEventListener('click', () => {
 /* =====================================================
    INIT
 ===================================================== */
+updateBookingsBadge();
 showView('home');

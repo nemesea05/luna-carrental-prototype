@@ -26,12 +26,15 @@
         <nav class="main-nav">
             <a href="#" class="nav-link active" data-go="home">Home</a>
             <a href="#" class="nav-link" data-go="allVehicles">Vehicles</a>
-            <a href="#" class="nav-link" data-go="myBookings">Bookings</a>
             <a href="#" class="nav-link" data-go="about">About Us</a>
             <a href="#" class="nav-link" data-go="contact">Contact</a>
         </nav>
 
         <div class="header-actions">
+            <button type="button" class="bookings-cart-btn" data-go="myBookings" aria-label="My Bookings">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span class="cart-badge" id="bookingsCountBadge">0</span>
+            </button>
             <a href="#" class="login-link" id="headerLoginLink">Log In</a>
             <div class="user-chip" id="headerUserChip" style="display:none;">
                 <div class="user-chip-avatar" id="userChipAvatar">J</div>
@@ -181,6 +184,8 @@
                 <p id="infoBoxText">Each 12-hour rental includes a 3-hour preparation gap between bookings for cleaning, inspection, and refueling between rentals.</p>
             </div>
         </div>
+
+        <button type="button" class="btn btn-navy btn-block confirm-type-btn" id="confirmTypeBtn" disabled>Confirm</button>
     </div>
 </section>
 
@@ -433,6 +438,15 @@
     <div class="flow-container narrow">
         <h1>My Bookings</h1>
         <p class="flow-sub">Track the status of the booking requests you've submitted.</p>
+
+        <div class="booking-tabs" id="bookingTabs">
+            <button type="button" class="booking-tab active" data-filter="all">All</button>
+            <button type="button" class="booking-tab" data-filter="pending">Pending</button>
+            <button type="button" class="booking-tab" data-filter="confirmed">Confirmed</button>
+            <button type="button" class="booking-tab" data-filter="completed">Completed</button>
+            <button type="button" class="booking-tab" data-filter="cancelled">Cancelled</button>
+        </div>
+
         <div class="bookings-list" id="myBookingsList"></div>
         <div class="bookings-empty" id="myBookingsEmpty">
             <i class="fa-solid fa-clipboard-list"></i>
