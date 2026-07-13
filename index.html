@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luna Car Rental</title>
+<title>EveryRide PH | Car Rental Services</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -19,11 +19,14 @@
 <header id="mainHeader" class="main-header">
     <div class="header-inner">
         <div class="logo-block clickable-logo" data-go="home">
-            <span class="logo-word">LUNA</span>
-            <span class="logo-sub">CAR RENTAL</span>
+            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-text">
+                <span class="logo-word">every<span class="accent-ride">ride</span></span>
+                <span class="logo-sub">car rental services</span>
+            </span>
         </div>
 
-        <nav class="main-nav">
+        <nav class="main-nav" id="mainNav">
             <a href="#" class="nav-link active" data-go="home">Home</a>
             <a href="#" class="nav-link" data-go="allVehicles">Vehicles</a>
             <a href="#" class="nav-link" data-go="about">About Us</a>
@@ -41,7 +44,7 @@
                 <span id="userChipName">Juan</span>
                 <button type="button" class="user-chip-logout" id="userChipLogout" title="Log out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
             </div>
-            <button type="button" class="btn btn-navy" data-go="chooseType">Book Now</button>
+            <button type="button" class="btn btn-navy" data-go="chooseType">Book Your Ride</button>
         </div>
 
         <button type="button" class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Menu">
@@ -59,8 +62,11 @@
             <i class="fa-solid fa-arrow-left"></i>
         </button>
         <div class="logo-block clickable-logo" data-go="home">
-            <span class="logo-word">LUNA</span>
-            <span class="logo-sub">CAR RENTAL</span>
+            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-text">
+                <span class="logo-word">every<span class="accent-ride">ride</span></span>
+                <span class="logo-sub">car rental services</span>
+            </span>
         </div>
     </div>
 </header>
@@ -74,11 +80,11 @@
 
     <div class="hero">
         <div class="hero-copy">
-            <span class="eyebrow">RELIABLE, AFFORDABLE, CONVENIENT.</span>
-            <h1>Drive your journey.<br>We'll take care<br><span class="accent">of the rest.</span></h1>
-            <p>Quality cars, easy booking, and support when you need it.</p>
+            <span class="eyebrow">RELIABLE, HONEST, MEMORABLE.</span>
+            <h1>Every journey,<span class="hero-script">every story.</span><span class="accent">We're along for the ride.</span></h1>
+            <p>We don't just rent cars — we help you create unforgettable moments with the people you love. Family getaways, weekend trips, or a simple drive home: every trip deserves to be comfortable, honest, and memorable.</p>
             <div class="hero-btns">
-                <button type="button" class="btn btn-navy btn-lg" data-go="chooseType"><i class="fa-solid fa-car-side"></i> Book Your Car</button>
+                <button type="button" class="btn btn-navy btn-lg" data-go="chooseType"><i class="fa-solid fa-car-side"></i> Book Your Ride</button>
                 <button type="button" class="btn btn-outline btn-lg scroll-link" data-scroll="fleet">Browse Vehicles</button>
             </div>
         </div>
@@ -124,17 +130,47 @@
         <div class="vehicle-grid" id="popularVehicleGrid"></div>
     </section>
 
+    <!-- The EveryRide Experience -->
+    <section class="experience-strip">
+        <div class="experience-head">
+            <span class="eyebrow">EVERY CUSTOMER DESERVES</span>
+            <h2>The EveryRide Experience</h2>
+        </div>
+        <div class="experience-grid">
+            <div class="experience-card">
+                <div class="experience-icon"><i class="fa-solid fa-cookie-bite"></i></div>
+                <h4>Free Snack Bar</h4>
+                <p>Enjoy complimentary snacks and drinks on every ride.</p>
+            </div>
+            <div class="experience-card">
+                <div class="experience-icon"><i class="fa-solid fa-wifi"></i></div>
+                <h4>WiFi Access</h4>
+                <p>Stay connected with free WiFi on board.</p>
+            </div>
+            <div class="experience-card">
+                <div class="experience-icon"><i class="fa-solid fa-gift"></i></div>
+                <h4>Special Celebrations</h4>
+                <p>We make every occasion extra special with you.</p>
+            </div>
+            <div class="experience-card">
+                <div class="experience-icon"><i class="fa-solid fa-kit-medical"></i></div>
+                <h4>Emergency Kit</h4>
+                <p>Your safety on the road is always our top priority.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Feature strip -->
     <section class="feature-strip">
         <div class="feature-item">
             <div class="feature-icon"><i class="fa-solid fa-clipboard-check"></i></div>
             <h4>Easy Booking</h4>
-            <p>Book your car in just a few clicks.</p>
+            <p>Book your ride in just a few clicks.</p>
         </div>
         <div class="feature-item">
             <div class="feature-icon"><i class="fa-solid fa-tags"></i></div>
-            <h4>Affordable Rates</h4>
-            <p>Quality service at the best prices.</p>
+            <h4>Honest Pricing</h4>
+            <p>Clear rates, no surprises, every time.</p>
         </div>
         <div class="feature-item">
             <div class="feature-icon"><i class="fa-solid fa-headset"></i></div>
@@ -144,7 +180,7 @@
         <div class="feature-item">
             <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
             <h4>Safe & Reliable</h4>
-            <p>Well-maintained cars for your safety.</p>
+            <p>Well-maintained cars for every trip.</p>
         </div>
     </section>
 
@@ -156,7 +192,17 @@
 <section id="view-chooseType" class="view flow-view" style="display:none;">
     <div class="flow-container narrow">
         <h1>Choose Rental Type</h1>
-        <p class="flow-sub">Select the type of rental that suits your needs.</p>
+        <p class="flow-sub">Select the type of rental that suits your journey.</p>
+
+        <div class="location-field">
+            <label><i class="fa-solid fa-location-dot"></i> Pick-up Location</label>
+            <select id="ctLocation">
+                <option>Quezon City, Metro Manila</option>
+                <option>Makati City, Metro Manila</option>
+                <option>Pasig City, Metro Manila</option>
+                <option>Taguig City, Metro Manila</option>
+            </select>
+        </div>
 
         <div class="rental-type-cards">
             <button type="button" class="rental-type-card" data-type="12hour">
@@ -165,7 +211,7 @@
                     <h3>12-Hour Rental</h3>
                     <p>Includes 3-hour preparation gap between rentals.</p>
                 </div>
-                <div class="rtc-price">₱2,500</div>
+                <div class="rtc-price">₱2,500+</div>
             </button>
             <button type="button" class="rental-type-card" data-type="wholeday">
                 <div class="rtc-icon"><i class="fa-regular fa-calendar-days"></i></div>
@@ -173,7 +219,7 @@
                     <h3>Whole Day Rental</h3>
                     <p>Rent for 24 hours from pickup to return.</p>
                 </div>
-                <div class="rtc-price">₱5,000</div>
+                <div class="rtc-price">₱5,000+</div>
             </button>
         </div>
 
@@ -209,7 +255,7 @@
         <div class="slots-block">
             <div class="slots-label">Available Time Slots for <span id="slotsDateLabel">--</span></div>
             <div class="time-slot-list" id="timeSlotList"></div>
-            <p class="slots-note"><i class="fa-solid fa-circle-info"></i> Each rental includes a 3-hour preparation gap between bookings.</p>
+            <p class="slots-note"><i class="fa-solid fa-circle-info"></i> Each rental includes a 3-hour preparation gap between bookings. Exact pricing is shown after you choose your vehicle.</p>
         </div>
 
         <button type="button" class="btn btn-navy btn-block" id="continue12Btn" disabled>Continue</button>
@@ -247,6 +293,7 @@
             <span>Rental Duration</span>
             <strong id="rangeDurationLabel">--</strong>
         </div>
+        <p class="range-hint"><i class="fa-solid fa-circle-info"></i> Whole Day Rental requires a minimum of 1 night — pick a return date after your pickup date.</p>
 
         <button type="button" class="btn btn-navy btn-block" id="continueDayBtn" disabled>Search Availability</button>
     </div>
@@ -424,7 +471,7 @@
                 <div class="cd-line"><span>Return</span><strong id="cfReturn">--</strong></div>
             </div>
 
-            <p class="confirm-note"><i class="fa-solid fa-circle-info"></i> We will contact you shortly to confirm your booking. Thank you!</p>
+            <p class="confirm-note"><i class="fa-solid fa-circle-info"></i> We will contact you shortly to confirm your booking. Thank you for riding with us!</p>
 
             <button type="button" class="btn btn-navy btn-block" id="goToBookingsBtn">Go to My Bookings</button>
         </div>
@@ -432,7 +479,7 @@
 </section>
 
 <!-- =========================================================
-     VIEW: MY BOOKINGS (placeholder for next phase)
+     VIEW: MY BOOKINGS
 ========================================================== -->
 <section id="view-myBookings" class="view flow-view" style="display:none;">
     <div class="flow-container narrow">
@@ -464,7 +511,7 @@
 <section id="view-allVehicles" class="view flow-view" style="display:none;">
     <div class="flow-container wide">
         <h1>All Vehicles</h1>
-        <p class="flow-sub">Browse our full fleet and filter to find the right car for your trip.</p>
+        <p class="flow-sub">Browse our full fleet and filter to find the right ride for your trip.</p>
 
         <div class="results-layout">
             <aside class="filters-sidebar">
@@ -536,13 +583,13 @@
 ========================================================== -->
 <section id="view-about" class="view flow-view no-pad" style="display:none;">
     <div class="page-banner">
-        <h1>About Luna Car Rental</h1>
-        <p>Your trusted travel partner.</p>
+        <h1>Every journey, every story.</h1>
+        <p>Your travel companion in the Philippines.</p>
     </div>
     <div class="flow-container wide">
         <div class="about-mission">
             <h2>Our Mission</h2>
-            <p class="about-lead">We aim to provide reliable, affordable, and convenient car rental services to make every journey safe and memorable.</p>
+            <p class="about-lead">To provide safe, reliable, and hassle-free car rental services that help people create more meaningful journeys and memories.</p>
             <div class="mission-grid">
                 <div class="mission-item">
                     <div class="mission-icon"><i class="fa-solid fa-handshake"></i></div>
@@ -550,28 +597,57 @@
                     <p>Well-maintained cars you can count on for every trip.</p>
                 </div>
                 <div class="mission-item">
-                    <div class="mission-icon"><i class="fa-solid fa-user-check"></i></div>
-                    <h4>Customer First</h4>
+                    <div class="mission-icon"><i class="fa-solid fa-heart"></i></div>
+                    <h4>Service with Heart</h4>
                     <p>Your comfort and safety always come first with us.</p>
                 </div>
                 <div class="mission-item">
                     <div class="mission-icon"><i class="fa-solid fa-tag"></i></div>
-                    <h4>Affordable Price</h4>
+                    <h4>Honest Pricing</h4>
                     <p>Quality service at rates that respect your budget.</p>
                 </div>
+            </div>
+
+            <div class="values-strip">
+                <span class="value-pill"><i class="fa-solid fa-shield-halved"></i> Safety First</span>
+                <span class="value-pill"><i class="fa-solid fa-heart"></i> Service with Heart</span>
+                <span class="value-pill"><i class="fa-solid fa-circle-check"></i> Reliability</span>
+                <span class="value-pill"><i class="fa-solid fa-hands-holding"></i> Respect</span>
+                <span class="value-pill"><i class="fa-solid fa-camera-retro"></i> Creating Memories</span>
             </div>
         </div>
 
         <div class="about-story">
             <div class="about-story-text">
                 <h2>Who We Are</h2>
-                <p>Luna Car Rental has been helping travelers and locals across Metro Manila get where they need to go since day one. Whether you need a car for a few hours or a few days, our fleet and flexible 12-hour and whole-day rental options are built around how people actually travel.</p>
-                <p>We believe renting a car should be simple: clear pricing, easy booking, and a team that's actually reachable when you need help.</p>
+                <p>Built from our family's love for exploring new places together, EveryRide was born to make travel more accessible. We believe everyone deserves the freedom to travel, connect, and create unforgettable memories, even without owning a car.</p>
+                <p>Whether you need a car for a few hours or a full day out of town, our fleet and flexible 12-hour and whole-day rental options are built around how Filipino families, barkadas, and couples actually travel — with clear pricing, easy booking, and a team that's actually reachable when you need help.</p>
             </div>
             <div class="about-story-stats">
                 <div class="stat-box"><strong>10k+</strong><span>Happy Customers</span></div>
                 <div class="stat-box"><strong>24/7</strong><span>Customer Support</span></div>
                 <div class="stat-box"><strong>15+</strong><span>Vehicles in Fleet</span></div>
+            </div>
+        </div>
+
+        <div class="audience-section">
+            <h2>Who We Serve</h2>
+            <div class="audience-grid">
+                <div class="audience-card">
+                    <div class="audience-icon"><i class="fa-solid fa-people-roof"></i></div>
+                    <h4>Filipino Families</h4>
+                    <p>Families who value quality time, comfort, and safety on every trip.</p>
+                </div>
+                <div class="audience-card">
+                    <div class="audience-icon"><i class="fa-solid fa-user-group"></i></div>
+                    <h4>Barkadas</h4>
+                    <p>Groups of friends who love road trips, adventures, and spontaneous getaways.</p>
+                </div>
+                <div class="audience-card">
+                    <div class="audience-icon"><i class="fa-solid fa-heart-circle-check"></i></div>
+                    <h4>Couples</h4>
+                    <p>Couples looking for romantic getaways and memorable moments together.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -606,7 +682,14 @@
                     <div class="ci-icon"><i class="fa-solid fa-envelope"></i></div>
                     <div>
                         <h4>Email Us</h4>
-                        <p>info@lunarental.com</p>
+                        <p>hello@everyrideph.com</p>
+                    </div>
+                </div>
+                <div class="contact-info-item">
+                    <div class="ci-icon"><i class="fa-brands fa-instagram"></i></div>
+                    <div>
+                        <h4>Follow Us</h4>
+                        <p>@everyrideph</p>
                     </div>
                 </div>
             </div>
@@ -643,10 +726,13 @@
     <div class="footer-inner">
         <div class="footer-brand">
             <div class="logo-block">
-                <span class="logo-word light">LUNA</span>
-                <span class="logo-sub light">CAR RENTAL</span>
+                <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+                <span class="logo-text">
+                    <span class="logo-word light">every<span class="accent-ride">ride</span></span>
+                    <span class="logo-sub light">car rental services</span>
+                </span>
             </div>
-            <p>Drive your journey with confidence. We'll take care of the rest.</p>
+            <p>Every journey, every story. We help you create unforgettable moments with the people you love.</p>
         </div>
         <div class="footer-col">
             <h4>Quick Links</h4>
@@ -660,10 +746,10 @@
             <h4>Contact Us</h4>
             <p><i class="fa-solid fa-location-dot"></i> Quezon City, Metro Manila</p>
             <p><i class="fa-solid fa-phone"></i> +63 912 345 6789</p>
-            <p><i class="fa-solid fa-envelope"></i> info@lunarental.com</p>
+            <p><i class="fa-solid fa-envelope"></i> hello@everyrideph.com</p>
         </div>
     </div>
-    <div class="footer-bottom">© 2026 Luna Car Rental. All rights reserved.</div>
+    <div class="footer-bottom">© 2026 EveryRide PH. All rights reserved.</div>
 </footer>
 
 <!-- =========================================================
@@ -674,8 +760,11 @@
         <button type="button" class="modal-close" id="loginModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
 
         <div class="logo-block modal-logo">
-            <span class="logo-word">LUNA</span>
-            <span class="logo-sub">CAR RENTAL</span>
+            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-text">
+                <span class="logo-word">every<span class="accent-ride">ride</span></span>
+                <span class="logo-sub">car rental services</span>
+            </span>
         </div>
         <h2>Welcome back</h2>
         <p class="modal-sub">Log in to manage your bookings.</p>
@@ -717,11 +806,14 @@
         <button type="button" class="modal-close" id="signupModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
 
         <div class="logo-block modal-logo">
-            <span class="logo-word">LUNA</span>
-            <span class="logo-sub">CAR RENTAL</span>
+            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-text">
+                <span class="logo-word">every<span class="accent-ride">ride</span></span>
+                <span class="logo-sub">car rental services</span>
+            </span>
         </div>
         <h2>Create your account</h2>
-        <p class="modal-sub">Sign up to start booking with Luna.</p>
+        <p class="modal-sub">Sign up to start booking with EveryRide.</p>
 
         <div class="social-auth-list">
             <button type="button" class="social-auth-btn" id="googleSignupBtn">

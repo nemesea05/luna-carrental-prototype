@@ -41,16 +41,21 @@ const state = {
     editingBookingId: null   // set when editing an existing pending booking
 };
 
-let bookings = JSON.parse(localStorage.getItem('luna_bookings') || '[]');
+let bookings = JSON.parse(localStorage.getItem('everyride_bookings') || '[]');
 
 /* =====================================================
    VIEW ROUTING
 ===================================================== */
 const VIEW_IDS = ['home','chooseType','selectDateTime','selectDates','searchResults','vehicleDetails','bookingSummary','checkout','confirmation','myBookings','allVehicles','about','contact'];
-const historyStack = [];
+
+// Real back-stack: forward navigation pushes, goBack pops and re-renders
+// the previous entry without pushing it again (no double-pop tricks).
+let historyStack = ['home'];
 
 function showView(name, opts = {}) {
-    if (!opts.fromBack) historyStack.push(name);
+    if (!opts.fromBack && historyStack[historyStack.length - 1] !== name) {
+        historyStack.push(name);
+    }
 
     VIEW_IDS.forEach(id => {
         const el = document.getElementById(`view-${id}`);
@@ -67,6 +72,7 @@ function showView(name, opts = {}) {
         link.classList.toggle('active', link.getAttribute('data-go') === name);
     });
 
+    closeMobileNav();
     window.scrollTo({ top:0, behavior:'instant' });
 
     if (name === 'chooseType') { state.editingBookingId = null; renderChooseType(); }
@@ -80,9 +86,9 @@ function showView(name, opts = {}) {
 }
 
 function goBack() {
-    historyStack.pop(); // remove current
-    const prev = historyStack.pop() || 'home';
-    showView(prev);
+    if (historyStack.length > 1) historyStack.pop();
+    const prev = historyStack[historyStack.length - 1] || 'home';
+    showView(prev, { fromBack: true });
 }
 
 document.getElementById('flowBackBtn').addEventListener('click', goBack);
@@ -91,8 +97,6 @@ document.querySelectorAll('[data-go]').forEach(el => {
     el.addEventListener('click', (e) => {
         e.preventDefault();
         showView(el.getAttribute('data-go'));
-        const nav = document.querySelector('.main-nav');
-        if (nav) nav.style.display = '';
     });
 });
 
@@ -115,13 +119,14 @@ function formatCurrency(n){ return `₱${n.toLocaleString('en-PH')}`; }
 function pad(n){ return String(n).padStart(2,'0'); }
 function toDateStr(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function parseDateStr(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function addDays(dateStr, n){ const d = parseDateStr(dateStr); d.setDate(d.getDate() + n); return toDateStr(d); }
 function formatShortDate(s){
     if(!s) return '--';
     return parseDateStr(s).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
 }
 function generateBookingId(){
     const digits = () => Math.floor(100000 + Math.random()*900000);
-    return `LUNA-${digits()}`;
+    return `ER-${digits()}`;
 }
 
 /* =====================================================
@@ -181,13 +186,20 @@ document.getElementById('quickSearchForm').addEventListener('submit', (e) => {
 /* =====================================================
    CHOOSE RENTAL TYPE
 ===================================================== */
+const ctLocationSelect = document.getElementById('ctLocation');
+
 function renderChooseType(){
     document.querySelectorAll('.rental-type-card').forEach(card => {
         card.classList.toggle('active', card.getAttribute('data-type') === state.rentalType);
     });
     document.getElementById('confirmTypeBtn').disabled = !state.rentalType;
+    ctLocationSelect.value = state.location;
     updateInfoBox();
 }
+
+ctLocationSelect.addEventListener('change', () => {
+    state.location = ctLocationSelect.value;
+});
 
 function updateInfoBox(){
     const title = document.getElementById('infoBoxTitle');
@@ -293,13 +305,18 @@ function renderDateTimeView(){
 
     document.getElementById('slotsDateLabel').textContent = formatShortDate(state.date);
 
+    // Vehicle isn't chosen yet at this step, so slots show duration only —
+    // showing a single flat price here would misrepresent the real price,
+    // which depends on which vehicle is picked later in the flow.
     const list = document.getElementById('timeSlotList');
-    list.innerHTML = TIME_SLOTS.map((slot, i) => `
-        <button type="button" class="time-slot ${state.timeSlot && state.timeSlot.start === slot.start ? 'selected' : ''}" data-idx="${i}">
+    list.innerHTML = TIME_SLOTS.map((slot, i) => {
+        const selected = state.timeSlot && state.timeSlot.start === slot.start;
+        return `
+        <button type="button" class="time-slot ${selected ? 'selected' : ''}" data-idx="${i}">
             <span>${slot.start} - ${slot.end}</span>
-            <span>${formatCurrency(2500)}</span>
-        </button>
-    `).join('');
+            <span>${selected ? '<i class="fa-solid fa-circle-check"></i> Selected' : '12 hrs'}</span>
+        </button>`;
+    }).join('');
 
     list.querySelectorAll('.time-slot').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -343,10 +360,11 @@ function renderDatesView(){
             return '';
         },
         onSelect: (dateStr) => {
-            if (!state.rangeStart || (state.rangeStart && state.rangeEnd)) {
-                state.rangeStart = dateStr;
-                state.rangeEnd = null;
-            } else if (dateStr < state.rangeStart) {
+            // Whole Day Rental requires at least 1 full night, so a return
+            // date must land strictly after the pickup date — selecting the
+            // same day (or an earlier day) always restarts the range instead
+            // of silently creating a free, 0-day booking.
+            if (!state.rangeStart || state.rangeEnd || dateStr <= state.rangeStart) {
                 state.rangeStart = dateStr;
                 state.rangeEnd = null;
             } else {
@@ -553,7 +571,7 @@ function saveBookingEdits(){
     booking.returnDate = isWholeDay ? state.rangeEnd : state.date;
     booking.total = getVehiclePrice(state.vehicle);
 
-    localStorage.setItem('luna_bookings', JSON.stringify(bookings));
+    localStorage.setItem('everyride_bookings', JSON.stringify(bookings));
     state.editingBookingId = null;
     updateBookingsBadge();
     showView('myBookings');
@@ -592,7 +610,7 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
     };
 
     bookings.push(booking);
-    localStorage.setItem('luna_bookings', JSON.stringify(bookings));
+    localStorage.setItem('everyride_bookings', JSON.stringify(bookings));
     updateBookingsBadge();
 
     renderConfirmation(booking);
@@ -723,7 +741,7 @@ function cancelBooking(id){
     if (!booking || booking.status !== 'pending') return;
     if (!confirm(`Cancel booking ${booking.id} for ${booking.vehicle.name}? This can't be undone.`)) return;
     booking.status = 'cancelled';
-    localStorage.setItem('luna_bookings', JSON.stringify(bookings));
+    localStorage.setItem('everyride_bookings', JSON.stringify(bookings));
     renderMyBookings();
 }
 
@@ -829,7 +847,7 @@ document.getElementById('contactForm').addEventListener('submit', (e) => {
 /* =====================================================
    AUTH — LOGIN / SIGNUP MODALS
 ===================================================== */
-let currentUser = JSON.parse(localStorage.getItem('luna_user') || 'null');
+let currentUser = JSON.parse(localStorage.getItem('everyride_user') || 'null');
 
 function openModal(id){ document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 function closeModal(id){ document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; }
@@ -861,7 +879,7 @@ document.getElementById('switchToLogin').addEventListener('click', (e) => {
 
 function setLoggedInUser(user){
     currentUser = user;
-    localStorage.setItem('luna_user', JSON.stringify(user));
+    localStorage.setItem('everyride_user', JSON.stringify(user));
     updateHeaderAuthUI();
     closeModal('loginModalOverlay');
     closeModal('signupModalOverlay');
@@ -883,7 +901,7 @@ function updateHeaderAuthUI(){
 
 document.getElementById('userChipLogout').addEventListener('click', () => {
     currentUser = null;
-    localStorage.removeItem('luna_user');
+    localStorage.removeItem('everyride_user');
     updateHeaderAuthUI();
 });
 
@@ -926,10 +944,22 @@ updateHeaderAuthUI();
 /* =====================================================
    MOBILE MENU
 ===================================================== */
-document.getElementById('mobileMenuToggle').addEventListener('click', () => {
-    const nav = document.querySelector('.main-nav');
-    nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-    nav.style.cssText += 'position:absolute; top:76px; left:0; width:100%; background:#fff; flex-direction:column; padding:20px 6%; border-bottom:1px solid var(--line); gap:16px;';
+const mainNavEl = document.querySelector('.main-nav');
+
+function closeMobileNav(){
+    mainNavEl.classList.remove('open');
+}
+
+document.getElementById('mobileMenuToggle').addEventListener('click', (e) => {
+    e.stopPropagation();
+    mainNavEl.classList.toggle('open');
+});
+
+// Close the mobile nav when tapping outside of it.
+document.addEventListener('click', (e) => {
+    if (!mainNavEl.classList.contains('open')) return;
+    if (mainNavEl.contains(e.target) || e.target.closest('#mobileMenuToggle')) return;
+    closeMobileNav();
 });
 
 /* =====================================================
