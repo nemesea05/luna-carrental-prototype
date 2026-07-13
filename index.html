@@ -18,19 +18,27 @@
 ========================================================== -->
 <header id="mainHeader" class="main-header">
     <div class="header-inner">
+        <!-- Logo: drop a file at assets/logo/logo.png (recommended 160x40px, transparent PNG/SVG,
+             2x = 320x80px for retina) and it replaces the icon badge automatically. -->
         <div class="logo-block clickable-logo" data-go="home">
-            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-badge">
+                <img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'">
+                <i class="fa-solid fa-car-side"></i>
+            </span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
                 <span class="logo-sub">car rental services</span>
             </span>
         </div>
 
+        <!-- Combined header + navigation: nav now lives inside the header as one unified bar
+             with a pill-style active indicator, instead of a separate row of links. -->
         <nav class="main-nav" id="mainNav">
-            <a href="#" class="nav-link active" data-go="home">Home</a>
-            <a href="#" class="nav-link" data-go="allVehicles">Vehicles</a>
-            <a href="#" class="nav-link" data-go="about">About Us</a>
-            <a href="#" class="nav-link" data-go="contact">Contact</a>
+            <a href="#" class="nav-link active" data-go="home"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="#" class="nav-link" data-go="allVehicles"><i class="fa-solid fa-car"></i> Vehicles</a>
+            <a href="#" class="nav-link" data-go="about"><i class="fa-solid fa-circle-info"></i> About Us</a>
+            <a href="#" class="nav-link" data-go="contact"><i class="fa-solid fa-envelope"></i> Contact</a>
+            <a href="#" class="nav-link nav-link-mobile-only" data-go="myBookings"><i class="fa-solid fa-bag-shopping"></i> My Bookings</a>
         </nav>
 
         <div class="header-actions">
@@ -62,7 +70,7 @@
             <i class="fa-solid fa-arrow-left"></i>
         </button>
         <div class="logo-block clickable-logo" data-go="home">
-            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
                 <span class="logo-sub">car rental services</span>
@@ -78,19 +86,34 @@
 ========================================================== -->
 <section id="view-home" class="view">
 
-    <div class="hero">
+    <!-- =====================================================
+         HERO CAROUSEL
+         Drop slide images at assets/hero/slide-1.jpg, slide-2.jpg, slide-3.jpg
+         Recommended size: 1920 x 800px, landscape JPG/WebP, under ~350KB each.
+         Keep the important subject centered/right — the left third sits under
+         the text overlay and a dark gradient on mobile/desktop.
+    ========================================================== -->
+    <div class="hero-carousel" id="heroCarousel">
+        <div class="hero-slides" id="heroSlides">
+            <div class="hero-slide active" style="background-image:url('assets/hero/slide-1.jpg')" data-fallback="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1920&auto=format&fit=crop"></div>
+            <div class="hero-slide" style="background-image:url('assets/hero/slide-2.jpg')" data-fallback="https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=1920&auto=format&fit=crop"></div>
+            <div class="hero-slide" style="background-image:url('assets/hero/slide-3.jpg')" data-fallback="https://images.unsplash.com/photo-1523983388277-336a66bf9bcd?q=80&w=1920&auto=format&fit=crop"></div>
+        </div>
+        <div class="hero-scrim"></div>
+
         <div class="hero-copy">
             <span class="eyebrow">RELIABLE, HONEST, MEMORABLE.</span>
             <h1>Every journey,<span class="hero-script">every story.</span><span class="accent">We're along for the ride.</span></h1>
             <p>We don't just rent cars — we help you create unforgettable moments with the people you love. Family getaways, weekend trips, or a simple drive home: every trip deserves to be comfortable, honest, and memorable.</p>
             <div class="hero-btns">
                 <button type="button" class="btn btn-navy btn-lg" data-go="chooseType"><i class="fa-solid fa-car-side"></i> Book Your Ride</button>
-                <button type="button" class="btn btn-outline btn-lg scroll-link" data-scroll="fleet">Browse Vehicles</button>
+                <button type="button" class="btn btn-outline-light btn-lg scroll-link" data-scroll="fleet">Browse Vehicles</button>
             </div>
         </div>
-        <div class="hero-media">
-            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1200&auto=format&fit=crop" alt="White SUV on a coastal road with a city skyline behind it">
-        </div>
+
+        <button type="button" class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
+        <button type="button" class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="hero-dots" id="heroDots"></div>
     </div>
 
     <!-- Floating quick-search card -->
@@ -365,6 +388,7 @@
                     <p id="vdPriceSub">7:00 AM - 7:00 PM</p>
                     <p class="vd-price-note">Includes Driver, Fuel, and Insurance</p>
                     <button type="button" class="btn btn-navy btn-block" id="selectVehicleBtn">Select This Vehicle</button>
+                    <p class="vd-unavailable-note" id="vdUnavailableNote" style="display:none;"></p>
                 </div>
             </aside>
 
@@ -518,6 +542,13 @@
                 <div class="filters-head">
                     <h3>Filters</h3>
                     <button type="button" id="clearFiltersBtn">Clear all</button>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Availability</h4>
+                    <label class="filter-check"><input type="checkbox" class="f-status" value="Available"><span>Available</span></label>
+                    <label class="filter-check"><input type="checkbox" class="f-status" value="Unavailable"><span>Unavailable</span></label>
+                    <label class="filter-check"><input type="checkbox" class="f-status" value="Booked"><span>Booked</span></label>
                 </div>
 
                 <div class="filter-group">
@@ -726,7 +757,7 @@
     <div class="footer-inner">
         <div class="footer-brand">
             <div class="logo-block">
-                <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+                <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
                 <span class="logo-text">
                     <span class="logo-word light">every<span class="accent-ride">ride</span></span>
                     <span class="logo-sub light">car rental services</span>
@@ -760,7 +791,7 @@
         <button type="button" class="modal-close" id="loginModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
 
         <div class="logo-block modal-logo">
-            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
                 <span class="logo-sub">car rental services</span>
@@ -806,7 +837,7 @@
         <button type="button" class="modal-close" id="signupModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
 
         <div class="logo-block modal-logo">
-            <span class="logo-badge"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
                 <span class="logo-sub">car rental services</span>

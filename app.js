@@ -4,11 +4,17 @@
 /* Vehicle preview photos live in assets/vehicles/, named by code (TV, HC, MX, TF).
    Drop your images in there using these exact filenames and they'll appear automatically.
    Until a file exists, the layout falls back to the icon placeholder below. */
+/* status: 'Available' | 'Unavailable' | 'Booked' — drives the status badge shown
+   on every vehicle card and whether the vehicle can be selected for booking. */
 const VEHICLES = [
-    { id:'vios', code:'TV', name:'Toyota Vios', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/TV.jpg', price12:2500, priceDay:5000 },
-    { id:'city', code:'HC', name:'Honda City', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/HC.jpg', price12:2700, priceDay:5400 },
-    { id:'xpander', code:'MX', name:'Mitsubishi Xpander', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000 },
-    { id:'fortuner', code:'TF', name:'Toyota Fortuner', type:'SUV', transmission:'Automatic', fuel:'Diesel', seats:7, bags:4, doors:5, icon:'fa-car-side', image:'assets/vehicles/TF.jpg', price12:5000, priceDay:9000 }
+    { id:'vios', code:'TV', name:'Toyota Vios', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/TV.jpg', price12:2500, priceDay:5000, status:'Unavailable',
+      features:['Bluetooth Audio','Backup Camera','USB Charging Ports','Keyless Entry'] },
+    { id:'city', code:'HC', name:'Honda City', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/HC.jpg', price12:2700, priceDay:5400, status:'Unavailable',
+      features:['Bluetooth Audio','Backup Camera','Cruise Control','USB Charging Ports'] },
+    { id:'xpander', code:'MX', name:'Mitsubishi Xpander', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000, status:'Available',
+      features:['Bluetooth Audio','Backup Camera','Third-Row Seating','USB Charging Ports','Keyless Entry'] },
+    { id:'fortuner', code:'TF', name:'Toyota Fortuner', type:'SUV', transmission:'Automatic', fuel:'Diesel', seats:7, bags:4, doors:5, icon:'fa-car-side', image:'assets/vehicles/TF.jpg', price12:5000, priceDay:9000, status:'Unavailable',
+      features:['Bluetooth Audio','360° Camera','Leather Seats','USB Charging Ports','Keyless Entry','Roof Rails'] }
 ];
 
 // Returns an <img> tag that quietly falls back to the gradient + icon placeholder
@@ -16,6 +22,21 @@ const VEHICLES = [
 function vehiclePhotoTag(v){
     return `<img src="${v.image}" alt="${v.name}" class="vehicle-photo" onerror="this.style.display='none'">`;
 }
+
+const VEHICLE_STATUS_META = {
+    Available:   { label:'Available',   className:'status-available' },
+    Unavailable: { label:'Unavailable', className:'status-unavailable' },
+    Booked:      { label:'Booked',      className:'status-booked' }
+};
+
+// Small badge shown on every vehicle card / photo — tells a user at a glance
+// whether a car can be booked right now.
+function statusBadge(v){
+    const meta = VEHICLE_STATUS_META[v.status] || VEHICLE_STATUS_META.Unavailable;
+    return `<span class="vehicle-status-badge ${meta.className}"><i class="fa-solid fa-circle"></i> ${meta.label}</span>`;
+}
+
+function isBookable(v){ return v.status === 'Available'; }
 
 const TIME_SLOTS = [
     { start:'7:00 AM', end:'7:00 PM' },
@@ -130,20 +151,87 @@ function generateBookingId(){
 }
 
 /* =====================================================
+   HOME — HERO CAROUSEL
+   Slides read their image from inline background-image (assets/hero/slide-N.jpg).
+   If that file isn't there yet, this swaps in the data-fallback URL so the
+   layout still looks right while real photos are being added.
+===================================================== */
+(function initHeroCarousel(){
+    const track = document.getElementById('heroSlides');
+    if (!track) return;
+    const slides = Array.from(track.querySelectorAll('.hero-slide'));
+    const dotsWrap = document.getElementById('heroDots');
+    const prevBtn = document.getElementById('heroPrev');
+    const nextBtn = document.getElementById('heroNext');
+    let current = 0;
+    let timer = null;
+
+    // Verify each slide's real asset loads; if not, use the fallback stock photo.
+    slides.forEach(slide => {
+        const url = slide.style.backgroundImage.slice(5, -2); // unwrap url("...")
+        const fallback = slide.getAttribute('data-fallback');
+        const img = new Image();
+        img.onerror = () => { if (fallback) slide.style.backgroundImage = `url('${fallback}')`; };
+        img.src = url;
+    });
+
+    dotsWrap.innerHTML = slides.map((_, i) => `<button type="button" class="hero-dot ${i === 0 ? 'active' : ''}" data-slide="${i}" aria-label="Go to slide ${i+1}"></button>`).join('');
+    const dots = Array.from(dotsWrap.querySelectorAll('.hero-dot'));
+
+    function goTo(index){
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (index + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
+    }
+
+    function restartAutoplay(){
+        clearInterval(timer);
+        timer = setInterval(() => goTo(current + 1), 5500);
+    }
+
+    prevBtn.addEventListener('click', () => { goTo(current - 1); restartAutoplay(); });
+    nextBtn.addEventListener('click', () => { goTo(current + 1); restartAutoplay(); });
+    dots.forEach(dot => dot.addEventListener('click', () => { goTo(Number(dot.getAttribute('data-slide'))); restartAutoplay(); }));
+
+    const carouselEl = document.getElementById('heroCarousel');
+    carouselEl.addEventListener('mouseenter', () => clearInterval(timer));
+    carouselEl.addEventListener('mouseleave', restartAutoplay);
+
+    restartAutoplay();
+})();
+
+/* =====================================================
    POPULAR VEHICLES (HOME)
 ===================================================== */
 function renderPopularVehicles(){
     const grid = document.getElementById('popularVehicleGrid');
     grid.innerHTML = VEHICLES.map(v => `
-        <div class="vehicle-card">
-            <div class="vehicle-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
+        <div class="vehicle-card ${isBookable(v) ? '' : 'is-dimmed'}">
+            <div class="vehicle-card-media">
+                ${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>
+                ${statusBadge(v)}
+            </div>
             <div class="vehicle-card-body">
                 <h3>${v.name}</h3>
-                <p class="vc-type">${v.type} · ${v.transmission}</p>
-                <div class="vc-bottom-row">
-                    <div class="vc-price">${formatCurrency(v.price12)} <small>/12 hrs</small></div>
-                    <button type="button" class="vc-view-btn" data-vehicle="${v.id}">View Details</button>
+                <p class="vc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
+                <div class="vc-specs">
+                    <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
+                    <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
+                    <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
                 </div>
+                <div class="vc-prices">
+                    <div class="vc-price-item">
+                        <span>12-Hour</span>
+                        <strong>${formatCurrency(v.price12)}</strong>
+                    </div>
+                    <div class="vc-price-item">
+                        <span>Whole Day</span>
+                        <strong>${formatCurrency(v.priceDay)}</strong>
+                    </div>
+                </div>
+                <button type="button" class="vc-view-btn" data-vehicle="${v.id}">View Details <i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </div>
     `).join('');
@@ -445,15 +533,16 @@ function renderResultList(){
 
     const listEl = document.getElementById('resultVehicleList');
     listEl.innerHTML = vehicles.map(v => `
-        <div class="result-card">
-            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
+        <div class="result-card ${isBookable(v) ? '' : 'is-dimmed'}">
+            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v)}</div>
             <div class="result-card-body">
                 <h3>${v.name}</h3>
-                <p class="rc-type">${v.type} · ${v.transmission}</p>
+                <p class="rc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
                 <div class="rc-specs">
                     <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
+                    <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
+                    <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
                     <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
-                    <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
                 </div>
             </div>
             <div class="result-card-action">
@@ -483,9 +572,11 @@ function renderVehicleDetails(){
     const v = state.vehicle || VEHICLES[0];
     state.vehicle = v;
 
-    document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>`;
+    document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v)}`;
     document.getElementById('vdName').textContent = v.name;
     document.getElementById('vdType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
+
+    const featureChips = (v.features || []).map(f => `<span><i class="fa-solid fa-circle-check"></i> ${f}</span>`).join('');
 
     document.getElementById('vdSpecs').innerHTML = `
         <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
@@ -494,6 +585,7 @@ function renderVehicleDetails(){
         <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
         <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
         <span><i class="fa-solid fa-snowflake"></i> Air Conditioning</span>
+        ${featureChips}
     `;
 
     document.getElementById('vdPhotoStrip').innerHTML = [1,2,3,4].map((n,i) => `
@@ -513,9 +605,23 @@ function renderVehicleDetails(){
             ? `${state.timeSlot.start} - ${state.timeSlot.end}`
             : 'Select a time slot';
     }
+
+    const selectBtn = document.getElementById('selectVehicleBtn');
+    const unavailableNote = document.getElementById('vdUnavailableNote');
+    if (isBookable(v)) {
+        selectBtn.disabled = false;
+        selectBtn.textContent = 'Select This Vehicle';
+        unavailableNote.style.display = 'none';
+    } else {
+        selectBtn.disabled = true;
+        selectBtn.textContent = 'Currently Unavailable';
+        unavailableNote.style.display = 'flex';
+        unavailableNote.innerHTML = `<i class="fa-solid fa-circle-info"></i> This vehicle is ${v.status.toLowerCase()} right now. Browse other vehicles or check back later.`;
+    }
 }
 
 document.getElementById('selectVehicleBtn').addEventListener('click', () => {
+    if (!isBookable(state.vehicle)) return;
     if (!state.rentalType) { showView('chooseType'); return; }
     if (state.rentalType === '12hour' && !(state.date && state.timeSlot)) { showView('selectDateTime'); return; }
     if (state.rentalType === 'wholeday' && !(state.rangeStart && state.rangeEnd)) { showView('selectDates'); return; }
@@ -748,13 +854,14 @@ function cancelBooking(id){
 /* =====================================================
    ALL VEHICLES (with filters)
 ===================================================== */
-const filterState = { type:[], transmission:[], fuel:[], seats:[], maxPrice:5000 };
+const filterState = { type:[], transmission:[], fuel:[], seats:[], status:[], maxPrice:5000 };
 
 function readFiltersFromDOM(){
     filterState.type = [...document.querySelectorAll('.f-type:checked')].map(el => el.value);
     filterState.transmission = [...document.querySelectorAll('.f-transmission:checked')].map(el => el.value);
     filterState.fuel = [...document.querySelectorAll('.f-fuel:checked')].map(el => el.value);
     filterState.seats = [...document.querySelectorAll('.f-seats:checked')].map(el => Number(el.value));
+    filterState.status = [...document.querySelectorAll('.f-status:checked')].map(el => el.value);
     filterState.maxPrice = Number(document.getElementById('priceRangeInput').value);
 }
 
@@ -764,6 +871,7 @@ function applyFilters(vehicles){
         if (filterState.transmission.length && !filterState.transmission.includes(v.transmission)) return false;
         if (filterState.fuel.length && !filterState.fuel.includes(v.fuel)) return false;
         if (filterState.seats.length && !filterState.seats.includes(v.seats)) return false;
+        if (filterState.status.length && !filterState.status.includes(v.status)) return false;
         if (v.price12 > filterState.maxPrice) return false;
         return true;
     });
@@ -791,19 +899,23 @@ function renderAllVehicles(){
     emptyEl.style.display = 'none';
 
     listEl.innerHTML = vehicles.map(v => `
-        <div class="result-card">
-            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
+        <div class="result-card ${isBookable(v) ? '' : 'is-dimmed'}">
+            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v)}</div>
             <div class="result-card-body">
                 <h3>${v.name}</h3>
-                <p class="rc-type">${v.type} · ${v.transmission}</p>
+                <p class="rc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
                 <div class="rc-specs">
                     <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
+                    <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
+                    <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
                     <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
-                    <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
                 </div>
             </div>
             <div class="result-card-action">
-                <div class="rc-price">${formatCurrency(v.price12)}<small>per 12 hrs</small></div>
+                <div class="rc-price-both">
+                    <div class="rc-price">${formatCurrency(v.price12)}<small>per 12 hrs</small></div>
+                    <div class="rc-price rc-price-alt">${formatCurrency(v.priceDay)}<small>whole day</small></div>
+                </div>
                 <button type="button" class="view-details-btn" data-vehicle="${v.id}">View Details</button>
             </div>
         </div>
@@ -818,13 +930,13 @@ function renderAllVehicles(){
     });
 }
 
-document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats').forEach(el => {
+document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats, .f-status').forEach(el => {
     el.addEventListener('change', renderAllVehicles);
 });
 document.getElementById('priceRangeInput').addEventListener('input', renderAllVehicles);
 document.getElementById('allVehiclesSortSelect').addEventListener('change', renderAllVehicles);
 document.getElementById('clearFiltersBtn').addEventListener('click', () => {
-    document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats').forEach(el => el.checked = false);
+    document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats, .f-status').forEach(el => el.checked = false);
     document.getElementById('priceRangeInput').value = 5000;
     renderAllVehicles();
 });
