@@ -63,10 +63,16 @@ input,select{ font-family:var(--font-body); }
 .main-header{ position:fixed; top:0; left:0; width:100%; z-index:1020; background:rgba(255,255,255,.98); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
 .header-inner{ max-width:1320px; margin:0 auto; height:72px; display:flex; align-items:center; justify-content:space-between; padding:0 6%; gap:18px; }
 
-/* ---- Logo lockup ---- */
+/* ---- Logo lockup: circular reload-arrow ring with a car icon nested in the
+   center, echoing the brand mark. On dark backgrounds add the .light modifier
+   to flip the ring/car to white; drop a real file at assets/logo/logo.png
+   (160x40px transparent PNG/SVG, 320x80 @2x) to override this mark entirely. ---- */
 .logo-block{ display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; flex-shrink:0; }
-.logo-badge{ position:relative; width:38px; height:38px; border-radius:11px; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; overflow:hidden; }
-.logo-badge .logo-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#fff; z-index:1; }
+.logo-badge{ position:relative; width:40px; height:40px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:var(--green); }
+.logo-badge.light{ color:#fff; }
+.logo-ring{ position:absolute; inset:0; width:100%; height:100%; color:currentColor; }
+.logo-car-icon{ position:relative; z-index:1; font-size:14px; color:currentColor; }
+.logo-badge .logo-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; z-index:2; border-radius:50%; }
 .logo-text{ display:flex; flex-direction:column; line-height:1; }
 .logo-word{ font-family:var(--font-display); font-weight:700; font-size:1.3rem; color:var(--charcoal); letter-spacing:-.01em; }
 .logo-word .accent-ride{ color:var(--yellow-dark); }
@@ -75,13 +81,14 @@ input,select{ font-family:var(--font-body); }
 .logo-sub{ font-size:9.5px; font-weight:700; letter-spacing:.16em; color:var(--slate); margin-top:2px; text-transform:uppercase; }
 .logo-sub.light{ color:rgba(255,255,255,.6); }
 
-/* ---- Combined nav dock ---- */
-.main-nav{ display:flex; align-items:center; gap:2px; background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:4px; flex-shrink:0; }
-.nav-link{ display:flex; align-items:center; gap:7px; font-size:13.5px; font-weight:600; color:var(--slate); position:relative; transition:.2s var(--ease); padding:9px 16px; border-radius:999px; white-space:nowrap; }
-.nav-link i{ font-size:12px; opacity:.75; }
+/* ---- Nav: clean text links with a sliding underline on the active page,
+   combined into the header bar rather than floating as a separate row. ---- */
+.main-nav{ display:flex; align-items:center; gap:32px; flex-shrink:0; }
+.nav-link{ font-size:14.5px; font-weight:600; color:var(--charcoal); position:relative; padding:6px 1px; transition:.2s var(--ease); white-space:nowrap; }
+.nav-link::after{ content:''; position:absolute; left:0; right:0; bottom:-2px; height:2.5px; border-radius:2px; background:var(--green); transform:scaleX(0); transform-origin:center; transition:transform .25s var(--ease); }
 .nav-link:hover{ color:var(--green-dark); }
-.nav-link.active{ color:#fff; background:var(--green); box-shadow:0 4px 12px -2px rgba(46,125,50,.4); }
-.nav-link.active i{ opacity:1; }
+.nav-link.active{ color:var(--green-dark); }
+.nav-link.active::after{ transform:scaleX(1); }
 .nav-link-mobile-only{ display:none; }
 
 .header-actions{ display:flex; align-items:center; gap:18px; flex-shrink:0; }
@@ -111,34 +118,35 @@ input,select{ font-family:var(--font-body); }
 .flow-sub{ font-size:14.5px; color:var(--slate); margin-bottom:28px; }
 
 /* =====================================================
-   HOME — HERO CAROUSEL
-   Full-bleed image carousel with the headline overlaid bottom-left.
-   Slide images: 1920x800px landscape, see HTML comment above the markup.
+   HOME — HERO
+   Text on a warm cream background, left; a rounded-corner image carousel
+   card on the right. Slide images: 1200x900px, see HTML comment above markup.
 ===================================================== */
-.hero-carousel{ position:relative; height:600px; overflow:hidden; background:var(--green-darker); }
+.hero{ display:flex; align-items:center; gap:48px; padding:150px 6% 60px; background:linear-gradient(180deg,var(--cream) 0%,var(--bg) 100%); overflow:hidden; }
+.hero-copy{ flex:1; max-width:540px; }
+.eyebrow{ display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700; letter-spacing:.08em; color:var(--green-dark); background:var(--green-light); padding:7px 14px; border-radius:999px; margin-bottom:18px; }
+.eyebrow i{ color:var(--yellow-dark); font-size:11px; }
+.hero-copy h1{ font-size:2.85rem; line-height:1.14; font-weight:700; letter-spacing:-.02em; margin-bottom:18px; color:var(--charcoal); }
+.hero-copy h1 .accent{ display:block; color:var(--yellow-dark); font-size:1.25rem; font-family:var(--font-body); font-weight:600; margin-top:10px; letter-spacing:0; }
+.hero-copy .hero-script{ position:relative; display:block; font-family:var(--font-script); font-weight:400; font-size:2.5rem; color:var(--green); line-height:1; margin:2px 0 10px; }
+.heart-doodle{ position:absolute; width:34px; height:26px; top:-6px; right:-40px; color:var(--yellow-dark); transform:rotate(-8deg); }
+.hero-copy p{ font-size:15.5px; color:var(--slate); line-height:1.7; margin-bottom:30px; max-width:460px; }
+.hero-btns{ display:flex; gap:14px; flex-wrap:wrap; }
+
+/* ---- Rounded carousel card ---- */
+.hero-carousel{ position:relative; flex:1; max-width:520px; height:460px; border-radius:26px; overflow:hidden; box-shadow:0 30px 60px -20px rgba(46,125,50,.3); flex-shrink:0; }
 .hero-slides{ position:absolute; inset:0; }
 .hero-slide{ position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; transition:opacity 1s var(--ease); }
 .hero-slide.active{ opacity:1; }
-.hero-scrim{ position:absolute; inset:0; background:linear-gradient(90deg, rgba(23,61,25,.82) 0%, rgba(23,61,25,.55) 42%, rgba(23,61,25,.15) 68%, rgba(23,61,25,.05) 100%), linear-gradient(0deg, rgba(23,61,25,.5) 0%, rgba(23,61,25,0) 34%); }
 
-.hero-copy{ position:relative; z-index:2; max-width:600px; height:100%; display:flex; flex-direction:column; justify-content:center; padding:40px 6% 60px; }
-.eyebrow{ display:inline-block; font-size:12px; font-weight:700; letter-spacing:.1em; color:var(--yellow); margin-bottom:16px; }
-.hero-copy h1{ font-size:2.9rem; line-height:1.14; font-weight:700; letter-spacing:-.02em; margin-bottom:18px; color:#fff; }
-.hero-copy h1 .accent{ display:block; color:var(--yellow); font-size:1.3rem; font-family:var(--font-body); font-weight:600; margin-top:10px; letter-spacing:0; }
-.hero-copy .hero-script{ display:block; font-family:var(--font-script); font-weight:400; font-size:2.5rem; color:#fff; line-height:1; margin:2px 0 6px; }
-.hero-copy p{ font-size:15.5px; color:rgba(255,255,255,.85); line-height:1.7; margin-bottom:30px; max-width:460px; }
-.hero-btns{ display:flex; gap:14px; flex-wrap:wrap; }
-.btn-outline-light{ background:rgba(255,255,255,.1); color:#fff; border:1.5px solid rgba(255,255,255,.55); backdrop-filter:blur(4px); }
-.btn-outline-light:hover{ background:rgba(255,255,255,.2); border-color:#fff; }
+.hero-arrow{ position:absolute; top:50%; transform:translateY(-50%); z-index:3; width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.85); border:none; color:var(--green-dark); display:flex; align-items:center; justify-content:center; font-size:14px; backdrop-filter:blur(4px); transition:.2s; box-shadow:0 4px 14px -4px rgba(0,0,0,.25); }
+.hero-arrow:hover{ background:#fff; }
+.hero-arrow-prev{ left:16px; }
+.hero-arrow-next{ right:16px; }
 
-.hero-arrow{ position:absolute; top:50%; transform:translateY(-50%); z-index:3; width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.16); border:1.5px solid rgba(255,255,255,.4); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; backdrop-filter:blur(4px); transition:.2s; }
-.hero-arrow:hover{ background:rgba(255,255,255,.3); }
-.hero-arrow-prev{ left:22px; }
-.hero-arrow-next{ right:22px; }
-
-.hero-dots{ position:absolute; bottom:24px; right:6%; z-index:3; display:flex; gap:8px; }
-.hero-dot{ width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.4); border:none; padding:0; cursor:pointer; transition:.2s; }
-.hero-dot.active{ background:var(--yellow); width:24px; border-radius:5px; }
+.hero-dots{ position:absolute; bottom:18px; left:0; right:0; z-index:3; display:flex; gap:8px; justify-content:center; }
+.hero-dot{ width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.6); border:none; padding:0; cursor:pointer; transition:.2s; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+.hero-dot.active{ background:var(--yellow); width:22px; border-radius:5px; }
 
 /* =====================================================
    QUICK SEARCH CARD
@@ -155,7 +163,7 @@ input,select{ font-family:var(--font-body); }
 /* =====================================================
    VEHICLE PREVIEW PHOTOS (falls back to icon if asset missing)
 ===================================================== */
-.vehicle-card-media, .result-card-media, .vehicle-photo-main{ position:relative; overflow:hidden; }
+.spotlight-media, .result-card-media, .vehicle-photo-main{ position:relative; overflow:hidden; }
 .vehicle-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; }
 
 /* =====================================================
@@ -167,33 +175,44 @@ input,select{ font-family:var(--font-body); }
 .view-all-link{ font-size:14px; font-weight:600; color:var(--green); display:flex; align-items:center; gap:6px; }
 .view-all-link:hover{ text-decoration:underline; }
 
-.vehicle-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:22px; }
-.vehicle-card{ background:#fff; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line); transition:.25s; display:flex; flex-direction:column; }
-.vehicle-card:hover{ box-shadow:0 12px 30px -10px rgba(46,125,50,.2); transform:translateY(-3px); }
-.vehicle-card.is-dimmed:hover{ transform:none; box-shadow:none; }
-.vehicle-card-media{ position:relative; height:150px; background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%); display:flex; align-items:center; justify-content:center; }
-.vehicle-card-media i{ font-size:52px; color:rgba(255,255,255,.9); }
-.vehicle-card.is-dimmed .vehicle-photo{ filter:grayscale(45%) brightness(.82); }
-.vehicle-card-body{ padding:16px 18px 18px; display:flex; flex-direction:column; flex:1; }
-.vehicle-card-body h3{ font-size:1.05rem; font-weight:700; margin-bottom:3px; }
-.vehicle-card-body .vc-type{ font-size:12.5px; color:var(--slate); margin-bottom:12px; }
+.section-eyebrow{ margin-bottom:10px; }
 
-.vc-specs{ display:flex; flex-wrap:wrap; gap:8px 14px; margin-bottom:14px; }
-.vc-specs span{ font-size:11.5px; font-weight:600; color:var(--slate); display:flex; align-items:center; gap:5px; }
+/* ---- Spotlight card: the one featured vehicle (Luna), shown as a big
+   two-column feature rather than a repeated card grid. ---- */
+.spotlight-wrap{ display:block; }
+.spotlight-card{ background:#fff; border-radius:28px; overflow:hidden; border:1px solid var(--line); display:flex; box-shadow:0 20px 50px -24px rgba(46,125,50,.28); }
+.spotlight-card.is-dimmed .vehicle-photo{ filter:grayscale(45%) brightness(.82); }
+.spotlight-media{ position:relative; flex:1.1; min-height:380px; background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%); display:flex; align-items:center; justify-content:center; }
+.spotlight-media i{ font-size:100px; color:rgba(255,255,255,.9); }
+.spotlight-nickname-tag{ position:absolute; bottom:16px; left:16px; z-index:2; display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; color:var(--green-dark); background:#fff; padding:9px 16px; border-radius:999px; box-shadow:0 8px 20px -6px rgba(0,0,0,.25); }
+.spotlight-nickname-tag i{ font-size:12px; color:var(--yellow-dark); }
+
+.spotlight-body{ flex:1; padding:38px 40px; display:flex; flex-direction:column; }
+.spotlight-nickname{ font-family:var(--font-script); font-size:2.3rem; color:var(--green); line-height:1; margin-bottom:4px; }
+.spotlight-body h3{ font-size:1.3rem; font-weight:700; margin-bottom:4px; }
+.spotlight-body .vc-type{ font-size:13px; color:var(--slate); margin-bottom:16px; }
+.spotlight-blurb{ font-size:13.5px; color:var(--slate); line-height:1.65; margin-bottom:20px; }
+
+.vc-specs{ display:flex; flex-wrap:wrap; gap:8px 16px; margin-bottom:18px; }
+.vc-specs span{ font-size:12px; font-weight:600; color:var(--slate); display:flex; align-items:center; gap:5px; }
 .vc-specs i{ color:var(--green); font-size:11px; }
 
-.vc-prices{ display:flex; gap:10px; margin-bottom:14px; margin-top:auto; }
-.vc-price-item{ flex:1; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:8px 10px; display:flex; flex-direction:column; gap:2px; }
+.vc-prices{ display:flex; gap:12px; margin-bottom:20px; margin-top:auto; }
+.vc-price-item{ flex:1; background:var(--bg); border:1px solid var(--line); border-radius:11px; padding:12px 14px; display:flex; flex-direction:column; gap:3px; }
 .vc-price-item span{ font-size:10.5px; font-weight:600; color:var(--slate); text-transform:uppercase; letter-spacing:.03em; }
-.vc-price-item strong{ font-family:var(--font-display); font-size:1rem; color:var(--green-dark); }
+.vc-price-item strong{ font-family:var(--font-display); font-size:1.15rem; color:var(--green-dark); }
 
-.vc-view-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:600; color:#fff; background:var(--green); border:none; padding:10px 12px; border-radius:9px; transition:.2s; }
+.vc-view-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; font-weight:700; color:#fff; background:var(--green); border:none; padding:14px 12px; border-radius:11px; transition:.2s; }
 .vc-view-btn:hover{ background:var(--green-dark); }
 .vc-view-btn i{ font-size:11px; }
 
-/* ---- Availability status badge — used on every vehicle card/photo ---- */
-.vehicle-status-badge{ position:absolute; top:10px; left:10px; z-index:2; display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; padding:6px 11px; border-radius:999px; backdrop-filter:blur(3px); }
-.vehicle-status-badge i{ font-size:7px; }
+/* ---- Availability status badge — used on every vehicle card/photo.
+   Sized deliberately small (fits neatly on a corner without crowding the
+   photo); the -lg modifier bumps it up only for the big spotlight card. ---- */
+.vehicle-status-badge{ position:absolute; top:10px; left:10px; z-index:2; display:inline-flex; align-items:center; gap:5px; font-size:10px; line-height:1; font-weight:700; padding:5px 10px; border-radius:999px; white-space:nowrap; backdrop-filter:blur(3px); }
+.vehicle-status-badge i{ font-size:6px; }
+.vehicle-status-badge-lg{ top:16px; left:16px; font-size:11.5px; padding:7px 13px; gap:6px; }
+.vehicle-status-badge-lg i{ font-size:7px; }
 .status-available{ background:rgba(46,125,50,.92); color:#fff; }
 .status-unavailable{ background:rgba(115,108,96,.85); color:#fff; }
 .status-booked{ background:rgba(224,168,0,.92); color:#fff; }
@@ -459,10 +478,10 @@ input,select{ font-family:var(--font-body); }
 /* =====================================================
    BOOKINGS CART ICON (header)
 ===================================================== */
-.bookings-cart-btn{ position:relative; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--green); display:flex; align-items:center; justify-content:center; font-size:16px; transition:.2s; }
-.bookings-cart-btn:hover{ background:var(--green-light); border-color:var(--green); }
-.cart-badge{ position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 4px; border-radius:50%; background:var(--yellow-dark); color:#fff; font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; border:2px solid #fff; }
-.cart-badge.is-empty{ display:none; }
+.notif-btn{ position:relative; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:#fff; color:var(--green); display:flex; align-items:center; justify-content:center; font-size:16px; transition:.2s; }
+.notif-btn:hover{ background:var(--green-light); border-color:var(--green); }
+.notif-badge{ position:absolute; top:-4px; right:-4px; min-width:18px; height:18px; padding:0 4px; border-radius:50%; background:var(--yellow-dark); color:#fff; font-size:10.5px; font-weight:700; display:flex; align-items:center; justify-content:center; border:2px solid #fff; }
+.notif-badge.is-empty{ display:none; }
 
 .confirm-type-btn{ margin-top:22px; }
 
@@ -470,34 +489,24 @@ input,select{ font-family:var(--font-body); }
    USER CHIP (header, logged in state)
 ===================================================== */
 .user-chip{ display:flex; align-items:center; gap:9px; background:var(--bg); border:1px solid var(--line); border-radius:50px; padding:5px 12px 5px 5px; }
-.user-chip-avatar{ width:28px; height:28px; border-radius:50%; background:var(--green); color:#fff; font-size:12.5px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.user-chip span{ font-size:13.5px; font-weight:600; color:var(--charcoal); }
+.user-chip-avatar{ width:32px; height:32px; border-radius:50%; background:var(--green); color:#fff; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.user-chip-text{ display:flex; flex-direction:column; line-height:1.25; }
+.user-chip-hi{ font-size:12.5px; font-weight:700; color:var(--charcoal); }
+.user-chip-tag{ font-size:10.5px; font-weight:500; color:var(--slate); }
 .user-chip-logout{ background:none; border:none; color:var(--slate); font-size:12.5px; padding:2px; margin-left:2px; transition:.2s; }
 .user-chip-logout:hover{ color:var(--danger); }
 
 /* =====================================================
-   ALL VEHICLES — FILTERS SIDEBAR
+   ALL VEHICLES — full profile page for our one featured vehicle
 ===================================================== */
-.filters-sidebar{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:22px; position:sticky; top:96px; align-self:flex-start; }
-.filters-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
-.filters-head h3{ font-size:1rem; font-weight:700; }
-.filters-head button{ background:none; border:none; color:var(--green); font-size:12.5px; font-weight:600; }
-.filters-head button:hover{ text-decoration:underline; }
-
-.filter-group{ padding-bottom:18px; margin-bottom:18px; border-bottom:1px solid var(--line); }
-.filter-group:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
-.filter-group h4{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--slate); font-weight:700; margin-bottom:12px; }
-.filter-check{ display:flex; align-items:center; gap:9px; font-size:13.5px; color:var(--charcoal); padding:6px 0; cursor:pointer; }
-.filter-check input{ width:16px; height:16px; accent-color:var(--green); }
-
-.price-range-label{ display:flex; justify-content:space-between; font-size:12px; color:var(--slate); margin-top:8px; }
-.price-range-label strong{ color:var(--green-dark); }
-#priceRangeInput{ width:100%; accent-color:var(--green); }
-
-.filters-empty{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:50px 30px; text-align:center; }
-.filters-empty i{ font-size:34px; color:var(--slate-light); margin-bottom:14px; }
-.filters-empty h3{ font-size:1.05rem; margin-bottom:6px; }
-.filters-empty p{ font-size:13.5px; color:var(--slate); }
+.allv-head{ max-width:680px; margin-bottom:32px; }
+.allv-head h1{ font-size:2rem; margin:4px 0 10px; }
+.allv-card{ max-width:1080px; box-shadow:none; border-color:var(--line); }
+.allv-specs{ padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:16px; }
+.allv-features{ display:flex; flex-wrap:wrap; gap:8px 18px; margin-bottom:22px; }
+.allv-features span{ font-size:12.5px; font-weight:600; color:var(--green-dark); display:flex; align-items:center; gap:6px; }
+.allv-features i{ color:var(--green); font-size:12px; }
+.allv-card .vc-view-btn{ max-width:340px; }
 
 /* =====================================================
    PAGE BANNER (About / Contact)
@@ -594,14 +603,23 @@ input,select{ font-family:var(--font-body); }
         background:#fff; padding:14px 6% 20px; border:none; border-bottom:1px solid var(--line);
         border-radius:0; box-shadow:0 16px 30px -18px rgba(23,61,25,.25);
     }
-    .main-nav.open .nav-link{ padding:13px 16px; justify-content:flex-start; border-radius:10px; }
-    .main-nav.open .nav-link.active{ box-shadow:none; }
+    .main-nav.open .nav-link{ display:flex; align-items:center; gap:9px; padding:13px 16px; border-radius:10px; }
+    .main-nav.open .nav-link::after{ display:none; }
+    .main-nav.open .nav-link.active{ background:var(--green-light); }
     .nav-link-mobile-only{ display:flex; border-top:1px solid var(--line); margin-top:6px; padding-top:15px; }
-    .header-actions .login-link, .header-actions .user-chip span{ display:none; }
+    .header-actions .login-link, .header-actions .user-chip-text{ display:none; }
     .mobile-menu-toggle{ display:flex; }
-    .hero-carousel{ height:520px; }
-    .hero-copy{ max-width:100%; text-align:left; padding:0 6%; }
-    .vehicle-grid{ grid-template-columns:repeat(2,1fr); }
+    .hero{ flex-direction:column; padding:130px 6% 40px; gap:32px; text-align:center; }
+    .hero-copy{ max-width:100%; text-align:center; }
+    .eyebrow{ margin-left:auto; margin-right:auto; }
+    .hero-copy p{ margin-left:auto; margin-right:auto; }
+    .hero-btns{ justify-content:center; }
+    .heart-doodle{ display:none; }
+    .hero-carousel{ max-width:100%; width:100%; height:340px; }
+    .spotlight-card{ flex-direction:column; border-radius:22px; }
+    .spotlight-media{ min-height:260px; }
+    .spotlight-media i{ font-size:70px; }
+    .spotlight-body{ padding:28px 24px; }
     .feature-strip{ grid-template-columns:repeat(2,1fr); }
     .experience-grid{ grid-template-columns:repeat(2,1fr); }
     .results-layout{ grid-template-columns:1fr; }
@@ -613,23 +631,28 @@ input,select{ font-family:var(--font-body); }
     .about-story{ grid-template-columns:1fr; }
     .contact-layout{ grid-template-columns:1fr; }
     .contact-form-grid{ grid-template-columns:1fr; }
-    .filters-sidebar{ position:static; }
+    .allv-card .vc-view-btn{ max-width:100%; }
 }
 
 @media(max-width:640px){
     .quick-search-card{ flex-direction:column; align-items:stretch; }
     .qs-submit{ width:100%; }
-    .vehicle-grid{ grid-template-columns:1fr 1fr; gap:12px; }
+    .spotlight-body{ padding:24px 20px; }
     .experience-grid{ grid-template-columns:1fr; }
-    .hero-carousel{ height:460px; }
-    .hero-copy{ padding:30px 6% 50px; }
+    .hero{ padding-top:120px; }
+    .hero-carousel{ height:280px; border-radius:20px; }
     .hero-copy h1{ font-size:2.1rem; }
     .hero-copy .hero-script{ font-size:1.9rem; }
-    .hero-arrow{ width:36px; height:36px; font-size:13px; }
-    .hero-dots{ bottom:16px; }
+    .hero-arrow{ width:34px; height:34px; font-size:12px; }
+    .hero-dots{ bottom:14px; }
     .result-card{ flex-wrap:wrap; }
     .result-card-action{ width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; }
     .range-summary{ grid-template-columns:1fr; }
     .values-strip{ gap:8px; }
     .value-pill{ padding:8px 14px; font-size:12px; }
+    .header-inner{ gap:10px; padding:0 4%; }
+    .logo-sub{ display:none; }
+    .header-actions{ gap:10px; }
+    .header-actions .btn-navy{ padding:9px 14px; font-size:12.5px; }
+    .notif-btn{ width:36px; height:36px; font-size:14px; }
 }

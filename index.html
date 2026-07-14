@@ -22,8 +22,14 @@
              2x = 320x80px for retina) and it replaces the icon badge automatically. -->
         <div class="logo-block clickable-logo" data-go="home">
             <span class="logo-badge">
+                <svg viewBox="0 0 36 36" class="logo-ring" aria-hidden="true">
+                    <path d="M6 18a12 12 0 0 1 12-12c3.2 0 6.1 1.3 8.2 3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M22 5.5l4.5 3.5-5 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M30 18a12 12 0 0 1-12 12c-3.2 0-6.1-1.3-8.2-3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M14 30.5l-4.5-3.5 5-2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <i class="fa-solid fa-car-side logo-car-icon"></i>
                 <img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'">
-                <i class="fa-solid fa-car-side"></i>
             </span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
@@ -34,22 +40,25 @@
         <!-- Combined header + navigation: nav now lives inside the header as one unified bar
              with a pill-style active indicator, instead of a separate row of links. -->
         <nav class="main-nav" id="mainNav">
-            <a href="#" class="nav-link active" data-go="home"><i class="fa-solid fa-house"></i> Home</a>
-            <a href="#" class="nav-link" data-go="allVehicles"><i class="fa-solid fa-car"></i> Vehicles</a>
-            <a href="#" class="nav-link" data-go="about"><i class="fa-solid fa-circle-info"></i> About Us</a>
-            <a href="#" class="nav-link" data-go="contact"><i class="fa-solid fa-envelope"></i> Contact</a>
+            <a href="#" class="nav-link active" data-go="home">Home</a>
+            <a href="#" class="nav-link" data-go="allVehicles">Vehicles</a>
+            <a href="#" class="nav-link" data-go="about">About Us</a>
+            <a href="#" class="nav-link" data-go="contact">Contact Us</a>
             <a href="#" class="nav-link nav-link-mobile-only" data-go="myBookings"><i class="fa-solid fa-bag-shopping"></i> My Bookings</a>
         </nav>
 
         <div class="header-actions">
-            <button type="button" class="bookings-cart-btn" data-go="myBookings" aria-label="My Bookings">
-                <i class="fa-solid fa-bag-shopping"></i>
-                <span class="cart-badge" id="bookingsCountBadge">0</span>
+            <button type="button" class="notif-btn" data-go="myBookings" aria-label="My Bookings">
+                <i class="fa-regular fa-bell"></i>
+                <span class="notif-badge" id="bookingsCountBadge">0</span>
             </button>
             <a href="#" class="login-link" id="headerLoginLink">Log In</a>
             <div class="user-chip" id="headerUserChip" style="display:none;">
                 <div class="user-chip-avatar" id="userChipAvatar">J</div>
-                <span id="userChipName">Juan</span>
+                <span class="user-chip-text">
+                    <span class="user-chip-hi">Hi, <span id="userChipName">Juan</span></span>
+                    <span class="user-chip-tag">Let's start your journey</span>
+                </span>
                 <button type="button" class="user-chip-logout" id="userChipLogout" title="Log out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
             </div>
             <button type="button" class="btn btn-navy" data-go="chooseType">Book Your Ride</button>
@@ -70,7 +79,16 @@
             <i class="fa-solid fa-arrow-left"></i>
         </button>
         <div class="logo-block clickable-logo" data-go="home">
-            <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-badge">
+                <svg viewBox="0 0 36 36" class="logo-ring" aria-hidden="true">
+                    <path d="M6 18a12 12 0 0 1 12-12c3.2 0 6.1 1.3 8.2 3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M22 5.5l4.5 3.5-5 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M30 18a12 12 0 0 1-12 12c-3.2 0-6.1-1.3-8.2-3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M14 30.5l-4.5-3.5 5-2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <i class="fa-solid fa-car-side logo-car-icon"></i>
+                <img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'">
+            </span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
                 <span class="logo-sub">car rental services</span>
@@ -87,33 +105,32 @@
 <section id="view-home" class="view">
 
     <!-- =====================================================
-         HERO CAROUSEL
+         HERO — text left, rounded carousel card right
          Drop slide images at assets/hero/slide-1.jpg, slide-2.jpg, slide-3.jpg
-         Recommended size: 1920 x 800px, landscape JPG/WebP, under ~350KB each.
-         Keep the important subject centered/right — the left third sits under
-         the text overlay and a dark gradient on mobile/desktop.
+         Recommended size: 1200 x 900px (4:3), landscape/portrait-friendly JPG/WebP,
+         under ~350KB each. Warm, candid family/friend moments work best here.
     ========================================================== -->
-    <div class="hero-carousel" id="heroCarousel">
-        <div class="hero-slides" id="heroSlides">
-            <div class="hero-slide active" style="background-image:url('assets/hero/slide-1.jpg')" data-fallback="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1920&auto=format&fit=crop"></div>
-            <div class="hero-slide" style="background-image:url('assets/hero/slide-2.jpg')" data-fallback="https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=1920&auto=format&fit=crop"></div>
-            <div class="hero-slide" style="background-image:url('assets/hero/slide-3.jpg')" data-fallback="https://images.unsplash.com/photo-1523983388277-336a66bf9bcd?q=80&w=1920&auto=format&fit=crop"></div>
-        </div>
-        <div class="hero-scrim"></div>
-
+    <div class="hero">
         <div class="hero-copy">
-            <span class="eyebrow">RELIABLE, HONEST, MEMORABLE.</span>
-            <h1>Every journey,<span class="hero-script">every story.</span><span class="accent">We're along for the ride.</span></h1>
-            <p>We don't just rent cars — we help you create unforgettable moments with the people you love. Family getaways, weekend trips, or a simple drive home: every trip deserves to be comfortable, honest, and memorable.</p>
+            <span class="eyebrow"><i class="fa-solid fa-heart"></i> YOUR FAMILY & BARKADA'S TRUSTED RIDE</span>
+            <h1>Every journey,<span class="hero-script">every story<svg class="heart-doodle" viewBox="0 0 40 30" aria-hidden="true"><path d="M8 4c-4 0-7 3-7 7 0 8 11 14 19 18 8-4 19-10 19-18 0-4-3-7-7-7-4 0-7 2-9 6l-3 5-3-5c-2-4-5-6-9-6z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><span class="accent">We're along for the ride.</span></h1>
+            <p>We don't just rent cars — we help you create unforgettable moments with the people you love. Family getaways, barkada road trips, or a simple drive home: every trip deserves to be comfortable, honest, and memorable.</p>
             <div class="hero-btns">
                 <button type="button" class="btn btn-navy btn-lg" data-go="chooseType"><i class="fa-solid fa-car-side"></i> Book Your Ride</button>
-                <button type="button" class="btn btn-outline-light btn-lg scroll-link" data-scroll="fleet">Browse Vehicles</button>
+                <button type="button" class="btn btn-outline btn-lg scroll-link" data-scroll="fleet">Meet the Family</button>
             </div>
         </div>
 
-        <button type="button" class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
-        <button type="button" class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
-        <div class="hero-dots" id="heroDots"></div>
+        <div class="hero-carousel" id="heroCarousel">
+            <div class="hero-slides" id="heroSlides">
+                <div class="hero-slide active" style="background-image:url('assets/hero/slide-1.jpg')" data-fallback="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1200&auto=format&fit=crop"></div>
+                <div class="hero-slide" style="background-image:url('assets/hero/slide-2.jpg')" data-fallback="https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=1200&auto=format&fit=crop"></div>
+                <div class="hero-slide" style="background-image:url('assets/hero/slide-3.jpg')" data-fallback="https://images.unsplash.com/photo-1523983388277-336a66bf9bcd?q=80&w=1200&auto=format&fit=crop"></div>
+            </div>
+            <button type="button" class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
+            <button type="button" class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
+            <div class="hero-dots" id="heroDots"></div>
+        </div>
     </div>
 
     <!-- Floating quick-search card -->
@@ -144,13 +161,16 @@
         </form>
     </div>
 
-    <!-- Popular Vehicles -->
+    <!-- Meet the Family -->
     <section class="section" id="fleet">
         <div class="section-head">
-            <h2>Popular Vehicles</h2>
-            <a href="#" class="view-all-link" data-go="allVehicles">View All Vehicles <i class="fa-solid fa-arrow-right"></i></a>
+            <div>
+                <span class="eyebrow section-eyebrow"><i class="fa-solid fa-heart"></i> OUR FLEET, YOUR FAMILY</span>
+                <h2>Meet the members of the family!</h2>
+            </div>
+            <a href="#" class="view-all-link" data-go="allVehicles">Full Specs & Booking <i class="fa-solid fa-arrow-right"></i></a>
         </div>
-        <div class="vehicle-grid" id="popularVehicleGrid"></div>
+        <div class="spotlight-wrap" id="popularVehicleGrid"></div>
     </section>
 
     <!-- The EveryRide Experience -->
@@ -534,78 +554,13 @@
 ========================================================== -->
 <section id="view-allVehicles" class="view flow-view" style="display:none;">
     <div class="flow-container wide">
-        <h1>All Vehicles</h1>
-        <p class="flow-sub">Browse our full fleet and filter to find the right ride for your trip.</p>
-
-        <div class="results-layout">
-            <aside class="filters-sidebar">
-                <div class="filters-head">
-                    <h3>Filters</h3>
-                    <button type="button" id="clearFiltersBtn">Clear all</button>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Availability</h4>
-                    <label class="filter-check"><input type="checkbox" class="f-status" value="Available"><span>Available</span></label>
-                    <label class="filter-check"><input type="checkbox" class="f-status" value="Unavailable"><span>Unavailable</span></label>
-                    <label class="filter-check"><input type="checkbox" class="f-status" value="Booked"><span>Booked</span></label>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Vehicle Type</h4>
-                    <label class="filter-check"><input type="checkbox" class="f-type" value="Sedan"><span>Sedan</span></label>
-                    <label class="filter-check"><input type="checkbox" class="f-type" value="MPV"><span>MPV</span></label>
-                    <label class="filter-check"><input type="checkbox" class="f-type" value="SUV"><span>SUV</span></label>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Transmission</h4>
-                    <label class="filter-check"><input type="checkbox" class="f-transmission" value="Automatic"><span>Automatic</span></label>
-                    <label class="filter-check"><input type="checkbox" class="f-transmission" value="Manual"><span>Manual</span></label>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Fuel Type</h4>
-                    <label class="filter-check"><input type="checkbox" class="f-fuel" value="Petrol"><span>Petrol</span></label>
-                    <label class="filter-check"><input type="checkbox" class="f-fuel" value="Diesel"><span>Diesel</span></label>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Seats</h4>
-                    <label class="filter-check"><input type="checkbox" class="f-seats" value="5"><span>5 Seats</span></label>
-                    <label class="filter-check"><input type="checkbox" class="f-seats" value="7"><span>7 Seats</span></label>
-                </div>
-
-                <div class="filter-group">
-                    <h4>Max Price (12-Hour)</h4>
-                    <input type="range" id="priceRangeInput" min="2500" max="5000" step="100" value="5000">
-                    <div class="price-range-label"><span>₱2,500</span><strong id="priceRangeValue">₱5,000</strong></div>
-                </div>
-            </aside>
-
-            <div class="results-main">
-                <div class="results-head">
-                    <div>
-                        <h2 id="allVehiclesCountLabel">Vehicles</h2>
-                        <p>Showing all available vehicles</p>
-                    </div>
-                    <div class="sort-select">
-                        <label for="allVehiclesSortSelect">Sort by</label>
-                        <select id="allVehiclesSortSelect">
-                            <option value="low">Price: Low to High</option>
-                            <option value="high">Price: High to Low</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="result-vehicle-list" id="allVehiclesList"></div>
-                <div class="filters-empty" id="filtersEmptyState" style="display:none;">
-                    <i class="fa-solid fa-filter-circle-xmark"></i>
-                    <h3>No vehicles match your filters</h3>
-                    <p>Try adjusting or clearing your filters.</p>
-                </div>
-            </div>
+        <div class="allv-head">
+            <span class="eyebrow"><i class="fa-solid fa-heart"></i> OUR FLEET, YOUR FAMILY</span>
+            <h1>Meet Luna, our Mitsubishi Xpander GLS 2026</h1>
+            <p class="flow-sub">We currently feature one trusted, well-maintained member of the family — with more joining the fleet soon. Here's everything you need to know before you ride with Luna.</p>
         </div>
+
+        <div id="allVehiclesList"></div>
     </div>
 </section>
 
@@ -657,7 +612,7 @@
             <div class="about-story-stats">
                 <div class="stat-box"><strong>10k+</strong><span>Happy Customers</span></div>
                 <div class="stat-box"><strong>24/7</strong><span>Customer Support</span></div>
-                <div class="stat-box"><strong>15+</strong><span>Vehicles in Fleet</span></div>
+                <div class="stat-box"><strong>100%</strong><span>Well-Maintained Rides</span></div>
             </div>
         </div>
 
@@ -757,7 +712,16 @@
     <div class="footer-inner">
         <div class="footer-brand">
             <div class="logo-block">
-                <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
+                <span class="logo-badge light">
+                <svg viewBox="0 0 36 36" class="logo-ring" aria-hidden="true">
+                    <path d="M6 18a12 12 0 0 1 12-12c3.2 0 6.1 1.3 8.2 3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M22 5.5l4.5 3.5-5 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M30 18a12 12 0 0 1-12 12c-3.2 0-6.1-1.3-8.2-3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M14 30.5l-4.5-3.5 5-2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <i class="fa-solid fa-car-side logo-car-icon"></i>
+                <img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'">
+            </span>
                 <span class="logo-text">
                     <span class="logo-word light">every<span class="accent-ride">ride</span></span>
                     <span class="logo-sub light">car rental services</span>
@@ -791,7 +755,16 @@
         <button type="button" class="modal-close" id="loginModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
 
         <div class="logo-block modal-logo">
-            <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-badge">
+                <svg viewBox="0 0 36 36" class="logo-ring" aria-hidden="true">
+                    <path d="M6 18a12 12 0 0 1 12-12c3.2 0 6.1 1.3 8.2 3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M22 5.5l4.5 3.5-5 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M30 18a12 12 0 0 1-12 12c-3.2 0-6.1-1.3-8.2-3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M14 30.5l-4.5-3.5 5-2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <i class="fa-solid fa-car-side logo-car-icon"></i>
+                <img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'">
+            </span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
                 <span class="logo-sub">car rental services</span>
@@ -837,7 +810,16 @@
         <button type="button" class="modal-close" id="signupModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
 
         <div class="logo-block modal-logo">
-            <span class="logo-badge"><img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'"><i class="fa-solid fa-car-side"></i></span>
+            <span class="logo-badge">
+                <svg viewBox="0 0 36 36" class="logo-ring" aria-hidden="true">
+                    <path d="M6 18a12 12 0 0 1 12-12c3.2 0 6.1 1.3 8.2 3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M22 5.5l4.5 3.5-5 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M30 18a12 12 0 0 1-12 12c-3.2 0-6.1-1.3-8.2-3.4" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+                    <path d="M14 30.5l-4.5-3.5 5-2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <i class="fa-solid fa-car-side logo-car-icon"></i>
+                <img src="assets/logo/logo.png" alt="EveryRide PH" class="logo-img" onerror="this.style.display='none'">
+            </span>
             <span class="logo-text">
                 <span class="logo-word">every<span class="accent-ride">ride</span></span>
                 <span class="logo-sub">car rental services</span>

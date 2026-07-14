@@ -1,20 +1,15 @@
 /* =====================================================
    DATA
 ===================================================== */
-/* Vehicle preview photos live in assets/vehicles/, named by code (TV, HC, MX, TF).
-   Drop your images in there using these exact filenames and they'll appear automatically.
-   Until a file exists, the layout falls back to the icon placeholder below. */
+/* EveryRide currently features one trusted member of the family: the
+   Mitsubishi Xpander GLS 2026, nicknamed "Luna". Vehicle photo lives at
+   assets/vehicles/MX.jpg — drop a file there and it appears automatically;
+   until then the layout falls back to the icon placeholder below. */
 /* status: 'Available' | 'Unavailable' | 'Booked' — drives the status badge shown
    on every vehicle card and whether the vehicle can be selected for booking. */
 const VEHICLES = [
-    { id:'vios', code:'TV', name:'Toyota Vios', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/TV.jpg', price12:2500, priceDay:5000, status:'Unavailable',
-      features:['Bluetooth Audio','Backup Camera','USB Charging Ports','Keyless Entry'] },
-    { id:'city', code:'HC', name:'Honda City', type:'Sedan', transmission:'Automatic', fuel:'Petrol', seats:5, bags:2, doors:4, icon:'fa-car', image:'assets/vehicles/HC.jpg', price12:2700, priceDay:5400, status:'Unavailable',
-      features:['Bluetooth Audio','Backup Camera','Cruise Control','USB Charging Ports'] },
-    { id:'xpander', code:'MX', name:'Mitsubishi Xpander', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000, status:'Available',
-      features:['Bluetooth Audio','Backup Camera','Third-Row Seating','USB Charging Ports','Keyless Entry'] },
-    { id:'fortuner', code:'TF', name:'Toyota Fortuner', type:'SUV', transmission:'Automatic', fuel:'Diesel', seats:7, bags:4, doors:5, icon:'fa-car-side', image:'assets/vehicles/TF.jpg', price12:5000, priceDay:9000, status:'Unavailable',
-      features:['Bluetooth Audio','360° Camera','Leather Seats','USB Charging Ports','Keyless Entry','Roof Rails'] }
+    { id:'xpander', code:'MX', name:'Mitsubishi Xpander GLS 2026', nickname:'Luna', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000, status:'Available',
+      features:['Bluetooth Audio','Backup Camera','Third-Row Seating','USB Charging Ports','Keyless Entry','Cruise Control','Push-Start Ignition'] }
 ];
 
 // Returns an <img> tag that quietly falls back to the gradient + icon placeholder
@@ -30,10 +25,12 @@ const VEHICLE_STATUS_META = {
 };
 
 // Small badge shown on every vehicle card / photo — tells a user at a glance
-// whether a car can be booked right now.
-function statusBadge(v){
+// whether a car can be booked right now. Kept compact so it never overwhelms
+// the photo it sits on.
+function statusBadge(v, size){
     const meta = VEHICLE_STATUS_META[v.status] || VEHICLE_STATUS_META.Unavailable;
-    return `<span class="vehicle-status-badge ${meta.className}"><i class="fa-solid fa-circle"></i> ${meta.label}</span>`;
+    const sizeClass = size === 'lg' ? ' vehicle-status-badge-lg' : '';
+    return `<span class="vehicle-status-badge ${meta.className}${sizeClass}"><i class="fa-solid fa-circle"></i> ${meta.label}</span>`;
 }
 
 function isBookable(v){ return v.status === 'Available'; }
@@ -203,24 +200,29 @@ function generateBookingId(){
 })();
 
 /* =====================================================
-   POPULAR VEHICLES (HOME)
+   MEET THE FAMILY (HOME) — spotlight on Luna, our one featured vehicle.
 ===================================================== */
 function renderPopularVehicles(){
     const grid = document.getElementById('popularVehicleGrid');
-    grid.innerHTML = VEHICLES.map(v => `
-        <div class="vehicle-card ${isBookable(v) ? '' : 'is-dimmed'}">
-            <div class="vehicle-card-media">
+    const v = VEHICLES[0];
+    grid.innerHTML = `
+        <div class="spotlight-card ${isBookable(v) ? '' : 'is-dimmed'}">
+            <div class="spotlight-media">
                 ${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>
-                ${statusBadge(v)}
+                ${statusBadge(v, 'lg')}
+                ${v.nickname ? `<span class="spotlight-nickname-tag"><i class="fa-solid fa-heart"></i> Meet ${v.nickname}!</span>` : ''}
             </div>
-            <div class="vehicle-card-body">
+            <div class="spotlight-body">
+                ${v.nickname ? `<span class="spotlight-nickname">${v.nickname}</span>` : ''}
                 <h3>${v.name}</h3>
                 <p class="vc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
                 <div class="vc-specs">
                     <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
                     <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
                     <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
+                    <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
                 </div>
+                <p class="spotlight-blurb">Roomy, reliable, and always ready for the next adventure with your family or barkada — Luna is the newest (and friendliest) member of the EveryRide family.</p>
                 <div class="vc-prices">
                     <div class="vc-price-item">
                         <span>12-Hour</span>
@@ -231,10 +233,10 @@ function renderPopularVehicles(){
                         <strong>${formatCurrency(v.priceDay)}</strong>
                     </div>
                 </div>
-                <button type="button" class="vc-view-btn" data-vehicle="${v.id}">View Details <i class="fa-solid fa-arrow-right"></i></button>
+                <button type="button" class="vc-view-btn" data-vehicle="${v.id}">Meet ${v.nickname || v.name} <i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </div>
-    `).join('');
+    `;
 
     grid.querySelectorAll('.vc-view-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -572,8 +574,8 @@ function renderVehicleDetails(){
     const v = state.vehicle || VEHICLES[0];
     state.vehicle = v;
 
-    document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v)}`;
-    document.getElementById('vdName').textContent = v.name;
+    document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v, 'lg')}`;
+    document.getElementById('vdName').textContent = v.nickname ? `${v.nickname} — ${v.name}` : v.name;
     document.getElementById('vdType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
 
     const featureChips = (v.features || []).map(f => `<span><i class="fa-solid fa-circle-check"></i> ${f}</span>`).join('');
@@ -852,94 +854,64 @@ function cancelBooking(id){
 }
 
 /* =====================================================
-   ALL VEHICLES (with filters)
+   ALL VEHICLES — full profile for our one featured vehicle, Luna.
+   (Filters were removed: with a single vehicle in the fleet, letting
+   people filter a list of one is just clutter. This will naturally grow
+   back into a filterable list as more vehicles join the family.)
 ===================================================== */
-const filterState = { type:[], transmission:[], fuel:[], seats:[], status:[], maxPrice:5000 };
-
-function readFiltersFromDOM(){
-    filterState.type = [...document.querySelectorAll('.f-type:checked')].map(el => el.value);
-    filterState.transmission = [...document.querySelectorAll('.f-transmission:checked')].map(el => el.value);
-    filterState.fuel = [...document.querySelectorAll('.f-fuel:checked')].map(el => el.value);
-    filterState.seats = [...document.querySelectorAll('.f-seats:checked')].map(el => Number(el.value));
-    filterState.status = [...document.querySelectorAll('.f-status:checked')].map(el => el.value);
-    filterState.maxPrice = Number(document.getElementById('priceRangeInput').value);
-}
-
-function applyFilters(vehicles){
-    return vehicles.filter(v => {
-        if (filterState.type.length && !filterState.type.includes(v.type)) return false;
-        if (filterState.transmission.length && !filterState.transmission.includes(v.transmission)) return false;
-        if (filterState.fuel.length && !filterState.fuel.includes(v.fuel)) return false;
-        if (filterState.seats.length && !filterState.seats.includes(v.seats)) return false;
-        if (filterState.status.length && !filterState.status.includes(v.status)) return false;
-        if (v.price12 > filterState.maxPrice) return false;
-        return true;
-    });
-}
-
 function renderAllVehicles(){
-    readFiltersFromDOM();
-    document.getElementById('priceRangeValue').textContent = formatCurrency(filterState.maxPrice);
+    const v = VEHICLES[0];
+    const featureChips = (v.features || []).map(f => `<span><i class="fa-solid fa-circle-check"></i> ${f}</span>`).join('');
 
-    const sort = document.getElementById('allVehiclesSortSelect').value;
-    let vehicles = applyFilters(VEHICLES);
-    vehicles.sort((a,b) => sort === 'low' ? a.price12 - b.price12 : b.price12 - a.price12);
-
-    document.getElementById('allVehiclesCountLabel').textContent = `${vehicles.length} Vehicle${vehicles.length !== 1 ? 's' : ''}`;
-
-    const listEl = document.getElementById('allVehiclesList');
-    const emptyEl = document.getElementById('filtersEmptyState');
-
-    if (!vehicles.length) {
-        listEl.style.display = 'none';
-        emptyEl.style.display = 'block';
-        return;
-    }
-    listEl.style.display = 'flex';
-    emptyEl.style.display = 'none';
-
-    listEl.innerHTML = vehicles.map(v => `
-        <div class="result-card ${isBookable(v) ? '' : 'is-dimmed'}">
-            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v)}</div>
-            <div class="result-card-body">
+    document.getElementById('allVehiclesList').innerHTML = `
+        <div class="spotlight-card allv-card ${isBookable(v) ? '' : 'is-dimmed'}">
+            <div class="spotlight-media">
+                ${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>
+                ${statusBadge(v, 'lg')}
+                ${v.nickname ? `<span class="spotlight-nickname-tag"><i class="fa-solid fa-heart"></i> This is ${v.nickname}</span>` : ''}
+            </div>
+            <div class="spotlight-body">
+                ${v.nickname ? `<span class="spotlight-nickname">${v.nickname}</span>` : ''}
                 <h3>${v.name}</h3>
-                <p class="rc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
-                <div class="rc-specs">
+                <p class="vc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
+
+                <div class="vc-specs allv-specs">
                     <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
                     <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
                     <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
                     <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+                    <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
+                    <span><i class="fa-solid fa-snowflake"></i> Air Conditioning</span>
                 </div>
-            </div>
-            <div class="result-card-action">
-                <div class="rc-price-both">
-                    <div class="rc-price">${formatCurrency(v.price12)}<small>per 12 hrs</small></div>
-                    <div class="rc-price rc-price-alt">${formatCurrency(v.priceDay)}<small>whole day</small></div>
+
+                <div class="allv-features">${featureChips}</div>
+
+                <div class="vc-prices">
+                    <div class="vc-price-item">
+                        <span>12-Hour</span>
+                        <strong>${formatCurrency(v.price12)}</strong>
+                    </div>
+                    <div class="vc-price-item">
+                        <span>Whole Day</span>
+                        <strong>${formatCurrency(v.priceDay)}</strong>
+                    </div>
                 </div>
-                <button type="button" class="view-details-btn" data-vehicle="${v.id}">View Details</button>
+
+                <button type="button" class="vc-view-btn view-details-btn" data-vehicle="${v.id}">
+                    ${isBookable(v) ? `Book ${v.nickname || v.name} Now` : 'View Details'} <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
         </div>
-    `).join('');
+    `;
 
-    listEl.querySelectorAll('.view-details-btn').forEach(btn => {
+    document.getElementById('allVehiclesList').querySelectorAll('.view-details-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            state.vehicle = VEHICLES.find(v => v.id === btn.getAttribute('data-vehicle'));
+            state.vehicle = VEHICLES.find(vv => vv.id === btn.getAttribute('data-vehicle'));
             if (!state.rentalType) state.rentalType = '12hour';
             showView('vehicleDetails');
         });
     });
 }
-
-document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats, .f-status').forEach(el => {
-    el.addEventListener('change', renderAllVehicles);
-});
-document.getElementById('priceRangeInput').addEventListener('input', renderAllVehicles);
-document.getElementById('allVehiclesSortSelect').addEventListener('change', renderAllVehicles);
-document.getElementById('clearFiltersBtn').addEventListener('click', () => {
-    document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats, .f-status').forEach(el => el.checked = false);
-    document.getElementById('priceRangeInput').value = 5000;
-    renderAllVehicles();
-});
 
 /* =====================================================
    CONTACT FORM
