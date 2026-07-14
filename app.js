@@ -1,15 +1,11 @@
 /* =====================================================
    DATA
 ===================================================== */
-/* EveryRide currently features one trusted member of the family: the
-   Mitsubishi Xpander GLS 2026, nicknamed "Luna". Vehicle photo lives at
-   assets/vehicles/MX.jpg — drop a file there and it appears automatically;
-   until then the layout falls back to the icon placeholder below. */
-/* status: 'Available' | 'Unavailable' | 'Booked' — drives the status badge shown
-   on every vehicle card and whether the vehicle can be selected for booking. */
+/* Vehicle preview photos live in assets/vehicles/, named by code (TV, HC, MX, TF).
+   Drop your images in there using these exact filenames and they'll appear automatically.
+   Until a file exists, the layout falls back to the icon placeholder below. */
 const VEHICLES = [
-    { id:'xpander', code:'MX', name:'Mitsubishi Xpander GLS 2026', nickname:'Luna', type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000, status:'Available',
-      features:['Bluetooth Audio','Backup Camera','Third-Row Seating','USB Charging Ports','Keyless Entry','Cruise Control','Push-Start Ignition'] }
+    { id:'xpander', code:'MX', nickname:'Luna', name:'Mitsubishi Xpander GLS', year:2026, type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000 }
 ];
 
 // Returns an <img> tag that quietly falls back to the gradient + icon placeholder
@@ -17,23 +13,6 @@ const VEHICLES = [
 function vehiclePhotoTag(v){
     return `<img src="${v.image}" alt="${v.name}" class="vehicle-photo" onerror="this.style.display='none'">`;
 }
-
-const VEHICLE_STATUS_META = {
-    Available:   { label:'Available',   className:'status-available' },
-    Unavailable: { label:'Unavailable', className:'status-unavailable' },
-    Booked:      { label:'Booked',      className:'status-booked' }
-};
-
-// Small badge shown on every vehicle card / photo — tells a user at a glance
-// whether a car can be booked right now. Kept compact so it never overwhelms
-// the photo it sits on.
-function statusBadge(v, size){
-    const meta = VEHICLE_STATUS_META[v.status] || VEHICLE_STATUS_META.Unavailable;
-    const sizeClass = size === 'lg' ? ' vehicle-status-badge-lg' : '';
-    return `<span class="vehicle-status-badge ${meta.className}${sizeClass}"><i class="fa-solid fa-circle"></i> ${meta.label}</span>`;
-}
-
-function isBookable(v){ return v.status === 'Available'; }
 
 const TIME_SLOTS = [
     { start:'7:00 AM', end:'7:00 PM' },
@@ -93,6 +72,7 @@ function showView(name, opts = {}) {
     closeMobileNav();
     window.scrollTo({ top:0, behavior:'instant' });
 
+    if (name === 'home') { renderFamilySpotlight(); renderUpcomingTrip(); }
     if (name === 'chooseType') { state.editingBookingId = null; renderChooseType(); }
     if (name === 'selectDateTime') renderDateTimeView();
     if (name === 'selectDates') renderDatesView();
@@ -148,105 +128,67 @@ function generateBookingId(){
 }
 
 /* =====================================================
-   HOME — HERO CAROUSEL
-   Slides read their image from inline background-image (assets/hero/slide-N.jpg).
-   If that file isn't there yet, this swaps in the data-fallback URL so the
-   layout still looks right while real photos are being added.
+   MEET THE FAMILY (HOME) — single-vehicle spotlight
 ===================================================== */
-(function initHeroCarousel(){
-    const track = document.getElementById('heroSlides');
-    if (!track) return;
-    const slides = Array.from(track.querySelectorAll('.hero-slide'));
-    const dotsWrap = document.getElementById('heroDots');
-    const prevBtn = document.getElementById('heroPrev');
-    const nextBtn = document.getElementById('heroNext');
-    let current = 0;
-    let timer = null;
-
-    // Verify each slide's real asset loads; if not, use the fallback stock photo.
-    slides.forEach(slide => {
-        const url = slide.style.backgroundImage.slice(5, -2); // unwrap url("...")
-        const fallback = slide.getAttribute('data-fallback');
-        const img = new Image();
-        img.onerror = () => { if (fallback) slide.style.backgroundImage = `url('${fallback}')`; };
-        img.src = url;
-    });
-
-    dotsWrap.innerHTML = slides.map((_, i) => `<button type="button" class="hero-dot ${i === 0 ? 'active' : ''}" data-slide="${i}" aria-label="Go to slide ${i+1}"></button>`).join('');
-    const dots = Array.from(dotsWrap.querySelectorAll('.hero-dot'));
-
-    function goTo(index){
-        slides[current].classList.remove('active');
-        dots[current].classList.remove('active');
-        current = (index + slides.length) % slides.length;
-        slides[current].classList.add('active');
-        dots[current].classList.add('active');
-    }
-
-    function restartAutoplay(){
-        clearInterval(timer);
-        timer = setInterval(() => goTo(current + 1), 5500);
-    }
-
-    prevBtn.addEventListener('click', () => { goTo(current - 1); restartAutoplay(); });
-    nextBtn.addEventListener('click', () => { goTo(current + 1); restartAutoplay(); });
-    dots.forEach(dot => dot.addEventListener('click', () => { goTo(Number(dot.getAttribute('data-slide'))); restartAutoplay(); }));
-
-    const carouselEl = document.getElementById('heroCarousel');
-    carouselEl.addEventListener('mouseenter', () => clearInterval(timer));
-    carouselEl.addEventListener('mouseleave', restartAutoplay);
-
-    restartAutoplay();
-})();
-
-/* =====================================================
-   MEET THE FAMILY (HOME) — spotlight on Luna, our one featured vehicle.
-===================================================== */
-function renderPopularVehicles(){
-    const grid = document.getElementById('popularVehicleGrid');
+function renderFamilySpotlight(){
     const v = VEHICLES[0];
-    grid.innerHTML = `
-        <div class="spotlight-card ${isBookable(v) ? '' : 'is-dimmed'}">
-            <div class="spotlight-media">
-                ${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>
-                ${statusBadge(v, 'lg')}
-                ${v.nickname ? `<span class="spotlight-nickname-tag"><i class="fa-solid fa-heart"></i> Meet ${v.nickname}!</span>` : ''}
-            </div>
-            <div class="spotlight-body">
-                ${v.nickname ? `<span class="spotlight-nickname">${v.nickname}</span>` : ''}
-                <h3>${v.name}</h3>
-                <p class="vc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
-                <div class="vc-specs">
-                    <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
-                    <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
-                    <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
-                    <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
-                </div>
-                <p class="spotlight-blurb">Roomy, reliable, and always ready for the next adventure with your family or barkada — Luna is the newest (and friendliest) member of the EveryRide family.</p>
-                <div class="vc-prices">
-                    <div class="vc-price-item">
-                        <span>12-Hour</span>
-                        <strong>${formatCurrency(v.price12)}</strong>
-                    </div>
-                    <div class="vc-price-item">
-                        <span>Whole Day</span>
-                        <strong>${formatCurrency(v.priceDay)}</strong>
-                    </div>
-                </div>
-                <button type="button" class="vc-view-btn" data-vehicle="${v.id}">Meet ${v.nickname || v.name} <i class="fa-solid fa-arrow-right"></i></button>
-            </div>
-        </div>
-    `;
 
-    grid.querySelectorAll('.vc-view-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            state.vehicle = VEHICLES.find(v => v.id === btn.getAttribute('data-vehicle'));
-            if (!state.rentalType) state.rentalType = '12hour';
-            showView('vehicleDetails');
-        });
+    document.getElementById('spotlightMedia').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i><span class="spotlight-nickname-tag">${v.nickname}</span>`;
+    document.getElementById('spotlightNickname').textContent = v.nickname;
+    document.getElementById('spotlightModel').textContent = `${v.name} ${v.year}`;
+    document.getElementById('spotlightSpecs').innerHTML = `
+        <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
+        <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
+        <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+        <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
+    `;
+    document.getElementById('spotlightPrice').innerHTML = `${formatCurrency(v.price12)} <small>/12 hrs</small>`;
+
+    document.getElementById('spotlightViewBtn').addEventListener('click', () => {
+        state.vehicle = v;
+        if (!state.rentalType) state.rentalType = '12hour';
+        showView('vehicleDetails');
     });
 }
-renderPopularVehicles();
+
+/* =====================================================
+   UPCOMING TRIP (HOME) — reflects the customer's own bookings
+===================================================== */
+function renderUpcomingTrip(){
+    const el = document.getElementById('upcomingTripContent');
+    const todayStr = toDateStr(new Date());
+
+    const upcoming = bookings
+        .filter(b => (b.status === 'pending' || b.status === 'confirmed') && b.pickup >= todayStr)
+        .sort((a, b) => a.pickup.localeCompare(b.pickup))[0];
+
+    if (!upcoming) {
+        el.innerHTML = `
+            <div class="ut-empty">
+                <i class="fa-solid fa-route"></i>
+                <p>No trips booked yet. Ready to make your first memory with Luna?</p>
+                <button type="button" class="btn btn-navy btn-sm" data-go="chooseType">Book Now</button>
+            </div>`;
+        el.querySelector('[data-go]').addEventListener('click', (e) => { e.preventDefault(); showView('chooseType'); });
+        return;
+    }
+
+    const meta = STATUS_META[upcoming.status] || STATUS_META.pending;
+    const dateLabel = upcoming.rentalType === 'wholeday'
+        ? `${formatShortDate(upcoming.pickup)} - ${formatShortDate(upcoming.returnDate)}`
+        : `${formatShortDate(upcoming.pickup)}, ${upcoming.pickupTimeSlot.start}`;
+
+    el.innerHTML = `
+        <div class="ut-media"><i class="fa-solid ${upcoming.vehicle.icon}"></i></div>
+        <div class="ut-title">Trip with ${upcoming.vehicle.nickname || upcoming.vehicle.name}</div>
+        <div class="ut-dates">${dateLabel} · ${upcoming.location}</div>
+        <span class="status-badge ${meta.class}">${meta.label}</span>
+        <div class="ut-actions">
+            <button type="button" class="btn btn-outline" data-go="myBookings">Manage Booking</button>
+            <button type="button" class="btn btn-navy" data-go="myBookings">View Details</button>
+        </div>`;
+    el.querySelectorAll('[data-go]').forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); showView('myBookings'); }));
+}
 
 /* =====================================================
    QUICK SEARCH FORM (HOME)
@@ -535,16 +477,15 @@ function renderResultList(){
 
     const listEl = document.getElementById('resultVehicleList');
     listEl.innerHTML = vehicles.map(v => `
-        <div class="result-card ${isBookable(v) ? '' : 'is-dimmed'}">
-            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v)}</div>
+        <div class="result-card">
+            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
             <div class="result-card-body">
-                <h3>${v.name}</h3>
-                <p class="rc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
+                <h3>${v.nickname ? `${v.nickname} — ${v.name}` : v.name}</h3>
+                <p class="rc-type">${v.type} · ${v.transmission}</p>
                 <div class="rc-specs">
                     <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
-                    <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
-                    <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
                     <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+                    <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
                 </div>
             </div>
             <div class="result-card-action">
@@ -574,11 +515,9 @@ function renderVehicleDetails(){
     const v = state.vehicle || VEHICLES[0];
     state.vehicle = v;
 
-    document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>${statusBadge(v, 'lg')}`;
+    document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>`;
     document.getElementById('vdName').textContent = v.nickname ? `${v.nickname} — ${v.name}` : v.name;
     document.getElementById('vdType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
-
-    const featureChips = (v.features || []).map(f => `<span><i class="fa-solid fa-circle-check"></i> ${f}</span>`).join('');
 
     document.getElementById('vdSpecs').innerHTML = `
         <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
@@ -587,7 +526,6 @@ function renderVehicleDetails(){
         <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
         <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
         <span><i class="fa-solid fa-snowflake"></i> Air Conditioning</span>
-        ${featureChips}
     `;
 
     document.getElementById('vdPhotoStrip').innerHTML = [1,2,3,4].map((n,i) => `
@@ -607,23 +545,9 @@ function renderVehicleDetails(){
             ? `${state.timeSlot.start} - ${state.timeSlot.end}`
             : 'Select a time slot';
     }
-
-    const selectBtn = document.getElementById('selectVehicleBtn');
-    const unavailableNote = document.getElementById('vdUnavailableNote');
-    if (isBookable(v)) {
-        selectBtn.disabled = false;
-        selectBtn.textContent = 'Select This Vehicle';
-        unavailableNote.style.display = 'none';
-    } else {
-        selectBtn.disabled = true;
-        selectBtn.textContent = 'Currently Unavailable';
-        unavailableNote.style.display = 'flex';
-        unavailableNote.innerHTML = `<i class="fa-solid fa-circle-info"></i> This vehicle is ${v.status.toLowerCase()} right now. Browse other vehicles or check back later.`;
-    }
 }
 
 document.getElementById('selectVehicleBtn').addEventListener('click', () => {
-    if (!isBookable(state.vehicle)) return;
     if (!state.rentalType) { showView('chooseType'); return; }
     if (state.rentalType === '12hour' && !(state.date && state.timeSlot)) { showView('selectDateTime'); return; }
     if (state.rentalType === 'wholeday' && !(state.rangeStart && state.rangeEnd)) { showView('selectDates'); return; }
@@ -639,7 +563,7 @@ function renderBookingSummary(){
     const price = getVehiclePrice(v);
 
     document.getElementById('bsVehicleIcon').innerHTML = `<i class="fa-solid ${v.icon}"></i>`;
-    document.getElementById('bsVehicleName').textContent = v.name;
+    document.getElementById('bsVehicleName').textContent = v.nickname ? `${v.nickname} — ${v.name}` : v.name;
     document.getElementById('bsVehicleType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
 
     document.getElementById('bsRentalType').textContent = isWholeDay ? 'Whole Day Rental' : '12-Hour Rental';
@@ -671,7 +595,7 @@ function saveBookingEdits(){
     if (!booking) { showView('myBookings'); return; }
 
     const isWholeDay = state.rentalType === 'wholeday';
-    booking.vehicle = { id: state.vehicle.id, code: state.vehicle.code, name: state.vehicle.name, type: state.vehicle.type, transmission: state.vehicle.transmission, icon: state.vehicle.icon };
+    booking.vehicle = { id: state.vehicle.id, code: state.vehicle.code, nickname: state.vehicle.nickname, name: state.vehicle.name, type: state.vehicle.type, transmission: state.vehicle.transmission, icon: state.vehicle.icon };
     booking.rentalType = state.rentalType;
     booking.location = state.location;
     booking.pickup = isWholeDay ? state.rangeStart : state.date;
@@ -702,7 +626,7 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
         id: generateBookingId(),
         submittedAt: new Date().toISOString(),
         status: 'pending',
-        vehicle: { id:v.id, code:v.code, name:v.name, type:v.type, transmission:v.transmission, icon:v.icon },
+        vehicle: { id:v.id, code:v.code, nickname:v.nickname, name:v.name, type:v.type, transmission:v.transmission, icon:v.icon },
         rentalType: state.rentalType,
         location: state.location,
         pickup: isWholeDay ? state.rangeStart : state.date,
@@ -730,7 +654,7 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
 ===================================================== */
 function renderConfirmation(booking){
     document.getElementById('cfBookingId').textContent = booking.id;
-    document.getElementById('cfVehicle').textContent = booking.vehicle.name;
+    document.getElementById('cfVehicle').textContent = booking.vehicle.nickname ? `${booking.vehicle.nickname} — ${booking.vehicle.name}` : booking.vehicle.name;
     document.getElementById('cfPickup').textContent = booking.rentalType === 'wholeday'
         ? formatShortDate(booking.pickup)
         : `${formatShortDate(booking.pickup)}, ${booking.pickupTimeSlot.start}`;
@@ -808,7 +732,7 @@ function renderMyBookings(){
             <div class="bi-top-row">
                 <div class="bi-icon"><i class="fa-solid ${b.vehicle.icon}"></i></div>
                 <div class="bi-body">
-                    <strong>${b.vehicle.name}</strong>
+                    <strong>${b.vehicle.nickname ? `${b.vehicle.nickname} · ` : ''}${b.vehicle.name}</strong>
                     <span>${b.id} · ${dateLabel}</span>
                 </div>
                 <div class="bi-status"><span class="status-badge ${meta.class}">${meta.label}</span></div>
@@ -854,64 +778,88 @@ function cancelBooking(id){
 }
 
 /* =====================================================
-   ALL VEHICLES — full profile for our one featured vehicle, Luna.
-   (Filters were removed: with a single vehicle in the fleet, letting
-   people filter a list of one is just clutter. This will naturally grow
-   back into a filterable list as more vehicles join the family.)
+   ALL VEHICLES (with filters)
 ===================================================== */
+const filterState = { type:[], transmission:[], fuel:[], seats:[], maxPrice:4000 };
+
+function readFiltersFromDOM(){
+    filterState.type = [...document.querySelectorAll('.f-type:checked')].map(el => el.value);
+    filterState.transmission = [...document.querySelectorAll('.f-transmission:checked')].map(el => el.value);
+    filterState.fuel = [...document.querySelectorAll('.f-fuel:checked')].map(el => el.value);
+    filterState.seats = [...document.querySelectorAll('.f-seats:checked')].map(el => Number(el.value));
+    filterState.maxPrice = Number(document.getElementById('priceRangeInput').value);
+}
+
+function applyFilters(vehicles){
+    return vehicles.filter(v => {
+        if (filterState.type.length && !filterState.type.includes(v.type)) return false;
+        if (filterState.transmission.length && !filterState.transmission.includes(v.transmission)) return false;
+        if (filterState.fuel.length && !filterState.fuel.includes(v.fuel)) return false;
+        if (filterState.seats.length && !filterState.seats.includes(v.seats)) return false;
+        if (v.price12 > filterState.maxPrice) return false;
+        return true;
+    });
+}
+
 function renderAllVehicles(){
-    const v = VEHICLES[0];
-    const featureChips = (v.features || []).map(f => `<span><i class="fa-solid fa-circle-check"></i> ${f}</span>`).join('');
+    readFiltersFromDOM();
+    document.getElementById('priceRangeValue').textContent = formatCurrency(filterState.maxPrice);
 
-    document.getElementById('allVehiclesList').innerHTML = `
-        <div class="spotlight-card allv-card ${isBookable(v) ? '' : 'is-dimmed'}">
-            <div class="spotlight-media">
-                ${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>
-                ${statusBadge(v, 'lg')}
-                ${v.nickname ? `<span class="spotlight-nickname-tag"><i class="fa-solid fa-heart"></i> This is ${v.nickname}</span>` : ''}
-            </div>
-            <div class="spotlight-body">
-                ${v.nickname ? `<span class="spotlight-nickname">${v.nickname}</span>` : ''}
-                <h3>${v.name}</h3>
-                <p class="vc-type">${v.type} · ${v.transmission} · ${v.fuel}</p>
+    const sort = document.getElementById('allVehiclesSortSelect').value;
+    let vehicles = applyFilters(VEHICLES);
+    vehicles.sort((a,b) => sort === 'low' ? a.price12 - b.price12 : b.price12 - a.price12);
 
-                <div class="vc-specs allv-specs">
+    document.getElementById('allVehiclesCountLabel').textContent = `${vehicles.length} Vehicle${vehicles.length !== 1 ? 's' : ''}`;
+
+    const listEl = document.getElementById('allVehiclesList');
+    const emptyEl = document.getElementById('filtersEmptyState');
+
+    if (!vehicles.length) {
+        listEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        return;
+    }
+    listEl.style.display = 'flex';
+    emptyEl.style.display = 'none';
+
+    listEl.innerHTML = vehicles.map(v => `
+        <div class="result-card">
+            <div class="result-card-media">${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i></div>
+            <div class="result-card-body">
+                <h3>${v.nickname ? `${v.nickname} — ${v.name}` : v.name}</h3>
+                <p class="rc-type">${v.type} · ${v.transmission}</p>
+                <div class="rc-specs">
                     <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
-                    <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
-                    <span><i class="fa-solid fa-door-closed"></i> ${v.doors} Doors</span>
                     <span><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
                     <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
-                    <span><i class="fa-solid fa-snowflake"></i> Air Conditioning</span>
                 </div>
-
-                <div class="allv-features">${featureChips}</div>
-
-                <div class="vc-prices">
-                    <div class="vc-price-item">
-                        <span>12-Hour</span>
-                        <strong>${formatCurrency(v.price12)}</strong>
-                    </div>
-                    <div class="vc-price-item">
-                        <span>Whole Day</span>
-                        <strong>${formatCurrency(v.priceDay)}</strong>
-                    </div>
-                </div>
-
-                <button type="button" class="vc-view-btn view-details-btn" data-vehicle="${v.id}">
-                    ${isBookable(v) ? `Book ${v.nickname || v.name} Now` : 'View Details'} <i class="fa-solid fa-arrow-right"></i>
-                </button>
+            </div>
+            <div class="result-card-action">
+                <div class="rc-price">${formatCurrency(v.price12)}<small>per 12 hrs</small></div>
+                <button type="button" class="view-details-btn" data-vehicle="${v.id}">View Details</button>
             </div>
         </div>
-    `;
+    `).join('');
 
-    document.getElementById('allVehiclesList').querySelectorAll('.view-details-btn').forEach(btn => {
+    listEl.querySelectorAll('.view-details-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            state.vehicle = VEHICLES.find(vv => vv.id === btn.getAttribute('data-vehicle'));
+            state.vehicle = VEHICLES.find(v => v.id === btn.getAttribute('data-vehicle'));
             if (!state.rentalType) state.rentalType = '12hour';
             showView('vehicleDetails');
         });
     });
 }
+
+document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats').forEach(el => {
+    el.addEventListener('change', renderAllVehicles);
+});
+document.getElementById('priceRangeInput').addEventListener('input', renderAllVehicles);
+document.getElementById('allVehiclesSortSelect').addEventListener('change', renderAllVehicles);
+document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+    document.querySelectorAll('.f-type, .f-transmission, .f-fuel, .f-seats').forEach(el => el.checked = false);
+    document.getElementById('priceRangeInput').value = 4000;
+    renderAllVehicles();
+});
 
 /* =====================================================
    CONTACT FORM
@@ -938,6 +886,11 @@ function closeModal(id){ document.getElementById(id).style.display = 'none'; doc
 
 document.getElementById('headerLoginLink').addEventListener('click', (e) => {
     e.preventDefault();
+    openModal('loginModalOverlay');
+});
+document.getElementById('mobileLoginLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    closeMobileNav();
     openModal('loginModalOverlay');
 });
 document.getElementById('loginModalClose').addEventListener('click', () => closeModal('loginModalOverlay'));
@@ -1047,7 +1000,46 @@ document.addEventListener('click', (e) => {
 });
 
 /* =====================================================
+   TESTIMONIAL CAROUSEL (HOME)
+===================================================== */
+const TESTIMONIALS = [
+    { text:"Great service, smooth booking, and the car was in excellent condition. Our family trip was truly memorable!", name:'Maria Santos', stars:5 },
+    { text:"Luna was spotless and the WiFi on board made our Tagaytay drive so much easier with the kids entertained.", name:'Ramon Cruz', stars:5 },
+    { text:"Booking took less than five minutes and the team followed up right away. Honest pricing, no surprises.", name:'Angela Reyes', stars:5 }
+];
+let testimonialIdx = 0;
+
+function renderTestimonial(){
+    const t = TESTIMONIALS[testimonialIdx];
+    document.getElementById('testimonialText').textContent = t.text;
+    document.getElementById('testimonialName').textContent = t.name;
+    document.getElementById('testimonialAvatar').textContent = t.name.charAt(0);
+
+    const dotsEl = document.getElementById('testimonialDots');
+    dotsEl.innerHTML = TESTIMONIALS.map((_, i) => `<button type="button" class="testimonial-dot ${i === testimonialIdx ? 'active' : ''}" data-idx="${i}" aria-label="Testimonial ${i+1}"></button>`).join('');
+    dotsEl.querySelectorAll('.testimonial-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            testimonialIdx = Number(dot.getAttribute('data-idx'));
+            renderTestimonial();
+        });
+    });
+}
+
+/* =====================================================
+   NEWSLETTER SIGNUP (HOME) — visual only, no backend available
+===================================================== */
+document.getElementById('newsletterForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    document.getElementById('newsletterSuccess').style.display = 'flex';
+    form.reset();
+    setTimeout(() => { document.getElementById('newsletterSuccess').style.display = 'none'; }, 5000);
+});
+
+/* =====================================================
    INIT
 ===================================================== */
 updateBookingsBadge();
+renderTestimonial();
 showView('home');
