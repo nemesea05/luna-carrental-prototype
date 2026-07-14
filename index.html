@@ -197,13 +197,34 @@
         </div>
     </section>
 
-    <!-- Meet the Family — single-vehicle spotlight + Upcoming Trip -->
-    <section id="fleet">
+    <!-- Browse Cars — highlighted single-vehicle spotlight + Upcoming Trip -->
+    <section id="fleet" class="browse-section">
+
+        <div class="browse-head">
+            <div class="browse-head-title">
+                <span class="eyebrow">MEET THE MEMBERS OF THE FAMILY</span>
+                <h2>Browse Cars</h2>
+            </div>
+            <div class="browse-filters" role="tablist" aria-label="Vehicle type">
+                <button type="button" class="filter-chip active" data-go="allVehicles">All Cars</button>
+                <button type="button" class="filter-chip" data-go="allVehicles">MPV</button>
+                <button type="button" class="filter-chip disabled" disabled title="More vehicles joining the family soon">SUV</button>
+                <button type="button" class="filter-chip disabled" disabled title="More vehicles joining the family soon">Sedan</button>
+                <button type="button" class="filter-chip disabled" disabled title="More vehicles joining the family soon">Van</button>
+            </div>
+            <a href="#" class="browse-view-all" data-go="allVehicles">View all vehicles <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
         <div class="family-spotlight-layout">
-            <div class="spotlight-card">
+            <div class="spotlight-card featured-card">
+                <span class="featured-ribbon"><i class="fa-solid fa-heart"></i> Family Favorite</span>
                 <div class="spotlight-media" id="spotlightMedia"><i class="fa-solid fa-van-shuttle"></i></div>
                 <div class="spotlight-body">
-                    <span class="spotlight-eyebrow">MEET THE MEMBERS OF THE FAMILY!</span>
+                    <div class="spotlight-rating">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <span>4.9 &middot; loved by 120+ families</span>
+                    </div>
+                    <span class="spotlight-eyebrow">TODAY'S HIGHLIGHT</span>
                     <div class="spotlight-name" id="spotlightNickname">Luna</div>
                     <div class="spotlight-model" id="spotlightModel">Mitsubishi Xpander GLS 2026</div>
                     <p class="spotlight-tagline">Every family needs a ride they can count on. Luna's roomy, reliable, and ready for your next barkada trip or family getaway.</p>

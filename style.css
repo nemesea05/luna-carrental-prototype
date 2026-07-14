@@ -189,15 +189,34 @@ input,select{ font-family:var(--font-body); }
 .experience-card p{ color:rgba(255,255,255,.72); font-size:12.5px; line-height:1.5; }
 
 /* =====================================================
-   MEET THE FAMILY — single-vehicle spotlight + Upcoming Trip
+   BROWSE CARS — header + highlighted single-vehicle spotlight + Upcoming Trip
 ===================================================== */
-.family-spotlight-layout{ max-width:1240px; margin:0 auto; padding:70px 6% 60px; display:grid; grid-template-columns:2fr 1fr; gap:22px; align-items:stretch; }
+.browse-section{ max-width:1240px; margin:0 auto; padding:70px 6% 0; }
 
-.spotlight-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; display:flex; }
+.browse-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px 24px; margin-bottom:28px; }
+.browse-head-title .eyebrow{ display:block; margin-bottom:6px; }
+.browse-head-title h2{ font-size:1.75rem; font-weight:700; letter-spacing:-.01em; }
+.browse-filters{ display:flex; gap:8px; flex-wrap:wrap; }
+.filter-chip{ border:1.5px solid var(--line); background:#fff; color:var(--charcoal); font-size:13px; font-weight:600; padding:9px 18px; border-radius:30px; transition:.2s var(--ease); white-space:nowrap; }
+.filter-chip:hover:not(.disabled){ border-color:var(--green); color:var(--green); }
+.filter-chip.active{ background:var(--green); border-color:var(--green); color:#fff; }
+.filter-chip.disabled{ opacity:.45; cursor:not-allowed; }
+.browse-view-all{ font-size:13.5px; font-weight:700; color:var(--green); display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:gap .2s var(--ease); }
+.browse-view-all:hover{ gap:10px; }
+
+.family-spotlight-layout{ padding:0 0 60px; display:grid; grid-template-columns:2fr 1fr; gap:22px; align-items:stretch; }
+
+.spotlight-card{ position:relative; background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; display:flex; }
+.featured-card{ border-color:transparent; background-image:linear-gradient(#fff,#fff),linear-gradient(120deg,var(--yellow) 0%,var(--green) 100%); background-origin:border-box; background-clip:padding-box,border-box; box-shadow:0 18px 40px rgba(46,125,50,.12); transition:transform .3s var(--ease), box-shadow .3s var(--ease); }
+.featured-card:hover{ transform:translateY(-4px); box-shadow:0 24px 48px rgba(46,125,50,.18); }
+.featured-ribbon{ position:absolute; top:18px; right:18px; z-index:2; background:var(--yellow); color:var(--green-darker); font-size:12px; font-weight:700; padding:7px 14px; border-radius:30px; display:flex; align-items:center; gap:6px; box-shadow:0 6px 16px rgba(0,0,0,.18); }
+.featured-ribbon i{ color:var(--danger); }
 .spotlight-media{ position:relative; flex:1; min-width:0; background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%); display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .spotlight-media i{ font-size:96px; color:rgba(255,255,255,.9); }
 .spotlight-nickname-tag{ position:absolute; top:16px; left:16px; background:var(--yellow); color:var(--green-darker); font-family:var(--font-script); font-size:1.5rem; padding:2px 18px 6px; border-radius:30px; box-shadow:0 6px 16px rgba(0,0,0,.15); }
 .spotlight-body{ flex:1; min-width:0; padding:30px 28px; display:flex; flex-direction:column; justify-content:center; }
+.spotlight-rating{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--slate); margin-bottom:12px; }
+.spotlight-rating i{ color:var(--yellow-dark); font-size:11px; }
 .spotlight-eyebrow{ font-size:12px; font-weight:700; letter-spacing:.1em; color:var(--green); margin-bottom:8px; }
 .spotlight-name{ font-family:var(--font-script); font-size:2.6rem; color:var(--green-dark); line-height:1; margin-bottom:4px; }
 .spotlight-model{ font-size:1.05rem; font-weight:700; color:var(--charcoal); margin-bottom:2px; }
@@ -631,6 +650,10 @@ input,select{ font-family:var(--font-body); }
     .vehicle-grid{ grid-template-columns:repeat(2,1fr); }
     .feature-strip{ grid-template-columns:repeat(2,1fr); }
     .family-spotlight-layout{ grid-template-columns:1fr; }
+    .browse-head{ flex-direction:column; align-items:flex-start; }
+    .browse-filters{ overflow-x:auto; flex-wrap:nowrap; max-width:100%; padding-bottom:4px; }
+    .spotlight-card{ flex-direction:column; }
+    .spotlight-media{ min-height:220px; }
     .testimonial-newsletter-layout{ grid-template-columns:1fr; }
     .trust-strip{ flex-wrap:wrap; justify-content:flex-start; gap:20px 28px; }
     .experience-grid{ grid-template-columns:repeat(2,1fr); }
