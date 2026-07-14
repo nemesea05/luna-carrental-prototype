@@ -680,6 +680,7 @@ const STATUS_META = {
 };
 
 let bookingsFilter = 'all';
+let activeBookingId = null;
 
 function updateBookingsBadge(){
     const badge = document.getElementById('bookingsCountBadge');
@@ -721,12 +722,6 @@ function renderMyBookings(){
             ? `${formatShortDate(b.pickup)} - ${formatShortDate(b.returnDate)}`
             : `${formatShortDate(b.pickup)}, ${b.pickupTimeSlot.start} - ${b.pickupTimeSlot.end}`;
 
-        // Only a pending booking can still be changed by the customer.
-        const actions = b.status === 'pending' ? `
-                <button type="button" class="bi-action-btn" data-edit="${b.id}">Edit</button>
-                <button type="button" class="bi-action-btn cancel-btn" data-cancel="${b.id}">Cancel Booking</button>
-            ` : '';
-
         return `
         <div class="booking-item-card">
             <div class="bi-top-row">
@@ -737,17 +732,49 @@ function renderMyBookings(){
                 </div>
                 <div class="bi-status"><span class="status-badge ${meta.class}">${meta.label}</span></div>
             </div>
-            ${actions ? `<div class="bi-actions">${actions}</div>` : ''}
+            <div class="bi-actions"><button type="button" class="bi-action-btn" data-details="${b.id}">View Details <i class="fa-solid fa-arrow-right"></i></button></div>
         </div>`;
     }).join('');
 
-    listEl.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => editBooking(btn.getAttribute('data-edit')));
-    });
-    listEl.querySelectorAll('[data-cancel]').forEach(btn => {
-        btn.addEventListener('click', () => cancelBooking(btn.getAttribute('data-cancel')));
+    listEl.querySelectorAll('[data-details]').forEach(btn => {
+        btn.addEventListener('click', () => openBookingDetails(btn.getAttribute('data-details')));
     });
 }
+
+function bookingDateLabel(booking){
+    return booking.rentalType === 'wholeday'
+        ? `${formatShortDate(booking.pickup)} - ${formatShortDate(booking.returnDate)}`
+        : `${formatShortDate(booking.pickup)}, ${booking.pickupTimeSlot.start} - ${booking.pickupTimeSlot.end}`;
+}
+
+function openBookingDetails(id){
+    const booking = bookings.find(b => b.id === id);
+    if (!booking) return;
+    const meta = STATUS_META[booking.status] || STATUS_META.pending;
+    const content = document.getElementById('bookingDetailsContent');
+    const canManage = booking.status === 'pending';
+    content.innerHTML = `
+        <div class="booking-details-heading"><span class="eyebrow">BOOKING DETAILS</span><h2 id="bookingDetailsTitle">${booking.vehicle.nickname ? `${booking.vehicle.nickname} · ` : ''}${booking.vehicle.name}</h2><p>Booking reference: ${booking.id}</p><div class="booking-detail-status"><span class="status-badge ${meta.class}">${meta.label}</span></div></div>
+        <div class="booking-detail-grid">
+            <div class="booking-detail-cell"><small>Rental type</small><strong>${booking.rentalType === 'wholeday' ? 'Whole Day Rental' : '12-Hour Rental'}</strong></div>
+            <div class="booking-detail-cell"><small>Pick-up location</small><strong>${booking.location}</strong></div>
+            <div class="booking-detail-cell"><small>Schedule</small><strong>${bookingDateLabel(booking)}</strong></div>
+            <div class="booking-detail-cell"><small>Vehicle</small><strong>${booking.vehicle.transmission} · ${booking.vehicle.type}</strong></div>
+        </div>
+        <div class="booking-details-total"><span>Total rental price</span><strong>₱${Number(booking.total || 0).toLocaleString()}</strong></div>
+        ${canManage ? `<div class="booking-detail-actions"><button type="button" class="btn btn-outline" data-detail-edit="${booking.id}">Edit Booking</button><button type="button" class="btn cancel-confirm-btn" data-detail-cancel="${booking.id}">Cancel Booking</button></div>` : ''}`;
+    document.getElementById('bookingDetailsOverlay').style.display = 'flex';
+    content.querySelector('[data-detail-edit]')?.addEventListener('click', () => { closeBookingDetails(); editBooking(booking.id); });
+    content.querySelector('[data-detail-cancel]')?.addEventListener('click', () => { closeBookingDetails(); openCancelBooking(booking.id); });
+}
+
+function closeBookingDetails(){ document.getElementById('bookingDetailsOverlay').style.display = 'none'; }
+function openCancelBooking(id){
+    activeBookingId = id;
+    document.getElementById('cancelBookingForm').reset();
+    document.getElementById('cancelBookingOverlay').style.display = 'flex';
+}
+function closeCancelBooking(){ activeBookingId = null; document.getElementById('cancelBookingOverlay').style.display = 'none'; }
 
 function editBooking(id){
     const booking = bookings.find(b => b.id === id);
@@ -768,11 +795,13 @@ function editBooking(id){
     showView(booking.rentalType === 'wholeday' ? 'selectDates' : 'selectDateTime');
 }
 
-function cancelBooking(id){
+function cancelBooking(id, reason = '', feedback = ''){
     const booking = bookings.find(b => b.id === id);
     if (!booking || booking.status !== 'pending') return;
-    if (!confirm(`Cancel booking ${booking.id} for ${booking.vehicle.name}? This can't be undone.`)) return;
     booking.status = 'cancelled';
+    booking.cancellationReason = reason;
+    booking.cancellationFeedback = feedback;
+    booking.cancelledAt = new Date().toISOString();
     localStorage.setItem('everyride_bookings', JSON.stringify(bookings));
     renderMyBookings();
 }
@@ -1035,6 +1064,37 @@ document.getElementById('newsletterForm').addEventListener('submit', (e) => {
     document.getElementById('newsletterSuccess').style.display = 'flex';
     form.reset();
     setTimeout(() => { document.getElementById('newsletterSuccess').style.display = 'none'; }, 5000);
+});
+
+/* =====================================================
+   LANDING PAGE CAROUSEL + BOOKING MODALS
+===================================================== */
+const heroSlides = [...document.querySelectorAll('.hero-slide')];
+const heroDots = [...document.querySelectorAll('.hero-pagination button')];
+let heroIndex = 0;
+let heroTimer;
+function setHeroSlide(index){
+    heroIndex = (index + heroSlides.length) % heroSlides.length;
+    heroSlides.forEach((slide, i) => slide.classList.toggle('active', i === heroIndex));
+    heroDots.forEach((dot, i) => dot.classList.toggle('active', i === heroIndex));
+}
+function restartHeroTimer(){ clearInterval(heroTimer); heroTimer = setInterval(() => setHeroSlide(heroIndex + 1), 6500); }
+document.querySelector('.hero-prev').addEventListener('click', () => { setHeroSlide(heroIndex - 1); restartHeroTimer(); });
+document.querySelector('.hero-next').addEventListener('click', () => { setHeroSlide(heroIndex + 1); restartHeroTimer(); });
+heroDots.forEach((dot, i) => dot.addEventListener('click', () => { setHeroSlide(i); restartHeroTimer(); }));
+restartHeroTimer();
+
+document.querySelectorAll('[data-close-booking-details]').forEach(btn => btn.addEventListener('click', closeBookingDetails));
+document.querySelectorAll('[data-close-cancel]').forEach(btn => btn.addEventListener('click', closeCancelBooking));
+document.getElementById('bookingDetailsOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeBookingDetails(); });
+document.getElementById('cancelBookingOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeCancelBooking(); });
+document.getElementById('cancelBookingForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!activeBookingId) return;
+    const selected = document.querySelector('input[name="cancelReason"]:checked');
+    const feedback = document.getElementById('cancelFeedback').value.trim();
+    cancelBooking(activeBookingId, selected ? selected.value : '', feedback);
+    closeCancelBooking();
 });
 
 /* =====================================================

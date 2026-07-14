@@ -101,19 +101,33 @@
 ========================================================== -->
 <section id="view-home" class="view">
 
-    <div class="hero">
+    <section class="hero-carousel" aria-label="EveryRide highlights">
+        <article class="hero-slide active" data-slide="0">
+            <div class="hero-shade"></div>
         <div class="hero-copy">
+            <span class="hero-kicker">YOUR STORY STARTS HERE</span>
             <h1>every journey,<span class="hero-script">every story <i class="fa-solid fa-heart hero-heart"></i></span></h1>
             <p>We don't just rent cars. We help you create unforgettable moments with the people you love — your family, your barkada, your person.</p>
             <div class="hero-btns">
-                <button type="button" class="btn btn-navy btn-lg" data-go="chooseType"><i class="fa-solid fa-car-side"></i> Book Your Ride</button>
-                <button type="button" class="btn btn-outline btn-lg scroll-link" data-scroll="fleet">Meet the Family</button>
+                <button type="button" class="btn btn-accent btn-lg" data-go="chooseType"><i class="fa-solid fa-car-side"></i> Book Your Ride</button>
+                <button type="button" class="hero-text-link scroll-link" data-scroll="fleet">Meet the Family <i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </div>
         <div class="hero-media">
             <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1200&auto=format&fit=crop" alt="White SUV on a coastal road with a city skyline behind it">
         </div>
-    </div>
+        </article>
+        <article class="hero-slide" data-slide="1">
+            <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&amp;w=1800&amp;auto=format&amp;fit=crop" alt="Car parked at a scenic destination">
+            <div class="hero-shade"></div><div class="hero-copy"><span class="hero-kicker">READY WHEN YOU ARE</span><h1>Room for the<span class="hero-script">whole crew</span></h1><p>Clean, well-maintained rides with space for every plan and every passenger.</p><div class="hero-btns"><button type="button" class="btn btn-accent btn-lg" data-go="allVehicles">Explore Our Fleet <i class="fa-solid fa-arrow-right"></i></button></div></div>
+        </article>
+        <article class="hero-slide" data-slide="2">
+            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&amp;w=1800&amp;auto=format&amp;fit=crop" alt="Car driving along a mountain road at sunset">
+            <div class="hero-shade"></div><div class="hero-copy"><span class="hero-kicker">SIMPLE, FLEXIBLE, EVERY DAY</span><h1>Make the drive<span class="hero-script">part of the memory</span></h1><p>Choose a 12-hour or whole-day rental and book your next escape in just a few steps.</p><div class="hero-btns"><button type="button" class="btn btn-accent btn-lg" data-go="chooseType">Check Availability <i class="fa-solid fa-arrow-right"></i></button></div></div>
+        </article>
+        <button type="button" class="hero-arrow hero-prev" aria-label="Previous slide"><i class="fa-solid fa-arrow-left"></i></button><button type="button" class="hero-arrow hero-next" aria-label="Next slide"><i class="fa-solid fa-arrow-right"></i></button>
+        <div class="hero-pagination" aria-label="Choose a slide"><button class="active" type="button" aria-label="Slide 1"></button><button type="button" aria-label="Slide 2"></button><button type="button" aria-label="Slide 3"></button></div>
+    </section>
 
     <!-- Floating quick-search card -->
     <div class="quick-search-wrap">
@@ -972,6 +986,34 @@
         </form>
 
         <p class="modal-switch">Already have an account? <a href="#" id="switchToLogin">Log In</a></p>
+    </div>
+</div>
+
+<!-- Booking details and cancellation feedback -->
+<div class="modal-overlay" id="bookingDetailsOverlay" style="display:none;">
+    <div class="modal-card booking-details-modal" role="dialog" aria-modal="true" aria-labelledby="bookingDetailsTitle">
+        <button type="button" class="modal-close" data-close-booking-details aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        <div id="bookingDetailsContent"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="cancelBookingOverlay" style="display:none;">
+    <div class="modal-card cancel-booking-modal" role="dialog" aria-modal="true" aria-labelledby="cancelBookingTitle">
+        <button type="button" class="modal-close" data-close-cancel aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        <div class="cancel-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+        <h2 id="cancelBookingTitle">Cancel this booking?</h2>
+        <p class="modal-sub">Your request will be cancelled and this action cannot be undone.</p>
+        <form id="cancelBookingForm">
+            <fieldset class="cancel-reasons"><legend>Why are you cancelling? <span>(optional)</span></legend>
+                <label><input type="radio" name="cancelReason" value="Plans changed"> Plans changed</label>
+                <label><input type="radio" name="cancelReason" value="Found another ride"> Found another ride</label>
+                <label><input type="radio" name="cancelReason" value="Need a different date or time"> Need a different date or time</label>
+                <label><input type="radio" name="cancelReason" value="other"> Other</label>
+            </fieldset>
+            <label class="feedback-label" for="cancelFeedback">Anything else you'd like us to know?</label>
+            <textarea id="cancelFeedback" rows="3" maxlength="300" placeholder="Share feedback or tell us how we can help."></textarea>
+            <div class="cancel-modal-actions"><button type="button" class="btn btn-outline" data-close-cancel>Keep Booking</button><button type="submit" class="btn cancel-confirm-btn">Yes, Cancel Booking</button></div>
+        </form>
     </div>
 </div>
 
