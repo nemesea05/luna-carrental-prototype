@@ -5,7 +5,7 @@
    Drop your images in there using these exact filenames and they'll appear automatically.
    Until a file exists, the layout falls back to the icon placeholder below. */
 const VEHICLES = [
-    { id:'xpander', code:'MX', nickname:'Luna', name:'Mitsubishi Xpander GLS', year:2026, type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:3000, priceDay:6000 }
+    { id:'xpander', code:'MX', nickname:'Luna', name:'Mitsubishi Xpander GLS', year:2026, type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:2300, priceDay:3200 }
 ];
 
 // Returns an <img> tag that quietly falls back to the gradient + icon placeholder
@@ -42,12 +42,46 @@ let bookings = JSON.parse(localStorage.getItem('everyride_bookings') || '[]');
 
 /* =====================================================
    VIEW ROUTING
+   One consistent app shell (sidebar on desktop / slide-in
+   drawer on mobile) wraps every view. A slim "flow context
+   bar" (back button + step progress) appears above any
+   booking-flow screen; the footer appears only on browse-
+   type pages. This is the single source of navigation for
+   the whole site, desktop and mobile alike.
 ===================================================== */
 const VIEW_IDS = ['home','chooseType','selectDateTime','selectDates','searchResults','vehicleDetails','bookingSummary','checkout','confirmation','myBookings','allVehicles','about','contact'];
+
+// Pages that use the plain browse layout (sidebar + content + footer, no back button).
+const PRIMARY_PAGES = ['home','allVehicles','about','contact'];
 
 // Real back-stack: forward navigation pushes, goBack pops and re-renders
 // the previous entry without pushing it again (no double-pop tricks).
 let historyStack = ['home'];
+
+const BOOKING_FLOW_STEP = {
+    chooseType: 0,
+    selectDateTime: 1,
+    selectDates: 1,
+    searchResults: 2,
+    vehicleDetails: 2,
+    bookingSummary: 3,
+    checkout: 3,
+    confirmation: 4
+};
+
+function updateBookingFlowProgress(viewName){
+    const step = BOOKING_FLOW_STEP[viewName];
+    const progressEl = document.getElementById('bookingFlowProgress');
+    progressEl.style.display = step === undefined ? 'none' : 'block';
+    if (step === undefined) return;
+    const stages = [...document.querySelectorAll('#bookingFlowProgress .flow-stage')];
+    const links = [...document.querySelectorAll('#bookingFlowProgress .flow-link')];
+    stages.forEach((stage, index) => {
+        stage.classList.toggle('done', index < step);
+        stage.classList.toggle('current', index === step);
+    });
+    links.forEach((link, index) => link.classList.toggle('done', index < step));
+}
 
 function showView(name, opts = {}) {
     if (!opts.fromBack && historyStack[historyStack.length - 1] !== name) {
@@ -59,17 +93,21 @@ function showView(name, opts = {}) {
         if (el) el.style.display = (id === name) ? 'block' : 'none';
     });
 
-    const primaryPages = ['home','allVehicles','about','contact'];
-    const usesMainHeader = primaryPages.includes(name);
-    document.getElementById('mainHeader').style.display = usesMainHeader ? 'block' : 'none';
-    document.getElementById('flowHeader').style.display = usesMainHeader ? 'none' : 'block';
-    document.getElementById('siteFooter').style.display = usesMainHeader ? 'block' : 'none';
+    const isPrimaryPage = PRIMARY_PAGES.includes(name);
+    document.getElementById('siteFooter').style.display = isPrimaryPage ? 'block' : 'none';
 
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.toggle('active', link.getAttribute('data-go') === name);
+    const flowBar = document.getElementById('flowContextBar');
+    flowBar.style.display = isPrimaryPage ? 'none' : 'block';
+    const flowTitleEl = document.getElementById('flowContextTitle');
+    if (!isPrimaryPage) flowTitleEl.textContent = FLOW_TITLES[name] || '';
+    updateBookingFlowProgress(name);
+
+    const highlightTarget = NAV_HIGHLIGHT[name];
+    document.querySelectorAll('.sidebar-nav button[data-go]').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-go') === highlightTarget);
     });
 
-    closeMobileNav();
+    closeDrawer();
     window.scrollTo({ top:0, behavior:'instant' });
 
     if (name === 'home') { renderFamilySpotlight(); renderUpcomingTrip(); }
@@ -82,6 +120,37 @@ function showView(name, opts = {}) {
     if (name === 'myBookings') renderMyBookings();
     if (name === 'allVehicles') renderAllVehicles();
 }
+
+// Which sidebar item should read as "active" for each view. Every booking-flow
+// step highlights Vehicles, since that's the section it belongs to; My Bookings
+// and the browse pages simply highlight themselves.
+const NAV_HIGHLIGHT = {
+    home: 'home',
+    allVehicles: 'allVehicles',
+    about: 'about',
+    contact: 'contact',
+    myBookings: 'myBookings',
+    chooseType: 'allVehicles',
+    selectDateTime: 'allVehicles',
+    selectDates: 'allVehicles',
+    searchResults: 'allVehicles',
+    vehicleDetails: 'allVehicles',
+    bookingSummary: 'allVehicles',
+    checkout: 'allVehicles',
+    confirmation: 'allVehicles'
+};
+
+const FLOW_TITLES = {
+    chooseType: 'Book Your Ride',
+    selectDateTime: 'Select Date & Time',
+    selectDates: 'Select Dates',
+    searchResults: 'Available Vehicles',
+    vehicleDetails: 'Vehicle Details',
+    bookingSummary: 'Booking Summary',
+    checkout: 'Checkout',
+    confirmation: 'Booking Confirmed',
+    myBookings: 'My Bookings'
+};
 
 function goBack() {
     if (historyStack.length > 1) historyStack.pop();
@@ -191,29 +260,32 @@ function renderUpcomingTrip(){
 }
 
 /* =====================================================
-   QUICK SEARCH FORM (HOME)
+   LUNA LANDING SEARCH (home hero search card)
 ===================================================== */
-const qsDate = document.getElementById('qsDate');
-(function initQsDate(){
-    const today = new Date();
-    qsDate.min = toDateStr(today);
-    qsDate.value = toDateStr(today);
-})();
-
-document.getElementById('quickSearchForm').addEventListener('submit', (e) => {
+let lunaRentalType = '12hour';
+const lunaDate = document.getElementById('lunaDate');
+lunaDate.min = toDateStr(new Date());
+lunaDate.value = toDateStr(new Date());
+document.querySelectorAll('[data-luna-type]').forEach(btn => btn.addEventListener('click', () => {
+    lunaRentalType = btn.getAttribute('data-luna-type');
+    document.querySelectorAll('[data-luna-type]').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelector('.luna-time-field').style.display = lunaRentalType === 'wholeday' ? 'none' : 'grid';
+}));
+document.getElementById('lunaSearchForm').addEventListener('submit', (e) => {
     e.preventDefault();
-    state.location = document.getElementById('qsLocation').value;
-    const type = document.getElementById('qsType').value;
-    const dateVal = qsDate.value;
-
-    if (type) {
-        state.rentalType = type;
-        if (dateVal) { state.date = dateVal; state.rangeStart = dateVal; }
-        showView(type === '12hour' ? 'selectDateTime' : 'selectDates');
+    state.location = document.getElementById('lunaLocation').value;
+    state.rentalType = lunaRentalType;
+    if (lunaRentalType === 'wholeday') {
+        state.rangeStart = lunaDate.value;
+        state.rangeEnd = addDays(lunaDate.value, 1);
+        showView('selectDates');
     } else {
-        showView('chooseType');
+        state.date = lunaDate.value;
+        state.timeSlot = TIME_SLOTS[Number(document.getElementById('lunaTime').value)];
+        showView('selectDateTime');
     }
 });
+document.getElementById('lunaVehicleDetails').addEventListener('click', () => { state.vehicle = VEHICLES[0]; showView('vehicleDetails'); });
 
 /* =====================================================
    CHOOSE RENTAL TYPE
@@ -532,27 +604,15 @@ function renderVehicleDetails(){
         <div class="strip-thumb ${i === 0 ? 'active' : ''}"><i class="fa-solid ${v.icon}"></i></div>
     `).join('');
 
-    const isWholeDay = state.rentalType === 'wholeday';
-    document.getElementById('vdRentalTypeLabel').textContent = isWholeDay ? 'Whole Day Rental' : '12-Hour Rental';
-    document.getElementById('vdPriceAmount').textContent = formatCurrency(getVehiclePrice(v));
-
-    if (isWholeDay) {
-        document.getElementById('vdPriceSub').textContent = state.rangeStart && state.rangeEnd
-            ? `${formatShortDate(state.rangeStart)} - ${formatShortDate(state.rangeEnd)}`
-            : 'Select your dates';
-    } else {
-        document.getElementById('vdPriceSub').textContent = state.timeSlot
-            ? `${state.timeSlot.start} - ${state.timeSlot.end}`
-            : 'Select a time slot';
-    }
+    document.getElementById('vdPrice12').textContent = formatCurrency(v.price12);
+    document.getElementById('vdPriceDay').textContent = formatCurrency(v.priceDay);
 }
 
-document.getElementById('selectVehicleBtn').addEventListener('click', () => {
-    if (!state.rentalType) { showView('chooseType'); return; }
-    if (state.rentalType === '12hour' && !(state.date && state.timeSlot)) { showView('selectDateTime'); return; }
-    if (state.rentalType === 'wholeday' && !(state.rangeStart && state.rangeEnd)) { showView('selectDates'); return; }
-    showView('bookingSummary');
-});
+document.querySelectorAll('[data-vehicle-rental]').forEach(btn => btn.addEventListener('click', () => {
+    state.rentalType = btn.getAttribute('data-vehicle-rental');
+    state.editingBookingId = null;
+    showView(state.rentalType === 'wholeday' ? 'selectDates' : 'selectDateTime');
+}));
 
 /* =====================================================
    BOOKING SUMMARY
@@ -641,12 +701,18 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
         payMethod
     };
 
-    bookings.push(booking);
-    localStorage.setItem('everyride_bookings', JSON.stringify(bookings));
-    updateBookingsBadge();
-
-    renderConfirmation(booking);
-    showView('confirmation');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    document.getElementById('bookingProcessingOverlay').style.display = 'flex';
+    setTimeout(() => {
+        bookings.push(booking);
+        localStorage.setItem('everyride_bookings', JSON.stringify(bookings));
+        updateBookingsBadge();
+        document.getElementById('bookingProcessingOverlay').style.display = 'none';
+        submitBtn.disabled = false;
+        renderConfirmation(booking);
+        showView('confirmation');
+    }, 1500);
 });
 
 /* =====================================================
@@ -679,13 +745,28 @@ const STATUS_META = {
     cancelled: { label:'Cancelled', class:'status-cancelled' }
 };
 
+function bookingProgressMarkup(status, compact = false){
+    const stages = [
+        { label:'Request sent', icon:'fa-check' },
+        { label:'Under review', icon:'fa-clipboard-check' },
+        { label:'Confirmed', icon:'fa-calendar-check' },
+        { label:'Ready to drive', icon:'fa-car-side' }
+    ];
+    const activeIndex = status === 'confirmed' ? 2 : status === 'completed' ? 3 : 1;
+    if (status === 'cancelled') return `<div class="booking-card-status is-cancelled"><i class="fa-solid fa-circle-xmark"></i> This booking request was cancelled.</div>`;
+    return `<div class="booking-progress ${compact ? 'booking-progress-compact' : ''}" aria-label="Booking status: ${stages[activeIndex].label}">${stages.map((stage, i) => `
+        <div class="progress-stage ${i < activeIndex ? 'done' : i === activeIndex ? 'current' : ''}"><span>${i < activeIndex ? `<i class="fa-solid ${stage.icon}"></i>` : i + 1}</span><small>${stage.label}</small></div>${i < stages.length - 1 ? `<div class="progress-link ${i < activeIndex ? 'done' : ''}"></div>` : ''}`).join('')}</div>`;
+}
+
 let bookingsFilter = 'all';
 let activeBookingId = null;
 
 function updateBookingsBadge(){
-    const badge = document.getElementById('bookingsCountBadge');
-    badge.textContent = bookings.length;
-    badge.classList.toggle('is-empty', bookings.length === 0);
+    const count = bookings.length;
+    document.querySelectorAll('.cart-badge').forEach(badge => {
+        badge.textContent = count;
+        badge.classList.toggle('is-empty', count === 0);
+    });
 }
 
 document.querySelectorAll('.booking-tab').forEach(tab => {
@@ -732,6 +813,7 @@ function renderMyBookings(){
                 </div>
                 <div class="bi-status"><span class="status-badge ${meta.class}">${meta.label}</span></div>
             </div>
+            ${bookingProgressMarkup(b.status, true)}
             <div class="bi-actions"><button type="button" class="bi-action-btn" data-details="${b.id}">View Details <i class="fa-solid fa-arrow-right"></i></button></div>
         </div>`;
     }).join('');
@@ -761,6 +843,7 @@ function openBookingDetails(id){
             <div class="booking-detail-cell"><small>Schedule</small><strong>${bookingDateLabel(booking)}</strong></div>
             <div class="booking-detail-cell"><small>Vehicle</small><strong>${booking.vehicle.transmission} · ${booking.vehicle.type}</strong></div>
         </div>
+        ${bookingProgressMarkup(booking.status)}
         <div class="booking-details-total"><span>Total rental price</span><strong>₱${Number(booking.total || 0).toLocaleString()}</strong></div>
         ${canManage ? `<div class="booking-detail-actions"><button type="button" class="btn btn-outline" data-detail-edit="${booking.id}">Edit Booking</button><button type="button" class="btn cancel-confirm-btn" data-detail-cancel="${booking.id}">Cancel Booking</button></div>` : ''}`;
     document.getElementById('bookingDetailsOverlay').style.display = 'flex';
@@ -907,21 +990,16 @@ document.getElementById('contactForm').addEventListener('submit', (e) => {
 
 /* =====================================================
    AUTH — LOGIN / SIGNUP MODALS
+   A single sidebar login control (shared by the desktop
+   sidebar and the mobile drawer, since it's the same DOM
+   node) opens these modals from anywhere in the app.
 ===================================================== */
 let currentUser = JSON.parse(localStorage.getItem('everyride_user') || 'null');
 
 function openModal(id){ document.getElementById(id).style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 function closeModal(id){ document.getElementById(id).style.display = 'none'; document.body.style.overflow = ''; }
 
-document.getElementById('headerLoginLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    openModal('loginModalOverlay');
-});
-document.getElementById('mobileLoginLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    closeMobileNav();
-    openModal('loginModalOverlay');
-});
+document.getElementById('sidebarLoginBtn').addEventListener('click', () => openModal('loginModalOverlay'));
 document.getElementById('loginModalClose').addEventListener('click', () => closeModal('loginModalOverlay'));
 document.getElementById('signupModalClose').addEventListener('click', () => closeModal('signupModalOverlay'));
 
@@ -946,29 +1024,29 @@ document.getElementById('switchToLogin').addEventListener('click', (e) => {
 function setLoggedInUser(user){
     currentUser = user;
     localStorage.setItem('everyride_user', JSON.stringify(user));
-    updateHeaderAuthUI();
+    updateAuthUI();
     closeModal('loginModalOverlay');
     closeModal('signupModalOverlay');
 }
 
-function updateHeaderAuthUI(){
-    const loginLink = document.getElementById('headerLoginLink');
-    const chip = document.getElementById('headerUserChip');
+function updateAuthUI(){
+    const loginBtn = document.getElementById('sidebarLoginBtn');
+    const chip = document.getElementById('sidebarUserChip');
     if (currentUser) {
-        loginLink.style.display = 'none';
+        loginBtn.style.display = 'none';
         chip.style.display = 'flex';
-        document.getElementById('userChipName').textContent = currentUser.name.split(' ')[0];
-        document.getElementById('userChipAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+        document.getElementById('sidebarUserChipName').textContent = currentUser.name.split(' ')[0];
+        document.getElementById('sidebarUserChipAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
     } else {
-        loginLink.style.display = 'inline';
+        loginBtn.style.display = 'flex';
         chip.style.display = 'none';
     }
 }
 
-document.getElementById('userChipLogout').addEventListener('click', () => {
+document.getElementById('sidebarUserChipLogout').addEventListener('click', () => {
     currentUser = null;
     localStorage.removeItem('everyride_user');
-    updateHeaderAuthUI();
+    updateAuthUI();
 });
 
 // Mock social sign-in (no backend available — simulates the round trip)
@@ -1005,28 +1083,33 @@ document.getElementById('signupForm').addEventListener('submit', (e) => {
     setLoggedInUser({ name, email, provider: 'email' });
 });
 
-updateHeaderAuthUI();
+updateAuthUI();
 
 /* =====================================================
-   MOBILE MENU
+   APP SHELL — sidebar / mobile drawer toggle
+   One sidebar element serves both roles: a fixed column on
+   desktop, a slide-in drawer (with backdrop) on mobile, so
+   every view shares identical navigation and there's nothing
+   to keep in sync between breakpoints.
 ===================================================== */
-const mainNavEl = document.querySelector('.main-nav');
+const appSidebar = document.getElementById('appSidebar');
+const drawerBackdrop = document.getElementById('drawerBackdrop');
 
-function closeMobileNav(){
-    mainNavEl.classList.remove('open');
+function openDrawer(){
+    appSidebar.classList.add('open');
+    drawerBackdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
 }
-
-document.getElementById('mobileMenuToggle').addEventListener('click', (e) => {
+function closeDrawer(){
+    appSidebar.classList.remove('open');
+    drawerBackdrop.classList.remove('show');
+    document.body.style.overflow = '';
+}
+document.getElementById('drawerToggle').addEventListener('click', (e) => {
     e.stopPropagation();
-    mainNavEl.classList.toggle('open');
+    appSidebar.classList.contains('open') ? closeDrawer() : openDrawer();
 });
-
-// Close the mobile nav when tapping outside of it.
-document.addEventListener('click', (e) => {
-    if (!mainNavEl.classList.contains('open')) return;
-    if (mainNavEl.contains(e.target) || e.target.closest('#mobileMenuToggle')) return;
-    closeMobileNav();
-});
+drawerBackdrop.addEventListener('click', closeDrawer);
 
 /* =====================================================
    TESTIMONIAL CAROUSEL (HOME)
@@ -1067,23 +1150,8 @@ document.getElementById('newsletterForm').addEventListener('submit', (e) => {
 });
 
 /* =====================================================
-   LANDING PAGE CAROUSEL + BOOKING MODALS
+   BOOKING DETAILS / CANCELLATION MODALS
 ===================================================== */
-const heroSlides = [...document.querySelectorAll('.hero-slide')];
-const heroDots = [...document.querySelectorAll('.hero-pagination button')];
-let heroIndex = 0;
-let heroTimer;
-function setHeroSlide(index){
-    heroIndex = (index + heroSlides.length) % heroSlides.length;
-    heroSlides.forEach((slide, i) => slide.classList.toggle('active', i === heroIndex));
-    heroDots.forEach((dot, i) => dot.classList.toggle('active', i === heroIndex));
-}
-function restartHeroTimer(){ clearInterval(heroTimer); heroTimer = setInterval(() => setHeroSlide(heroIndex + 1), 6500); }
-document.querySelector('.hero-prev').addEventListener('click', () => { setHeroSlide(heroIndex - 1); restartHeroTimer(); });
-document.querySelector('.hero-next').addEventListener('click', () => { setHeroSlide(heroIndex + 1); restartHeroTimer(); });
-heroDots.forEach((dot, i) => dot.addEventListener('click', () => { setHeroSlide(i); restartHeroTimer(); }));
-restartHeroTimer();
-
 document.querySelectorAll('[data-close-booking-details]').forEach(btn => btn.addEventListener('click', closeBookingDetails));
 document.querySelectorAll('[data-close-cancel]').forEach(btn => btn.addEventListener('click', closeCancelBooking));
 document.getElementById('bookingDetailsOverlay').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeBookingDetails(); });
