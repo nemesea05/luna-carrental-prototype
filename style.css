@@ -84,11 +84,10 @@ input,select{ font-family:var(--font-body); }
 .sidebar-nav button.active{ color:#fff; background:linear-gradient(90deg,rgba(255,193,7,.2),rgba(255,193,7,.05)); box-shadow:inset 3px 0 var(--yellow); }
 .sidebar-nav button .cart-badge{ position:static; margin-left:auto; border:none; }
 
-.sidebar-promo{ position:relative; overflow:hidden; min-height:220px; margin:28px 2px 22px; padding:20px 16px; border:1px solid rgba(255,193,7,.65); border-radius:18px; background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,193,7,.08)); }
-.sidebar-promo span{ display:block; max-width:130px; font-size:13px; line-height:1.4; position:relative; z-index:1; }
+.sidebar-promo{ position:relative; overflow:hidden; margin:28px 2px 22px; padding:20px 16px; border:1px solid rgba(255,193,7,.65); border-radius:18px; background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,193,7,.08)); }
+.sidebar-promo span{ display:block; max-width:170px; font-size:13px; line-height:1.4; position:relative; z-index:1; }
 .sidebar-promo strong{ display:block; margin-top:6px; color:var(--yellow); font-family:var(--font-display); font-size:26px; line-height:.95; position:relative; z-index:1; }
 .sidebar-promo strong small{ display:block; font-family:var(--font-body); font-size:13px; line-height:1.25; }
-.sidebar-promo img{ position:absolute; right:-30px; bottom:-8px; width:185px; filter:drop-shadow(0 9px 9px rgba(0,0,0,.25)); }
 
 .sidebar-contact{ display:flex; align-items:center; gap:9px; margin:0 2px 14px; padding:11px 13px; border:1px solid rgba(255,255,255,.18); border-radius:13px; color:#fff; font-size:12.5px; font-weight:700; }
 .sidebar-contact i{ color:var(--yellow); font-size:15px; }
@@ -181,7 +180,8 @@ input,select{ font-family:var(--font-body); }
 .luna-intro p{ font-size:12px; line-height:1.5; }
 .luna-vehicle-card,.luna-benefit{ border-radius:20px; background:#fffdf8; box-shadow:0 5px 17px rgba(48,39,15,.06); }
 .luna-vehicle-card{ min-height:196px; display:flex; align-items:center; padding:12px; overflow:hidden; }
-.luna-vehicle-card img{ width:48%; height:160px; object-fit:contain; }
+.luna-vehicle-media{ width:48%; height:160px; border-radius:14px; background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.luna-vehicle-media i{ font-size:52px; color:rgba(255,255,255,.9); }
 .luna-vehicle-card>div{ min-width:0; }
 .luna-vehicle-card small{ font-size:12px; }
 .luna-vehicle-card h2{ margin:2px 0 7px; font-size:23px; color:var(--green-darker); }
@@ -500,10 +500,14 @@ input,select{ font-family:var(--font-body); }
 .confirm-card h1{ font-size:1.6rem; font-weight:700; margin-bottom:6px; }
 .confirm-card .flow-sub{ margin-bottom:24px; }
 
-.confirm-details-box{ background:var(--bg); border-radius:var(--radius-sm); padding:18px 20px; text-align:left; margin-bottom:20px; }
-.cd-line{ display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; color:var(--slate); }
-.cd-line strong{ color:var(--charcoal); font-weight:600; }
+.confirm-details-box{ background:var(--bg); border-radius:var(--radius-sm); padding:18px 20px; text-align:left; margin-bottom:0; }
+.cd-line{ display:flex; justify-content:space-between; gap:12px; font-size:13.5px; padding:8px 0; color:var(--slate); border-bottom:1px dashed var(--line); }
+.cd-line:last-child{ border-bottom:none; }
+.cd-line strong{ color:var(--charcoal); font-weight:600; text-align:right; }
 
+.confirm-total-row{ display:flex; justify-content:space-between; align-items:center; background:var(--green-light); border-radius:var(--radius-sm); padding:14px 20px; margin:10px 0 22px; }
+.confirm-total-row span{ font-size:14px; font-weight:600; color:var(--green-darker); }
+.confirm-total-row strong{ font-family:var(--font-display); font-size:1.4rem; color:var(--green-dark); }
 
 .confirm-note{ display:flex; gap:8px; align-items:flex-start; background:var(--green-light); border-radius:var(--radius-sm); padding:14px 16px; font-size:12.5px; color:var(--green-darker); line-height:1.6; text-align:left; margin-bottom:22px; }
 .confirm-note i{ margin-top:2px; }

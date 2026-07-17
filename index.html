@@ -66,7 +66,6 @@
         <div class="sidebar-promo">
             <span>First 5 booked<br>rent customers will have</span>
             <strong>FREE <small>ADDITIONAL<br>3 HOURS!</small></strong>
-            <img src="assets/vehicles/MX.jpg" alt="Mitsubishi Xpander">
         </div>
 
         <a href="tel:09123456789" class="sidebar-contact"><i class="fa-solid fa-phone"></i> 0912 345 6789 — We're happy to help!</a>
@@ -124,7 +123,7 @@
 
             <section class="luna-showcase">
                 <div class="luna-intro"><span>OUR TOP VEHICLE</span><h2>Made for every<br>journey.</h2><i></i><p>Comfort, style, and reliability for your next story.</p></div>
-                <article class="luna-vehicle-card"><img src="assets/vehicles/MX.jpg" alt="White Mitsubishi Xpander GLS"><div><small>Mitsubishi</small><h2>Xpander GLS</h2><p><i class="fa-solid fa-user"></i> 7 Seats &nbsp; <i class="fa-solid fa-suitcase"></i> 4 Bags &nbsp; <i class="fa-solid fa-gear"></i> Automatic</p><button type="button" id="lunaVehicleDetails">View Details <i class="fa-solid fa-arrow-right"></i></button></div></article>
+                <article class="luna-vehicle-card"><div class="luna-vehicle-media"><i class="fa-solid fa-van-shuttle"></i></div><div><small>Mitsubishi</small><h2>Xpander GLS</h2><p><i class="fa-solid fa-user"></i> 7 Seats &nbsp; <i class="fa-solid fa-suitcase"></i> 4 Bags &nbsp; <i class="fa-solid fa-gear"></i> Automatic</p><button type="button" id="lunaVehicleDetails">View Details <i class="fa-solid fa-arrow-right"></i></button></div></article>
                 <article class="luna-benefit"><i class="fa-solid fa-shield-heart"></i><h3>Clean &amp; Well-Maintained</h3><p>All vehicles are thoroughly cleaned and regularly serviced.</p></article>
                 <article class="luna-benefit"><i class="fa-solid fa-user-shield"></i><h3>Trusted Drivers</h3><p>Professional, courteous, and knowledgeable.</p></article>
                 <article class="luna-benefit"><i class="fa-solid fa-heart"></i><h3>Great Experience</h3><p>Comfortable, honest, and memorable.</p></article>
@@ -516,7 +515,7 @@
                     </div>
                     <div class="cf-field">
                         <label for="ckPhone">Phone Number</label>
-                        <input type="tel" id="ckPhone" placeholder="0912 345 6789" required>
+                        <input type="tel" id="ckPhone" placeholder="0912 345 6789" pattern="^(0|\+63)9[0-9\s]{8,11}$" title="Enter a valid PH mobile number, e.g. 0912 345 6789" required>
                     </div>
 
                     <h4>Payment Method</h4>
@@ -548,15 +547,20 @@
                 <div class="confirm-card">
                     <div class="confirm-icon"><i class="fa-solid fa-check"></i></div>
                     <h1>Booking Confirmed!</h1>
-                    <p class="flow-sub">Your booking has been received.</p>
+                    <p class="flow-sub">Here's your receipt — we've sent a copy of these details to your email too.</p>
 
                     <div class="confirm-details-box">
                         <div class="cd-line"><span>Booking ID</span><strong id="cfBookingId">--</strong></div>
                         <div class="cd-line"><span>Status</span><span class="status-badge status-pending" id="cfStatus">Pending</span></div>
                         <div class="cd-line"><span>Vehicle</span><strong id="cfVehicle">--</strong></div>
+                        <div class="cd-line"><span>Rental Type</span><strong id="cfRentalType">--</strong></div>
                         <div class="cd-line"><span>Pick-up</span><strong id="cfPickup">--</strong></div>
                         <div class="cd-line"><span>Return</span><strong id="cfReturn">--</strong></div>
+                        <div class="cd-line"><span>Location</span><strong id="cfLocation">--</strong></div>
+                        <div class="cd-line"><span>Booked By</span><strong id="cfName">--</strong></div>
+                        <div class="cd-line"><span>Payment Method</span><strong id="cfPayment">--</strong></div>
                     </div>
+                    <div class="confirm-total-row"><span>Total Amount</span><strong id="cfTotal">--</strong></div>
 
                     <div class="booking-status-tracker" aria-label="Booking request status">
                         <div class="tracker-step done"><span><i class="fa-solid fa-check"></i></span><small>Request sent</small></div><div class="tracker-line active"></div>
@@ -819,15 +823,6 @@
             <div class="footer-inner">
                 <div class="footer-brand">
                     <div class="logo-block">
-                        <span class="logo-icon light"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M8 16C10 9 16.5 4.5 24 4.5C33 4.5 40.5 11 42.5 20" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                            <path d="M13.5 6.8L8 16L4 8.8" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M40 32C38 39 31.5 43.5 24 43.5C15 43.5 7.5 37 5.5 28" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                            <path d="M34.5 41.2L40 32L44 39.2" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M15 27.5C15 26.1 16 25 17.5 24.7L19.5 24.3C20 22 21 20.5 23 20.5H26C28 20.5 29 22 29.5 24.3L31.5 24.7C33 25 34 26.1 34 27.5V29.5C34 30.3 33.3 31 32.5 31H31C30.7 32.4 29.5 33.5 28 33.5C26.5 33.5 25.3 32.4 25 31H23C22.7 32.4 21.5 33.5 20 33.5C18.5 33.5 17.3 32.4 17 31H16.5C15.7 31 15 30.3 15 29.5V27.5Z" fill="currentColor"/>
-                            <circle cx="20" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                            <circle cx="28" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                        </svg></span>
                         <span class="logo-text">
                             <span class="logo-word light">every<span class="accent-ride">ride</span></span>
                             <span class="logo-sub light">car rental services</span>

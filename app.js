@@ -8,10 +8,11 @@ const VEHICLES = [
     { id:'xpander', code:'MX', nickname:'Luna', name:'Mitsubishi Xpander GLS', year:2026, type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:2300, priceDay:3200 }
 ];
 
-// Returns an <img> tag that quietly falls back to the gradient + icon placeholder
-// (already present as a sibling in the same media container) if the asset is missing.
+// Vehicle photos are temporarily disabled site-wide — every media slot falls
+// back to its icon placeholder until real photography is ready to drop in.
+// Flip this back on (return the <img> tag) once assets/vehicles/*.jpg are set.
 function vehiclePhotoTag(v){
-    return `<img src="${v.image}" alt="${v.name}" class="vehicle-photo" onerror="this.style.display='none'">`;
+    return '';
 }
 
 const TIME_SLOTS = [
@@ -35,7 +36,8 @@ const state = {
     rangeEnd: null,
     vehicle: null,
     sort: 'low',
-    editingBookingId: null   // set when editing an existing pending booking
+    editingBookingId: null,  // set when editing an existing pending booking
+    fromVehicleDetails: false // true when re-picking dates for a vehicle already chosen, so Continue should return to that vehicle's summary instead of the results list
 };
 
 let bookings = JSON.parse(localStorage.getItem('everyride_bookings') || '[]');
@@ -111,7 +113,7 @@ function showView(name, opts = {}) {
     window.scrollTo({ top:0, behavior:'instant' });
 
     if (name === 'home') { renderFamilySpotlight(); renderUpcomingTrip(); }
-    if (name === 'chooseType') { state.editingBookingId = null; renderChooseType(); }
+    if (name === 'chooseType') { state.editingBookingId = null; state.fromVehicleDetails = false; renderChooseType(); }
     if (name === 'selectDateTime') renderDateTimeView();
     if (name === 'selectDates') renderDatesView();
     if (name === 'searchResults') renderSearchResults();
@@ -275,6 +277,8 @@ document.getElementById('lunaSearchForm').addEventListener('submit', (e) => {
     e.preventDefault();
     state.location = document.getElementById('lunaLocation').value;
     state.rentalType = lunaRentalType;
+    state.editingBookingId = null;
+    state.fromVehicleDetails = false;
     if (lunaRentalType === 'wholeday') {
         state.rangeStart = lunaDate.value;
         state.rangeEnd = addDays(lunaDate.value, 1);
@@ -441,7 +445,10 @@ document.getElementById('calNext12').addEventListener('click', () => {
     renderDateTimeView();
 });
 document.getElementById('continue12Btn').addEventListener('click', () => {
-    if (state.date && state.timeSlot) showView(state.editingBookingId ? 'bookingSummary' : 'searchResults');
+    if (!(state.date && state.timeSlot)) return;
+    if (state.editingBookingId) { showView('bookingSummary'); return; }
+    if (state.fromVehicleDetails) { state.fromVehicleDetails = false; showView('bookingSummary'); return; }
+    showView('searchResults');
 });
 
 /* ---- Whole day rental range picker ---- */
@@ -502,7 +509,10 @@ document.getElementById('calNextDay').addEventListener('click', () => {
     renderDatesView();
 });
 document.getElementById('continueDayBtn').addEventListener('click', () => {
-    if (state.rangeStart && state.rangeEnd) showView(state.editingBookingId ? 'bookingSummary' : 'searchResults');
+    if (!(state.rangeStart && state.rangeEnd)) return;
+    if (state.editingBookingId) { showView('bookingSummary'); return; }
+    if (state.fromVehicleDetails) { state.fromVehicleDetails = false; showView('bookingSummary'); return; }
+    showView('searchResults');
 });
 
 /* =====================================================
@@ -577,6 +587,7 @@ function renderResultList(){
 
 document.getElementById('sortSelect').addEventListener('change', renderResultList);
 document.getElementById('changeSearchBtn').addEventListener('click', () => {
+    state.fromVehicleDetails = false;
     showView(state.rentalType === 'wholeday' ? 'selectDates' : 'selectDateTime');
 });
 
@@ -611,6 +622,7 @@ function renderVehicleDetails(){
 document.querySelectorAll('[data-vehicle-rental]').forEach(btn => btn.addEventListener('click', () => {
     state.rentalType = btn.getAttribute('data-vehicle-rental');
     state.editingBookingId = null;
+    state.fromVehicleDetails = true;
     showView(state.rentalType === 'wholeday' ? 'selectDates' : 'selectDateTime');
 }));
 
@@ -716,17 +728,28 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
 });
 
 /* =====================================================
-   CONFIRMATION
+   CONFIRMATION / RECEIPT
 ===================================================== */
+const PAYMENT_LABELS = {
+    cash: 'Cash on Pick-up',
+    bank: 'Bank Transfer',
+    card: 'Credit / Debit Card'
+};
+
 function renderConfirmation(booking){
     document.getElementById('cfBookingId').textContent = booking.id;
     document.getElementById('cfVehicle').textContent = booking.vehicle.nickname ? `${booking.vehicle.nickname} — ${booking.vehicle.name}` : booking.vehicle.name;
+    document.getElementById('cfRentalType').textContent = booking.rentalType === 'wholeday' ? 'Whole Day Rental' : '12-Hour Rental';
     document.getElementById('cfPickup').textContent = booking.rentalType === 'wholeday'
         ? formatShortDate(booking.pickup)
         : `${formatShortDate(booking.pickup)}, ${booking.pickupTimeSlot.start}`;
     document.getElementById('cfReturn').textContent = booking.rentalType === 'wholeday'
         ? formatShortDate(booking.returnDate)
         : `${formatShortDate(booking.pickup)}, ${booking.pickupTimeSlot.end}`;
+    document.getElementById('cfLocation').textContent = booking.location;
+    document.getElementById('cfName').textContent = booking.contact.name;
+    document.getElementById('cfPayment').textContent = PAYMENT_LABELS[booking.payMethod] || booking.payMethod;
+    document.getElementById('cfTotal').textContent = formatCurrency(booking.total);
 }
 
 document.getElementById('goToBookingsBtn').addEventListener('click', () => showView('myBookings'));
@@ -842,6 +865,8 @@ function openBookingDetails(id){
             <div class="booking-detail-cell"><small>Pick-up location</small><strong>${booking.location}</strong></div>
             <div class="booking-detail-cell"><small>Schedule</small><strong>${bookingDateLabel(booking)}</strong></div>
             <div class="booking-detail-cell"><small>Vehicle</small><strong>${booking.vehicle.transmission} · ${booking.vehicle.type}</strong></div>
+            <div class="booking-detail-cell"><small>Booked by</small><strong>${booking.contact ? booking.contact.name : '--'}</strong></div>
+            <div class="booking-detail-cell"><small>Payment method</small><strong>${PAYMENT_LABELS[booking.payMethod] || booking.payMethod || '--'}</strong></div>
         </div>
         ${bookingProgressMarkup(booking.status)}
         <div class="booking-details-total"><span>Total rental price</span><strong>₱${Number(booking.total || 0).toLocaleString()}</strong></div>
