@@ -5,7 +5,7 @@
    Drop your images in there using these exact filenames and they'll appear automatically.
    Until a file exists, the layout falls back to the icon placeholder below. */
 const VEHICLES = [
-    { id:'xpander', code:'MX', nickname:'Luna', name:'Mitsubishi Xpander GLS', year:2026, type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:2300, priceDay:3200 }
+    { id:'xpander', code:'MX', nickname:'Luna', name:'Mitsubishi Xpander GLS', year:2026, type:'MPV', transmission:'Automatic', fuel:'Petrol', seats:7, bags:4, doors:5, icon:'fa-van-shuttle', image:'assets/vehicles/MX.jpg', price12:2300, priceDay:3200, rating:4.9, reviewLabel:'loved by 120+ families' }
 ];
 
 // Vehicle photos are temporarily disabled site-wide — every media slot falls
@@ -65,7 +65,6 @@ const BOOKING_FLOW_STEP = {
     selectDateTime: 1,
     selectDates: 1,
     searchResults: 2,
-    vehicleDetails: 2,
     bookingSummary: 3,
     checkout: 3,
     confirmation: 4
@@ -85,7 +84,60 @@ function updateBookingFlowProgress(viewName){
     links.forEach((link, index) => link.classList.toggle('done', index < step));
 }
 
+/* =====================================================
+   TAB LOADING SCREEN
+   A brief branded loading screen plays in the content area
+   whenever the user switches between the app's primary tabs
+   — Home, Vehicles, My Bookings, About Us, Contact Us —
+   whether triggered from the sidebar, the mobile topbar, or
+   any in-page link/button that points at one of those tabs.
+   Multi-step flows (choosing a rental type, dates, checkout,
+   etc.) are untouched and stay instant.
+===================================================== */
+const TAB_VIEWS = ['home', 'allVehicles', 'myBookings', 'about', 'contact'];
+const TAB_LOADING_LABELS = {
+    home: 'Loading Home',
+    allVehicles: 'Loading Vehicles',
+    myBookings: 'Loading My Bookings',
+    about: 'Loading About Us',
+    contact: 'Loading Contact'
+};
+const TAB_LOADING_DURATION = 420;
+
+let currentView = 'home';
+let tabLoadingTimer = null;
+
+const tabLoadingOverlay = document.getElementById('tabLoadingOverlay');
+const tabLoadingText = document.getElementById('tabLoadingText');
+
+function showTabLoading(name){
+    tabLoadingText.textContent = TAB_LOADING_LABELS[name] || 'Loading';
+    tabLoadingOverlay.classList.add('show');
+}
+function hideTabLoading(){
+    tabLoadingOverlay.classList.remove('show');
+}
+
 function showView(name, opts = {}) {
+    closeDrawer();
+
+    const isTabChange = TAB_VIEWS.includes(name) && name !== currentView;
+
+    if (isTabChange) {
+        clearTimeout(tabLoadingTimer);
+        showTabLoading(name);
+        tabLoadingTimer = setTimeout(() => {
+            commitViewChange(name, opts, true);
+            hideTabLoading();
+        }, TAB_LOADING_DURATION);
+    } else {
+        commitViewChange(name, opts, false);
+    }
+}
+
+function commitViewChange(name, opts, animate) {
+    currentView = name;
+
     if (!opts.fromBack && historyStack[historyStack.length - 1] !== name) {
         historyStack.push(name);
     }
@@ -109,8 +161,16 @@ function showView(name, opts = {}) {
         btn.classList.toggle('active', btn.getAttribute('data-go') === highlightTarget);
     });
 
-    closeDrawer();
     window.scrollTo({ top:0, behavior:'instant' });
+
+    if (animate) {
+        const activeEl = document.getElementById(`view-${name}`);
+        if (activeEl) {
+            activeEl.classList.remove('view-enter');
+            void activeEl.offsetWidth; // force reflow so the fade-in replays every time
+            activeEl.classList.add('view-enter');
+        }
+    }
 
     if (name === 'home') { renderFamilySpotlight(); renderUpcomingTrip(); }
     if (name === 'chooseType') { state.editingBookingId = null; state.fromVehicleDetails = false; renderChooseType(); }
@@ -207,6 +267,7 @@ function renderFamilySpotlight(){
     document.getElementById('spotlightMedia').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i><span class="spotlight-nickname-tag">${v.nickname}</span>`;
     document.getElementById('spotlightNickname').textContent = v.nickname;
     document.getElementById('spotlightModel').textContent = `${v.name} ${v.year}`;
+    document.getElementById('spotlightRatingText').textContent = `${v.rating} · ${v.reviewLabel}`;
     document.getElementById('spotlightSpecs').innerHTML = `
         <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
         <span><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
@@ -217,7 +278,6 @@ function renderFamilySpotlight(){
 
     document.getElementById('spotlightViewBtn').addEventListener('click', () => {
         state.vehicle = v;
-        if (!state.rentalType) state.rentalType = '12hour';
         showView('vehicleDetails');
     });
 }
@@ -601,6 +661,7 @@ function renderVehicleDetails(){
     document.getElementById('vdPhotoMain').innerHTML = `${vehiclePhotoTag(v)}<i class="fa-solid ${v.icon}"></i>`;
     document.getElementById('vdName').textContent = v.nickname ? `${v.nickname} — ${v.name}` : v.name;
     document.getElementById('vdType').textContent = `${v.type} · ${v.transmission} · ${v.fuel}`;
+    document.getElementById('vdRatingText').textContent = `${v.rating} · ${v.reviewLabel}`;
 
     document.getElementById('vdSpecs').innerHTML = `
         <span><i class="fa-solid fa-user"></i> ${v.seats} Seats</span>
@@ -619,12 +680,25 @@ function renderVehicleDetails(){
     document.getElementById('vdPriceDay').textContent = formatCurrency(v.priceDay);
 }
 
-document.querySelectorAll('[data-vehicle-rental]').forEach(btn => btn.addEventListener('click', () => {
-    state.rentalType = btn.getAttribute('data-vehicle-rental');
+// True once a rental type + matching schedule has already been chosen earlier
+// in this session (i.e. this vehicle was reached via the active search-results
+// flow). In that case Book Now has nothing left to ask and goes straight to
+// the booking summary; otherwise it starts the tracked sequence at step 1.
+function hasActiveSchedule(){
+    if (state.rentalType === '12hour') return !!(state.date && state.timeSlot);
+    if (state.rentalType === 'wholeday') return !!(state.rangeStart && state.rangeEnd);
+    return false;
+}
+
+document.getElementById('bookNowBtn').addEventListener('click', () => {
     state.editingBookingId = null;
-    state.fromVehicleDetails = true;
-    showView(state.rentalType === 'wholeday' ? 'selectDates' : 'selectDateTime');
-}));
+    if (hasActiveSchedule()) {
+        showView('bookingSummary');
+    } else {
+        state.fromVehicleDetails = true;
+        showView('chooseType');
+    }
+});
 
 /* =====================================================
    BOOKING SUMMARY
@@ -981,7 +1055,6 @@ function renderAllVehicles(){
     listEl.querySelectorAll('.view-details-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             state.vehicle = VEHICLES.find(v => v.id === btn.getAttribute('data-vehicle'));
-            if (!state.rentalType) state.rentalType = '12hour';
             showView('vehicleDetails');
         });
     });

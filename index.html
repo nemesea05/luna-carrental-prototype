@@ -79,6 +79,14 @@
     </aside>
     <div class="drawer-backdrop" id="drawerBackdrop"></div>
 
+    <div class="tab-loading-overlay" id="tabLoadingOverlay" aria-hidden="true">
+        <div class="tab-loading-inner">
+            <div class="tab-loading-spinner"><i class="fa-solid fa-car-side"></i></div>
+            <div class="tab-loading-text" id="tabLoadingText">Loading</div>
+            <div class="tab-loading-dots"><span></span><span></span><span></span></div>
+        </div>
+    </div>
+
     <div class="app-content">
 
         <!-- Contextual bar for booking-flow steps: back button + step progress.
@@ -208,7 +216,7 @@
                         <div class="spotlight-body">
                             <div class="spotlight-rating">
                                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                                <span>4.9 &middot; loved by 120+ families</span>
+                                <span id="spotlightRatingText">4.9 &middot; loved by 120+ families</span>
                             </div>
                             <span class="spotlight-eyebrow">TODAY'S HIGHLIGHT</span>
                             <div class="spotlight-name" id="spotlightNickname">Luna</div>
@@ -436,21 +444,28 @@
                     <aside class="details-side">
                         <h1 id="vdName">Vehicle Name</h1>
                         <p class="vd-type" id="vdType">SUV · Automatic · Diesel</p>
+                        <div class="vd-rating" id="vdRating">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            <span id="vdRatingText">4.9 &middot; loved by 120+ families</span>
+                        </div>
 
                         <h4>Specifications</h4>
                         <div class="vd-specs" id="vdSpecs"></div>
 
                         <div class="vd-price-box">
-                            <div class="vehicle-rental-options">
-                                <p class="vd-price-note">Choose a rental option to select your schedule.</p>
-                                <button type="button" class="rental-price-option" data-vehicle-rental="12hour">
-                                    <span><strong>12-Hour Rental</strong><small>Perfect for a quick city trip</small></span><b id="vdPrice12">PHP 2,300</b><i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                                <button type="button" class="rental-price-option" data-vehicle-rental="wholeday">
-                                    <span><strong>Whole Day Rental</strong><small>Up to 24 hours of adventure</small></span><b id="vdPriceDay">PHP 3,200</b><i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                                <p class="vd-price-note"><i class="fa-solid fa-circle-check"></i> Includes Driver, Fuel, and Insurance on both options</p>
+                            <h4>Rental Rates</h4>
+                            <div class="vd-rate-list">
+                                <div class="vd-rate-row">
+                                    <span><strong>12-Hour Rental</strong><small>Perfect for a quick city trip</small></span>
+                                    <b id="vdPrice12">₱2,300</b>
+                                </div>
+                                <div class="vd-rate-row">
+                                    <span><strong>Whole Day Rental</strong><small>Up to 24 hours of adventure</small></span>
+                                    <b id="vdPriceDay">₱3,200</b>
+                                </div>
                             </div>
+                            <p class="vd-price-note"><i class="fa-solid fa-circle-check"></i> Both rates include Driver, Fuel, and Insurance</p>
+                            <button type="button" class="btn btn-navy btn-block" id="bookNowBtn"><i class="fa-solid fa-car-side"></i> Book Now</button>
                         </div>
                     </aside>
 
