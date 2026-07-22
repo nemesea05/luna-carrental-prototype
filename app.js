@@ -680,24 +680,15 @@ function renderVehicleDetails(){
     document.getElementById('vdPriceDay').textContent = formatCurrency(v.priceDay);
 }
 
-// True once a rental type + matching schedule has already been chosen earlier
-// in this session (i.e. this vehicle was reached via the active search-results
-// flow). In that case Book Now has nothing left to ask and goes straight to
-// the booking summary; otherwise it starts the tracked sequence at step 1.
-function hasActiveSchedule(){
-    if (state.rentalType === '12hour') return !!(state.date && state.timeSlot);
-    if (state.rentalType === 'wholeday') return !!(state.rangeStart && state.rangeEnd);
-    return false;
-}
-
 document.getElementById('bookNowBtn').addEventListener('click', () => {
     state.editingBookingId = null;
-    if (hasActiveSchedule()) {
-        showView('bookingSummary');
-    } else {
-        state.fromVehicleDetails = true;
-        showView('chooseType');
-    }
+    state.fromVehicleDetails = false;
+    state.rentalType = null;
+    state.date = null;
+    state.timeSlot = null;
+    state.rangeStart = null;
+    state.rangeEnd = null;
+    showView('chooseType');
 });
 
 /* =====================================================
