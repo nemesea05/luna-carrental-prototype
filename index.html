@@ -114,6 +114,11 @@
         ========================================================== -->
         <section id="view-home" class="view">
 
+            <div class="home-utility-bar">
+                <div class="home-utility-location"><i class="fa-solid fa-location-dot"></i><span>Quezon City, Metro Manila</span><i class="fa-solid fa-chevron-down"></i></div>
+                <div class="home-utility-actions"><a href="tel:09123456789" class="home-utility-call"><i class="fa-solid fa-phone"></i><span>0912 345 6789<small>We're happy to help!</small></span></a><button type="button" class="home-utility-bookings" data-go="myBookings"><i class="fa-regular fa-calendar-days"></i> My Bookings</button></div>
+            </div>
+
             <section class="luna-hero">
                 <img src="assets/luna/Luna-Asset-3.png" alt="Family taking a photo beside an EveryRide Mitsubishi Xpander">
                 <div class="luna-hero-overlay"></div>
@@ -561,7 +566,7 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn-navy btn-block">Confirm Booking</button>
+                    <button type="submit" class="btn btn-navy btn-block"><i class="fa-solid fa-paper-plane"></i> Submit Booking Request</button>
                 </form>
             </div>
         </section>
@@ -589,12 +594,15 @@
                     </div>
                     <div class="confirm-total-row"><span>Total Amount</span><strong id="cfTotal">--</strong></div>
 
-                    <div class="booking-status-tracker" aria-label="Booking request status">
-                        <div class="tracker-step done"><span><i class="fa-solid fa-check"></i></span><small>Request sent</small></div><div class="tracker-line active"></div>
-                        <div class="tracker-step current"><span>2</span><small>Under review</small></div><div class="tracker-line"></div>
-                        <div class="tracker-step"><span>3</span><small>Confirmed</small></div><div class="tracker-line"></div>
-                        <div class="tracker-step"><span>4</span><small>Ready to drive</small></div>
-                    </div>
+                    <section class="request-status-card" aria-label="Booking request status">
+                        <div class="request-status-head"><span class="request-status-icon"><i class="fa-solid fa-clock"></i></span><div><strong>Request under review</strong><small>We usually confirm bookings within 30 minutes.</small></div><span class="status-badge status-pending">Pending</span></div>
+                        <div class="booking-status-tracker">
+                            <div class="tracker-step done"><span><i class="fa-solid fa-check"></i></span><small>Request sent</small></div><div class="tracker-line active"></div>
+                            <div class="tracker-step current"><span>2</span><small>Under review</small></div><div class="tracker-line"></div>
+                            <div class="tracker-step"><span>3</span><small>Confirmed</small></div><div class="tracker-line"></div>
+                            <div class="tracker-step"><span>4</span><small>Ready to drive</small></div>
+                        </div>
+                    </section>
                     <p class="confirm-note"><i class="fa-solid fa-circle-info"></i> We will contact you shortly to confirm your booking. Thank you for riding with us!</p>
 
                     <button type="button" class="btn btn-navy btn-block" id="goToBookingsBtn">Go to My Bookings</button>

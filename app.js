@@ -65,7 +65,8 @@ const BOOKING_FLOW_STEP = {
     selectDateTime: 1,
     selectDates: 1,
     searchResults: 2,
-    bookingSummary: 3,
+    vehicleDetails: 2,
+    bookingSummary: 2,
     checkout: 3,
     confirmation: 4
 };
@@ -680,14 +681,22 @@ function renderVehicleDetails(){
     document.getElementById('vdPriceDay').textContent = formatCurrency(v.priceDay);
 }
 
+function hasActiveSchedule(){
+    if (state.rentalType === '12hour') return Boolean(state.date && state.timeSlot);
+    if (state.rentalType === 'wholeday') return Boolean(state.rangeStart && state.rangeEnd);
+    return false;
+}
+
 document.getElementById('bookNowBtn').addEventListener('click', () => {
     state.editingBookingId = null;
+    // Browsing a vehicle begins at step 1. When the customer reached this
+    // page from the availability list, their type and dates are already set,
+    // so Book Now advances to the review instead of restarting the flow.
+    if (hasActiveSchedule()) {
+        showView('bookingSummary');
+        return;
+    }
     state.fromVehicleDetails = false;
-    state.rentalType = null;
-    state.date = null;
-    state.timeSlot = null;
-    state.rangeStart = null;
-    state.rangeEnd = null;
     showView('chooseType');
 });
 
