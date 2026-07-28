@@ -37,7 +37,7 @@ const state = {
     vehicle: null,
     sort: 'low',
     editingBookingId: null,  // set when editing an existing pending booking
-    fromVehicleDetails: false // true when re-picking dates for a vehicle already chosen, so Continue should return to that vehicle's summary instead of the results list
+    fromVehicleDetails: false // true when a vehicle was picked (via Book Now) before a rental type/date was chosen, so Continue should return to that vehicle's summary instead of the results list
 };
 
 let bookings = JSON.parse(localStorage.getItem('everyride_bookings') || '[]');
@@ -60,13 +60,17 @@ const PRIMARY_PAGES = ['home','allVehicles','about','contact'];
 // the previous entry without pushing it again (no double-pop tricks).
 let historyStack = ['home'];
 
+// The tracked booking sequence. Vehicle Details is deliberately absent: it's
+// a pure "just looking" info page reachable from Home or the Vehicles tab,
+// so it never shows a step indicator — the sequence only starts once the
+// customer actually presses Book Now (see hasActiveSchedule()/bookNowBtn
+// below) or picks a rental type from the Home search / "Rent a car" CTA.
 const BOOKING_FLOW_STEP = {
     chooseType: 0,
     selectDateTime: 1,
     selectDates: 1,
     searchResults: 2,
-    vehicleDetails: 2,
-    bookingSummary: 2,
+    bookingSummary: 3,
     checkout: 3,
     confirmation: 4
 };
@@ -173,8 +177,8 @@ function commitViewChange(name, opts, animate) {
         }
     }
 
-    if (name === 'home') { renderFamilySpotlight(); renderUpcomingTrip(); }
-    if (name === 'chooseType') { state.editingBookingId = null; state.fromVehicleDetails = false; renderChooseType(); }
+    if (name === 'home') { state.fromVehicleDetails = false; renderFamilySpotlight(); renderUpcomingTrip(); }
+    if (name === 'chooseType') { state.editingBookingId = null; renderChooseType(); }
     if (name === 'selectDateTime') renderDateTimeView();
     if (name === 'selectDates') renderDatesView();
     if (name === 'searchResults') renderSearchResults();
@@ -276,12 +280,15 @@ function renderFamilySpotlight(){
         <span><i class="fa-solid fa-suitcase"></i> ${v.bags} Bags</span>
     `;
     document.getElementById('spotlightPrice').innerHTML = `${formatCurrency(v.price12)} <small>/12 hrs</small>`;
-
-    document.getElementById('spotlightViewBtn').addEventListener('click', () => {
-        state.vehicle = v;
-        showView('vehicleDetails');
-    });
 }
+
+// Bound once (not inside renderFamilySpotlight, which re-runs every time the
+// Home tab is opened) — the button is a static element, so re-binding on
+// every visit would stack up duplicate click handlers over a session.
+document.getElementById('spotlightViewBtn').addEventListener('click', () => {
+    state.vehicle = VEHICLES[0];
+    showView('vehicleDetails');
+});
 
 /* =====================================================
    UPCOMING TRIP (HOME) — reflects the customer's own bookings
@@ -654,6 +661,11 @@ document.getElementById('changeSearchBtn').addEventListener('click', () => {
 
 /* =====================================================
    VEHICLE DETAILS
+   Pure "just looking" info page: shows specs, rating, and
+   both rental rates as reference only. It never enters the
+   tracked booking sequence — see the BOOKING_FLOW_STEP
+   comment above. The sequence only begins when Book Now
+   is pressed.
 ===================================================== */
 function renderVehicleDetails(){
     const v = state.vehicle || VEHICLES[0];
@@ -681,6 +693,10 @@ function renderVehicleDetails(){
     document.getElementById('vdPriceDay').textContent = formatCurrency(v.priceDay);
 }
 
+// True once a rental type + matching schedule has already been chosen earlier
+// in this session (i.e. this vehicle was reached via the active search-results
+// flow). In that case Book Now has nothing left to ask and goes straight to
+// the booking summary; otherwise it starts the tracked sequence at step 1.
 function hasActiveSchedule(){
     if (state.rentalType === '12hour') return Boolean(state.date && state.timeSlot);
     if (state.rentalType === 'wholeday') return Boolean(state.rangeStart && state.rangeEnd);
@@ -691,12 +707,15 @@ document.getElementById('bookNowBtn').addEventListener('click', () => {
     state.editingBookingId = null;
     // Browsing a vehicle begins at step 1. When the customer reached this
     // page from the availability list, their type and dates are already set,
-    // so Book Now advances to the review instead of restarting the flow.
+    // so Book Now advances straight to the review instead of restarting the flow.
     if (hasActiveSchedule()) {
         showView('bookingSummary');
         return;
     }
-    state.fromVehicleDetails = false;
+    // Otherwise this vehicle was picked before a rental type/date exists —
+    // flag it so that once those are chosen, Continue skips back to this
+    // vehicle's summary instead of dropping the customer into the results list.
+    state.fromVehicleDetails = true;
     showView('chooseType');
 });
 
@@ -809,6 +828,12 @@ const PAYMENT_LABELS = {
     bank: 'Bank Transfer',
     card: 'Credit / Debit Card'
 };
+const STATUS_LABELS = {
+    pending: 'Pending',
+    confirmed: 'Confirmed',
+    completed: 'Completed',
+    cancelled: 'Cancelled'
+};
 
 function renderConfirmation(booking){
     document.getElementById('cfBookingId').textContent = booking.id;
@@ -824,6 +849,11 @@ function renderConfirmation(booking){
     document.getElementById('cfName').textContent = booking.contact.name;
     document.getElementById('cfPayment').textContent = PAYMENT_LABELS[booking.payMethod] || booking.payMethod;
     document.getElementById('cfTotal').textContent = formatCurrency(booking.total);
+
+    const statusLabel = STATUS_LABELS[booking.status] || 'Pending';
+    document.getElementById('cfStatus').textContent = statusLabel;
+    const statusHeadEl = document.getElementById('cfStatusHead');
+    if (statusHeadEl) statusHeadEl.textContent = statusLabel;
 }
 
 document.getElementById('goToBookingsBtn').addEventListener('click', () => showView('myBookings'));
