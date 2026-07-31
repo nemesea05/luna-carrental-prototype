@@ -75,6 +75,28 @@ const VEHICLES = [
   }
 ];
 
+
+const TIME_SLOTS = [
+  { id: "morning", start: "7:00 AM", end: "7:00 PM", durationHours: 12 },
+  { id: "overnight", start: "10:00 PM", end: "10:00 AM", durationHours: 12 },
+  { id: "afternoon", start: "1:00 PM", end: "1:00 AM", durationHours: 12 },
+  { id: "early", start: "4:00 AM", end: "4:00 PM", durationHours: 12 }
+];
+
+/* Front-end-only sample reservations. They make the calendar demonstrate
+   available, limited, and unavailable dates even before a visitor creates
+   their first local booking. Real bookings saved in localStorage are added
+   to these blocks automatically. */
+const DEMO_AVAILABILITY_BLOCKS = [
+  { vehicleId: "xpander", rentalType: "wholeday", startOffset: 2, endOffset: 3, time: "7:00 AM" },
+  { vehicleId: "civic", rentalType: "12hour", startOffset: 2, slotId: "afternoon" },
+  { vehicleId: "fortuner", rentalType: "12hour", startOffset: 3, slotId: "overnight" },
+  { vehicleId: "xpander", rentalType: "wholeday", startOffset: 5, endOffset: 6, time: "7:00 AM" },
+  { vehicleId: "fortuner", rentalType: "wholeday", startOffset: 5, endOffset: 6, time: "7:00 AM" },
+  { vehicleId: "civic", rentalType: "wholeday", startOffset: 5, endOffset: 6, time: "7:00 AM" },
+  { vehicleId: "terra", rentalType: "wholeday", startOffset: 5, endOffset: 6, time: "7:00 AM" }
+];
+
 const STORAGE = {
   bookings: "everyride_redesign_bookings",
   user: "everyride_redesign_user",
@@ -93,6 +115,13 @@ const state = {
   sort: "recommended",
   minimumSeats: 0,
   bookingToCancel: null,
+  scheduleDate: null,
+  scheduleSlotId: null,
+  rangeStart: null,
+  rangeEnd: null,
+  wholeDayPickupTime: "7:00 AM",
+  calendarView12: new Date(),
+  calendarViewDay: new Date(),
   bookings: readStorage(STORAGE.bookings, []),
   account: readStorage(STORAGE.user, null),
   user: readStorage(STORAGE.session, false) ? readStorage(STORAGE.user, null) : null,
@@ -139,13 +168,11 @@ function refreshIcons() {
 
 function setMinDates() {
   const today = todayString();
-  ["heroDate", "bookingDate", "bookingReturnDate"].forEach(id => {
-    const input = document.getElementById(id);
-    if (input) input.min = today;
-  });
-  $("#heroDate").value ||= today;
-  $("#bookingDate").value ||= today;
-  $("#bookingReturnDate").value ||= addDays(today, 1);
+  const heroDate = $("#heroDate");
+  if (heroDate) {
+    heroDate.min = today;
+    heroDate.value ||= today;
+  }
 }
 
 function routeTo(route) {
@@ -313,15 +340,322 @@ function showVehicleDetails(id) {
   refreshIcons();
 }
 
+function parseTimeLabel(label = "7:00 AM") {
+  const match = String(label).match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return { hours: 7, minutes: 0 };
+  let hours = Number(match[1]) % 12;
+  if (match[3].toUpperCase() === "PM") hours += 12;
+  return { hours, minutes: Number(match[2]) };
+}
+
+function createDateTime(dateString, timeLabel) {
+  const [year, month, day] = dateString.split("-").map(Number);
+  const { hours, minutes } = parseTimeLabel(timeLabel);
+  return new Date(year, month - 1, day, hours, minutes, 0, 0);
+}
+
+function dateDifferenceDays(start, end) {
+  return Math.round((new Date(`${end}T12:00:00`) - new Date(`${start}T12:00:00`)) / 86400000);
+}
+
+function selectedSlot() {
+  return TIME_SLOTS.find(slot => slot.id === state.scheduleSlotId) || null;
+}
+
+function slotFromPrefill(value) {
+  return TIME_SLOTS.find(slot => slot.id === value || slot.start === value || String(value || "").startsWith(slot.start)) || null;
+}
+
+function slotInterval(dateString, slot) {
+  const start = createDateTime(dateString, slot.start);
+  const end = new Date(start.getTime() + slot.durationHours * 3600000);
+  return { start, end };
+}
+
+function wholeDayInterval(startDate, endDate, timeLabel = state.wholeDayPickupTime) {
+  return { start: createDateTime(startDate, timeLabel), end: createDateTime(endDate, timeLabel) };
+}
+
+function intervalsConflict(candidateStart, candidateEnd, blockedStart, blockedEnd) {
+  const gap = 3 * 3600000;
+  return candidateStart < new Date(blockedEnd.getTime() + gap) && new Date(candidateEnd.getTime() + gap) > blockedStart;
+}
+
+function demoBlockedIntervals() {
+  const base = todayString();
+  return DEMO_AVAILABILITY_BLOCKS.map(block => {
+    if (block.rentalType === "12hour") {
+      const slot = TIME_SLOTS.find(item => item.id === block.slotId);
+      const interval = slotInterval(addDays(base, block.startOffset), slot);
+      return { vehicleId: block.vehicleId, start: interval.start, end: interval.end, source: "demo" };
+    }
+    const interval = wholeDayInterval(addDays(base, block.startOffset), addDays(base, block.endOffset), block.time);
+    return { vehicleId: block.vehicleId, start: interval.start, end: interval.end, source: "demo" };
+  });
+}
+
+function bookingBlockedInterval(booking) {
+  if (!booking || booking.status === "cancelled") return null;
+  const vehicleId = booking.vehicleId || booking.vehicle?.id;
+  const pickupDate = booking.pickupDate || booking.pickup;
+  if (!vehicleId || !pickupDate) return null;
+
+  if (booking.rentalType === "wholeday") {
+    const returnDate = booking.returnDate || addDays(pickupDate, 1);
+    const time = booking.wholeDayPickupTime || (booking.pickupTime && booking.pickupTime !== "Flexible" ? booking.pickupTime : "7:00 AM");
+    const interval = wholeDayInterval(pickupDate, returnDate, time);
+    return { vehicleId, start: interval.start, end: interval.end, source: booking.id };
+  }
+
+  const slot = TIME_SLOTS.find(item => item.id === booking.slotId) || slotFromPrefill(booking.pickupTime || booking.pickupTimeSlot?.start) || TIME_SLOTS[0];
+  const interval = slotInterval(pickupDate, slot);
+  return { vehicleId, start: interval.start, end: interval.end, source: booking.id };
+}
+
+function blockedIntervalsForVehicle(vehicleId) {
+  const userBlocks = state.bookings.map(bookingBlockedInterval).filter(Boolean);
+  return [...demoBlockedIntervals(), ...userBlocks].filter(block => block.vehicleId === vehicleId);
+}
+
+function isVehicleAvailable(vehicleId, interval) {
+  return !blockedIntervalsForVehicle(vehicleId).some(block => intervalsConflict(interval.start, interval.end, block.start, block.end));
+}
+
+function availableVehicleIds(interval, scopeIds = VEHICLES.map(vehicle => vehicle.id)) {
+  return scopeIds.filter(vehicleId => isVehicleAvailable(vehicleId, interval));
+}
+
+function availabilityScopeIds() {
+  return state.selectedVehicleId ? [state.selectedVehicleId] : VEHICLES.map(vehicle => vehicle.id);
+}
+
+function availabilityStatusForDate(dateString, rentalType) {
+  const scope = availabilityScopeIds();
+  if (rentalType === "12hour") {
+    let availableCombinations = 0;
+    TIME_SLOTS.forEach(slot => {
+      availableCombinations += availableVehicleIds(slotInterval(dateString, slot), scope).length;
+    });
+    const maximum = scope.length * TIME_SLOTS.length;
+    if (!availableCombinations) return { status: "unavailable", available: 0, maximum };
+    if (availableCombinations === maximum) return { status: "available", available: availableCombinations, maximum };
+    return { status: "limited", available: availableCombinations, maximum };
+  }
+
+  const interval = wholeDayInterval(dateString, addDays(dateString, 1), state.wholeDayPickupTime);
+  const count = availableVehicleIds(interval, scope).length;
+  if (!count) return { status: "unavailable", available: 0, maximum: scope.length };
+  if (count === scope.length) return { status: "available", available: count, maximum: scope.length };
+  return { status: "limited", available: count, maximum: scope.length };
+}
+
+function firstAvailableDate(rentalType, startDate = todayString()) {
+  for (let offset = 0; offset < 120; offset += 1) {
+    const date = addDays(startDate, offset);
+    if (availabilityStatusForDate(date, rentalType).status !== "unavailable") return date;
+  }
+  return startDate;
+}
+
+function getCurrentScheduleInterval() {
+  if (state.rentalType === "12hour") {
+    const slot = selectedSlot();
+    return state.scheduleDate && slot ? slotInterval(state.scheduleDate, slot) : null;
+  }
+  return state.rangeStart && state.rangeEnd ? wholeDayInterval(state.rangeStart, state.rangeEnd, state.wholeDayPickupTime) : null;
+}
+
+function availableVehiclesForCurrentSchedule() {
+  const interval = getCurrentScheduleInterval();
+  if (!interval) return [];
+  const ids = availableVehicleIds(interval);
+  return VEHICLES.filter(vehicle => ids.includes(vehicle.id));
+}
+
+function updateAvailabilityScopeCopy() {
+  if (state.selectedVehicleId) {
+    const vehicle = getVehicle(state.selectedVehicleId);
+    $("#availabilityScopeTitle").textContent = `${vehicle.brand} ${vehicle.model} availability`;
+    $("#availabilityScopeText").textContent = "Unavailable dates and slots are based on this specific vehicle's reservations.";
+  } else {
+    $("#availabilityScopeTitle").textContent = "Fleet availability";
+    $("#availabilityScopeText").textContent = "Green dates have broad availability, yellow dates have fewer choices, and red dates have no vehicle available.";
+  }
+}
+
+function calendarButtonClass(dateString, type) {
+  if (type === "12hour") return dateString === state.scheduleDate ? "selected" : "";
+  const classes = [];
+  if (state.rangeStart === dateString) classes.push("range-start");
+  if (state.rangeEnd === dateString) classes.push("range-end");
+  if (state.rangeStart && state.rangeEnd && dateString > state.rangeStart && dateString < state.rangeEnd) classes.push("in-range");
+  return classes.join(" ");
+}
+
+function rangeCanUseDate(dateString) {
+  if (!state.rangeStart || state.rangeEnd || dateString <= state.rangeStart) return availabilityStatusForDate(dateString, "wholeday").status !== "unavailable";
+  const interval = wholeDayInterval(state.rangeStart, dateString, state.wholeDayPickupTime);
+  return availableVehicleIds(interval, availabilityScopeIds()).length > 0;
+}
+
+function select12ScheduleDate(dateString) {
+  state.scheduleDate = dateString;
+  state.scheduleSlotId = null;
+  state.calendarView12 = new Date(`${dateString}T12:00:00`);
+  renderSchedulePicker();
+}
+
+function selectWholeDayScheduleDate(dateString) {
+  state.calendarViewDay = new Date(`${dateString}T12:00:00`);
+  if (!state.rangeStart || state.rangeEnd || dateString <= state.rangeStart) {
+    state.rangeStart = dateString;
+    state.rangeEnd = null;
+  } else {
+    const interval = wholeDayInterval(state.rangeStart, dateString, state.wholeDayPickupTime);
+    if (!availableVehicleIds(interval, availabilityScopeIds()).length) {
+      showToast("That date range is unavailable. Choose an earlier return date or a different pickup date.", "error");
+      return;
+    }
+    state.rangeEnd = dateString;
+  }
+  renderSchedulePicker();
+}
+
+function renderCalendarGrid(grid, label, viewDate, rentalType, onSelect) {
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  label.textContent = `${monthNames[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+  grid.innerHTML = weekdays.map(day => `<span class="calendar-weekday">${day}</span>`).join("");
+
+  const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
+  const days = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+  for (let index = 0; index < firstDay; index += 1) grid.insertAdjacentHTML("beforeend", '<span class="calendar-blank"></span>');
+
+  for (let day = 1; day <= days; day += 1) {
+    const date = new Date(viewDate.getFullYear(), viewDate.getMonth(), day, 12);
+    const dateString = date.toISOString().split("T")[0];
+    const past = dateString < todayString();
+    const meta = availabilityStatusForDate(dateString, rentalType);
+    const rangeDisabled = rentalType === "wholeday" && !past && !rangeCanUseDate(dateString);
+    const unavailable = meta.status === "unavailable" || rangeDisabled;
+    const visualStatus = unavailable ? "unavailable" : meta.status;
+    const selectedClass = calendarButtonClass(dateString, rentalType);
+    const title = past ? "Past date" : unavailable ? "Unavailable for this schedule" : meta.status === "limited" ? "Limited availability" : "Available";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `booking-calendar-day ${visualStatus} ${selectedClass}`.trim();
+    button.dataset.date = dateString;
+    button.disabled = past || unavailable;
+    button.title = title;
+    button.setAttribute("aria-label", `${formatDate(dateString)}: ${title}`);
+    button.innerHTML = `<span>${day}</span><i></i>`;
+    if (dateString === todayString()) button.classList.add("today");
+    if (!button.disabled) button.addEventListener("click", () => onSelect(dateString));
+    grid.appendChild(button);
+  }
+}
+
+function render12HourSchedule() {
+  if (!state.scheduleDate || state.scheduleDate < todayString()) state.scheduleDate = firstAvailableDate("12hour");
+  if (availabilityStatusForDate(state.scheduleDate, "12hour").status === "unavailable") {
+    state.scheduleDate = firstAvailableDate("12hour", state.scheduleDate);
+    state.calendarView12 = new Date(`${state.scheduleDate}T12:00:00`);
+  }
+  if (!(state.calendarView12 instanceof Date) || Number.isNaN(state.calendarView12.getTime())) state.calendarView12 = new Date(`${state.scheduleDate}T12:00:00`);
+
+  renderCalendarGrid($("#calendar12Grid"), $("#calendar12Label"), state.calendarView12, "12hour", select12ScheduleDate);
+
+  const scope = availabilityScopeIds();
+  const dateLabel = formatDate(state.scheduleDate);
+  $("#selected12DateLabel").textContent = dateLabel;
+  $("#bookingDate").value = state.scheduleDate;
+
+  const slotAvailability = TIME_SLOTS.map(slot => {
+    const ids = availableVehicleIds(slotInterval(state.scheduleDate, slot), scope);
+    return { slot, ids };
+  });
+  if (state.scheduleSlotId && !slotAvailability.find(item => item.slot.id === state.scheduleSlotId && item.ids.length)) state.scheduleSlotId = null;
+
+  $("#bookingSlotList").innerHTML = slotAvailability.map(({ slot, ids }) => {
+    const selected = state.scheduleSlotId === slot.id;
+    const disabled = ids.length === 0;
+    const availabilityLabel = disabled ? "Unavailable" : state.selectedVehicleId ? "Available" : `${ids.length} vehicle${ids.length === 1 ? "" : "s"} available`;
+    return `<button type="button" class="booking-slot ${selected ? "selected" : ""} ${disabled ? "unavailable" : ""}" data-slot-id="${slot.id}" ${disabled ? "disabled" : ""}><span><strong>${slot.start} – ${slot.end}</strong><small>12 hours</small></span><b>${selected ? "Selected" : availabilityLabel}</b></button>`;
+  }).join("");
+  $$('[data-slot-id]', $("#bookingSlotList")).forEach(button => button.addEventListener("click", () => {
+    state.scheduleSlotId = button.dataset.slotId;
+    renderSchedulePicker();
+  }));
+  const availableCount = slotAvailability.filter(item => item.ids.length).length;
+  $("#slotAvailabilityCount").textContent = `${availableCount} of ${TIME_SLOTS.length} slots open`;
+  const slot = selectedSlot();
+  $("#bookingTime").value = slot?.start || "";
+}
+
+function renderWholeDaySchedule() {
+  if (state.rangeStart && state.rangeStart < todayString()) {
+    state.rangeStart = null;
+    state.rangeEnd = null;
+  }
+  if (state.rangeStart && state.rangeEnd) {
+    const currentRange = wholeDayInterval(state.rangeStart, state.rangeEnd, state.wholeDayPickupTime);
+    if (!availableVehicleIds(currentRange, availabilityScopeIds()).length) {
+      state.rangeStart = firstAvailableDate("wholeday");
+      state.rangeEnd = null;
+      state.calendarViewDay = new Date(`${state.rangeStart}T12:00:00`);
+    }
+  }
+  const anchor = state.rangeStart || firstAvailableDate("wholeday");
+  if (!(state.calendarViewDay instanceof Date) || Number.isNaN(state.calendarViewDay.getTime())) state.calendarViewDay = new Date(`${anchor}T12:00:00`);
+  $("#bookingWholeDayTime").value = state.wholeDayPickupTime;
+
+  renderCalendarGrid($("#calendarDayGrid"), $("#calendarDayLabel"), state.calendarViewDay, "wholeday", selectWholeDayScheduleDate);
+
+  $("#rangeStartLabel").textContent = state.rangeStart ? formatDate(state.rangeStart) : "Select a date";
+  $("#rangeEndLabel").textContent = state.rangeEnd ? formatDate(state.rangeEnd) : "Select a date";
+  $("#bookingDate").value = state.rangeStart || "";
+  $("#bookingReturnDate").value = state.rangeEnd || "";
+  $("#bookingTime").value = state.wholeDayPickupTime;
+
+  if (state.rangeStart && state.rangeEnd) {
+    const days = dateDifferenceDays(state.rangeStart, state.rangeEnd);
+    const interval = wholeDayInterval(state.rangeStart, state.rangeEnd, state.wholeDayPickupTime);
+    const count = availableVehicleIds(interval, availabilityScopeIds()).length;
+    $("#rangeDurationLabel").textContent = `${days} day${days === 1 ? "" : "s"} · ${days * 24} hours`;
+    $("#rangeAvailability").classList.toggle("unavailable", count === 0);
+    $("#rangeAvailability span").textContent = state.selectedVehicleId ? (count ? "Selected vehicle is available for this range." : "Selected vehicle is unavailable for this range.") : `${count} vehicle${count === 1 ? "" : "s"} available for this range.`;
+  } else {
+    $("#rangeDurationLabel").textContent = "Minimum 1 day";
+    $("#rangeAvailability").classList.remove("unavailable");
+    $("#rangeAvailability span").textContent = state.rangeStart ? "Now select a return date after the pickup date." : "Select a pickup date, then select a return date.";
+  }
+}
+
+function renderSchedulePicker() {
+  updateAvailabilityScopeCopy();
+  $("#calendar12Panel").hidden = state.rentalType !== "12hour";
+  $("#calendarDayPanel").hidden = state.rentalType !== "wholeday";
+  if (state.rentalType === "12hour") render12HourSchedule();
+  else renderWholeDaySchedule();
+  refreshIcons();
+}
+
 function startBooking(vehicleId = null, prefill = {}) {
   state.bookingStep = 1;
   state.selectedVehicleId = vehicleId || null;
   if (prefill.rentalType) state.rentalType = prefill.rentalType;
+
+  const requestedDate = prefill.date && prefill.date >= todayString() ? prefill.date : todayString();
+  state.scheduleDate = requestedDate;
+  state.scheduleSlotId = slotFromPrefill(prefill.time)?.id || null;
+  state.rangeStart = requestedDate;
+  state.rangeEnd = addDays(requestedDate, 1);
+  state.wholeDayPickupTime = "7:00 AM";
+  state.calendarView12 = new Date(`${requestedDate}T12:00:00`);
+  state.calendarViewDay = new Date(`${requestedDate}T12:00:00`);
+
   syncBookingTypeUI();
   $("#bookingLocation").value = prefill.location || $("#heroLocation").value || "Quezon City, Metro Manila";
-  $("#bookingDate").value = prefill.date || todayString();
-  $("#bookingTime").value = prefill.time || "7:00 AM";
-  $("#bookingReturnDate").value = addDays($("#bookingDate").value, 1);
   if (state.user) {
     $("#guestFirstName").value = state.user.firstName || "";
     $("#guestLastName").value = state.user.lastName || "";
@@ -330,6 +664,7 @@ function startBooking(vehicleId = null, prefill = {}) {
   $("#guestPhone").value = "";
   $("#guestNotes").value = "";
   $("#bookingConsent").checked = false;
+  renderSchedulePicker();
   renderBookingVehicles();
   renderBookingStep();
   openModal("bookingModal");
@@ -337,19 +672,29 @@ function startBooking(vehicleId = null, prefill = {}) {
 
 function syncBookingTypeUI() {
   $$('[data-booking-type]').forEach(button => button.classList.toggle("active", button.dataset.bookingType === state.rentalType));
-  $("#bookingTimeField").hidden = state.rentalType === "wholeday";
-  $("#returnDateField").hidden = state.rentalType !== "wholeday";
+  renderSchedulePicker();
 }
 
 function renderBookingVehicles() {
-  $("#bookingVehicleList").innerHTML = VEHICLES.map(vehicle => {
-    const price = state.rentalType === "wholeday" ? vehicle.priceDay : vehicle.price12;
-    return `<button type="button" class="booking-vehicle-option ${state.selectedVehicleId === vehicle.id ? "selected" : ""}" data-select-booking-vehicle="${vehicle.id}"><img src="${vehicle.image}" alt=""><div><h4>${vehicle.brand} ${vehicle.model}</h4><p>${vehicle.seats} seats · ${vehicle.transmission} · ${vehicle.type}</p></div><strong>${formatMoney(price)}</strong></button>`;
+  const vehicles = availableVehiclesForCurrentSchedule();
+  if (state.selectedVehicleId && !vehicles.some(vehicle => vehicle.id === state.selectedVehicleId)) state.selectedVehicleId = null;
+
+  if (!vehicles.length) {
+    $("#bookingVehicleList").innerHTML = '<div class="no-available-vehicles"><i data-lucide="calendar-x"></i><h4>No vehicles available</h4><p>Go back and select another date, time slot, or date range.</p></div>';
+    refreshIcons();
+    return;
+  }
+
+  const duration = state.rentalType === "wholeday" && state.rangeStart && state.rangeEnd ? dateDifferenceDays(state.rangeStart, state.rangeEnd) : 1;
+  $("#bookingVehicleList").innerHTML = vehicles.map(vehicle => {
+    const price = state.rentalType === "wholeday" ? vehicle.priceDay * duration : vehicle.price12;
+    return `<button type="button" class="booking-vehicle-option ${state.selectedVehicleId === vehicle.id ? "selected" : ""}" data-select-booking-vehicle="${vehicle.id}"><img src="${vehicle.image}" alt="${vehicle.brand} ${vehicle.model}"><div><h4>${vehicle.brand} ${vehicle.model}</h4><p>${vehicle.seats} seats · ${vehicle.transmission} · ${vehicle.type}</p><span class="vehicle-available-label"><i data-lucide="circle-check"></i> Available for your schedule</span></div><strong>${formatMoney(price)}</strong></button>`;
   }).join("");
   $$('[data-select-booking-vehicle]').forEach(button => button.addEventListener("click", () => {
     state.selectedVehicleId = button.dataset.selectBookingVehicle;
     renderBookingVehicles();
   }));
+  refreshIcons();
 }
 
 function renderBookingStep() {
@@ -365,6 +710,7 @@ function renderBookingStep() {
   $("#bookingBackBtn").hidden = state.bookingStep === 1;
   $("#bookingNextBtn").hidden = state.bookingStep === 4;
   $("#bookingSubmitBtn").hidden = state.bookingStep !== 4;
+  if (state.bookingStep === 1) renderSchedulePicker();
   if (state.bookingStep === 2) renderBookingVehicles();
   if (state.bookingStep === 4) renderBookingReview();
   $(".booking-modal-card").scrollTo({ top: 0, behavior: "smooth" });
@@ -373,15 +719,16 @@ function renderBookingStep() {
 
 function validateBookingStep() {
   if (state.bookingStep === 1) {
-    const date = $("#bookingDate").value;
-    if (!date) return showToast("Select a pickup date.", "error"), false;
-    if (date < todayString()) return showToast("Pickup date cannot be in the past.", "error"), false;
-    if (state.rentalType === "wholeday") {
-      const returnDate = $("#bookingReturnDate").value;
-      if (!returnDate || returnDate <= date) return showToast("Return date must be after the pickup date.", "error"), false;
+    if (state.rentalType === "12hour") {
+      if (!state.scheduleDate) return showToast("Select a pickup date.", "error"), false;
+      if (!state.scheduleSlotId) return showToast("Select an available 12-hour time slot.", "error"), false;
+    } else {
+      if (!state.rangeStart || !state.rangeEnd) return showToast("Select both pickup and return dates.", "error"), false;
+      if (state.rangeEnd <= state.rangeStart) return showToast("Return date must be after the pickup date.", "error"), false;
     }
+    if (!availableVehiclesForCurrentSchedule().length) return showToast("No vehicle is available for that schedule.", "error"), false;
   }
-  if (state.bookingStep === 2 && !state.selectedVehicleId) return showToast("Select a vehicle to continue.", "error"), false;
+  if (state.bookingStep === 2 && !state.selectedVehicleId) return showToast("Select an available vehicle to continue.", "error"), false;
   if (state.bookingStep === 3) {
     const required = ["guestFirstName","guestLastName","guestEmail","guestPhone"];
     const invalid = required.some(id => !document.getElementById(id).checkValidity());
@@ -396,33 +743,48 @@ function validateBookingStep() {
 
 function bookingDraft() {
   const vehicle = getVehicle(state.selectedVehicleId);
-  const price = state.rentalType === "wholeday" ? vehicle.priceDay : vehicle.price12;
+  const slot = selectedSlot();
+  const durationDays = state.rentalType === "wholeday" ? dateDifferenceDays(state.rangeStart, state.rangeEnd) : 1;
+  const amount = state.rentalType === "wholeday" ? vehicle.priceDay * durationDays : vehicle.price12;
   return {
     vehicle,
     rentalType: state.rentalType,
     location: $("#bookingLocation").value,
-    pickupDate: $("#bookingDate").value,
-    returnDate: state.rentalType === "wholeday" ? $("#bookingReturnDate").value : null,
-    pickupTime: state.rentalType === "12hour" ? $("#bookingTime").value : "Flexible",
+    pickupDate: state.rentalType === "wholeday" ? state.rangeStart : state.scheduleDate,
+    returnDate: state.rentalType === "wholeday" ? state.rangeEnd : null,
+    pickupTime: state.rentalType === "wholeday" ? state.wholeDayPickupTime : `${slot.start} - ${slot.end}`,
+    wholeDayPickupTime: state.rentalType === "wholeday" ? state.wholeDayPickupTime : null,
+    slotId: state.rentalType === "12hour" ? slot.id : null,
+    durationDays,
     firstName: $("#guestFirstName").value.trim(),
     lastName: $("#guestLastName").value.trim(),
     email: $("#guestEmail").value.trim(),
     phone: $("#guestPhone").value.trim(),
     notes: $("#guestNotes").value.trim(),
-    amount: price
+    amount
   };
 }
 
 function renderBookingReview() {
   const draft = bookingDraft();
+  const scheduleLabel = draft.rentalType === "wholeday"
+    ? `${formatDate(draft.pickupDate)} at ${draft.pickupTime} to ${formatDate(draft.returnDate)} at ${draft.pickupTime}`
+    : `${formatDate(draft.pickupDate)} · ${draft.pickupTime}`;
   $("#bookingReview").innerHTML = `
-    <section class="review-card"><h4>Trip details</h4><div class="review-rows"><div class="review-row"><span>Rental type</span><strong>${draft.rentalType === "wholeday" ? "Whole day" : "12 hours"}</strong></div><div class="review-row"><span>Pickup</span><strong>${formatDate(draft.pickupDate)} · ${draft.pickupTime}</strong></div>${draft.returnDate ? `<div class="review-row"><span>Return</span><strong>${formatDate(draft.returnDate)}</strong></div>` : ""}<div class="review-row"><span>Location</span><strong>${escapeHTML(draft.location)}</strong></div><div class="review-row"><span>Customer</span><strong>${escapeHTML(`${draft.firstName} ${draft.lastName}`)}</strong></div><div class="review-row"><span>Contact</span><strong>${escapeHTML(draft.phone)}</strong></div><div class="review-row review-total"><span>Estimated total</span><strong>${formatMoney(draft.amount)}</strong></div></div></section>
-    <section class="review-card review-vehicle"><img src="${draft.vehicle.image}" alt="${draft.vehicle.brand} ${draft.vehicle.model}"><div><span class="eyebrow">SELECTED VEHICLE</span><h4>${draft.vehicle.brand} ${draft.vehicle.model}</h4><p>${draft.vehicle.seats} seats · ${draft.vehicle.transmission} · ${draft.vehicle.type}</p></div></section>`;
+    <section class="review-card"><h4>Trip details</h4><div class="review-rows"><div class="review-row"><span>Rental type</span><strong>${draft.rentalType === "wholeday" ? `${draft.durationDays}-day rental` : "12-hour rental"}</strong></div><div class="review-row"><span>Schedule</span><strong>${scheduleLabel}</strong></div><div class="review-row"><span>Location</span><strong>${escapeHTML(draft.location)}</strong></div><div class="review-row"><span>Customer</span><strong>${escapeHTML(`${draft.firstName} ${draft.lastName}`)}</strong></div><div class="review-row"><span>Contact</span><strong>${escapeHTML(draft.phone)}</strong></div><div class="review-row review-total"><span>Estimated total</span><strong>${formatMoney(draft.amount)}</strong></div></div></section>
+    <section class="review-card review-vehicle"><img src="${draft.vehicle.image}" alt="${draft.vehicle.brand} ${draft.vehicle.model}"><div><span class="eyebrow">SELECTED VEHICLE</span><h4>${draft.vehicle.brand} ${draft.vehicle.model}</h4><p>${draft.vehicle.seats} seats · ${draft.vehicle.transmission} · ${draft.vehicle.type}</p><span class="vehicle-available-label"><i data-lucide="shield-check"></i> Availability rechecked</span></div></section>`;
 }
 
 function submitBooking(event) {
   event.preventDefault();
   if (!validateBookingStep()) return;
+  const interval = getCurrentScheduleInterval();
+  if (!interval || !isVehicleAvailable(state.selectedVehicleId, interval)) {
+    showToast("This vehicle is no longer available for that schedule. Please choose another vehicle.", "error");
+    state.bookingStep = 2;
+    renderBookingStep();
+    return;
+  }
   const draft = bookingDraft();
   const booking = {
     id: `ER-${Date.now().toString().slice(-6)}`,
@@ -453,7 +815,9 @@ function renderBookings() {
     const vehicle = getVehicle(booking.vehicleId);
     const statusClass = booking.status === "cancelled" ? "cancelled" : getBookingGroup(booking) === "past" ? "completed" : "";
     const statusLabel = booking.status === "cancelled" ? "Cancelled" : getBookingGroup(booking) === "past" ? "Completed" : "Pending confirmation";
-    return `<article class="booking-item"><div class="booking-item-image"><img src="${vehicle.image}" alt="${vehicle.brand} ${vehicle.model}"></div><div class="booking-item-copy"><small>${escapeHTML(booking.id)}</small><h3>${vehicle.brand} ${vehicle.model}</h3><div class="booking-meta"><span><i data-lucide="calendar"></i>${formatDate(booking.pickupDate)}</span><span><i data-lucide="clock"></i>${escapeHTML(booking.pickupTime)}</span><span><i data-lucide="map-pin"></i>${escapeHTML(booking.location)}</span></div></div><div class="booking-side"><span class="status-pill ${statusClass}">${statusLabel}</span><strong>${formatMoney(booking.amount)}</strong><div class="booking-side-actions">${getBookingGroup(booking) === "upcoming" ? `<button class="outline-btn" data-cancel-booking="${booking.id}">Cancel</button>` : ""}<button class="primary-btn" data-view-vehicle="${vehicle.id}">Vehicle</button></div></div></article>`;
+    const scheduleDate = booking.rentalType === "wholeday" && booking.returnDate ? `${formatDate(booking.pickupDate)} – ${formatDate(booking.returnDate)}` : formatDate(booking.pickupDate);
+    const rentalLabel = booking.rentalType === "wholeday" ? `${booking.durationDays || dateDifferenceDays(booking.pickupDate, booking.returnDate)} day${(booking.durationDays || dateDifferenceDays(booking.pickupDate, booking.returnDate)) === 1 ? "" : "s"}` : "12 hours";
+    return `<article class="booking-item"><div class="booking-item-image"><img src="${vehicle.image}" alt="${vehicle.brand} ${vehicle.model}"></div><div class="booking-item-copy"><small>${escapeHTML(booking.id)}</small><h3>${vehicle.brand} ${vehicle.model}</h3><div class="booking-meta"><span><i data-lucide="calendar"></i>${scheduleDate}</span><span><i data-lucide="clock"></i>${escapeHTML(booking.pickupTime)} · ${rentalLabel}</span><span><i data-lucide="map-pin"></i>${escapeHTML(booking.location)}</span></div></div><div class="booking-side"><span class="status-pill ${statusClass}">${statusLabel}</span><strong>${formatMoney(booking.amount)}</strong><div class="booking-side-actions">${getBookingGroup(booking) === "upcoming" ? `<button class="outline-btn" data-cancel-booking="${booking.id}">Cancel</button>` : ""}<button class="primary-btn" data-view-vehicle="${vehicle.id}">Vehicle</button></div></div></article>`;
   }).join("");
   $("#bookingEmpty").hidden = bookings.length > 0;
   $$('[data-cancel-booking]').forEach(button => button.addEventListener("click", () => openCancelBooking(button.dataset.cancelBooking)));
@@ -616,12 +980,36 @@ function initEvents() {
 
   $$('[data-booking-type]').forEach(button => button.addEventListener("click", () => {
     state.rentalType = button.dataset.bookingType;
+    if (state.rentalType === "12hour") {
+      state.scheduleDate ||= firstAvailableDate("12hour");
+      state.scheduleSlotId = null;
+    } else {
+      state.rangeStart ||= firstAvailableDate("wholeday");
+      state.rangeEnd = state.rangeStart ? addDays(state.rangeStart, 1) : null;
+    }
     syncBookingTypeUI();
     renderBookingVehicles();
   }));
-  $("#bookingDate").addEventListener("change", event => {
-    $("#bookingReturnDate").min = addDays(event.target.value, 1);
-    if ($("#bookingReturnDate").value <= event.target.value) $("#bookingReturnDate").value = addDays(event.target.value, 1);
+  $("#bookingWholeDayTime").addEventListener("change", event => {
+    state.wholeDayPickupTime = event.target.value;
+    state.rangeEnd = null;
+    renderSchedulePicker();
+  });
+  $("#calendar12Prev").addEventListener("click", () => {
+    state.calendarView12 = new Date(state.calendarView12.getFullYear(), state.calendarView12.getMonth() - 1, 1);
+    renderCalendarGrid($("#calendar12Grid"), $("#calendar12Label"), state.calendarView12, "12hour", select12ScheduleDate);
+  });
+  $("#calendar12Next").addEventListener("click", () => {
+    state.calendarView12 = new Date(state.calendarView12.getFullYear(), state.calendarView12.getMonth() + 1, 1);
+    renderCalendarGrid($("#calendar12Grid"), $("#calendar12Label"), state.calendarView12, "12hour", select12ScheduleDate);
+  });
+  $("#calendarDayPrev").addEventListener("click", () => {
+    state.calendarViewDay = new Date(state.calendarViewDay.getFullYear(), state.calendarViewDay.getMonth() - 1, 1);
+    renderCalendarGrid($("#calendarDayGrid"), $("#calendarDayLabel"), state.calendarViewDay, "wholeday", selectWholeDayScheduleDate);
+  });
+  $("#calendarDayNext").addEventListener("click", () => {
+    state.calendarViewDay = new Date(state.calendarViewDay.getFullYear(), state.calendarViewDay.getMonth() + 1, 1);
+    renderCalendarGrid($("#calendarDayGrid"), $("#calendarDayLabel"), state.calendarViewDay, "wholeday", selectWholeDayScheduleDate);
   });
   $("#bookingNextBtn").addEventListener("click", () => {
     if (!validateBookingStep()) return;

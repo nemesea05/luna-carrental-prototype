@@ -4,6 +4,8 @@
   --green-800: #194a38;
   --green-700: #236348;
   --green-600: #2f7d58;
+  --green-500: #3f936b;
+  --green-300: #9bcbb2;
   --green-100: #e8f3ed;
   --green-50: #f3f8f5;
   --yellow-500: #f4bd32;
@@ -11,10 +13,15 @@
   --cream-100: #fbf7ee;
   --cream-50: #fffdf8;
   --ink-900: #17231e;
+  --ink-800: #293a33;
   --ink-700: #405049;
+  --ink-600: #586860;
   --ink-500: #6d7a74;
+  --ink-400: #8c9892;
   --line: #e4e9e6;
   --white: #fff;
+  --surface: #f7faf8;
+  --yellow: var(--yellow-500);
   --danger: #b83a3a;
   --danger-soft: #fff0f0;
   --shadow-sm: 0 8px 24px rgba(16, 49, 37, 0.08);
@@ -561,4 +568,86 @@ svg { width: 19px; height: 19px; stroke-width: 2; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
   .reveal { opacity: 1; transform: none; }
+}
+
+
+/* =====================================================
+   AVAILABILITY CALENDAR BOOKING FLOW
+===================================================== */
+.schedule-location { margin-bottom: 16px; }
+.availability-scope { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 18px; padding: 13px 15px; border: 1px solid #d8eadf; border-radius: 14px; background: var(--green-50); color: var(--green-900); }
+.availability-scope > svg { width: 19px; height: 19px; flex: 0 0 auto; margin-top: 1px; }
+.availability-scope strong { display: block; margin-bottom: 2px; font-size: .82rem; }
+.availability-scope p { margin: 0; color: var(--ink-600); font-size: .75rem; line-height: 1.5; }
+.schedule-panel[hidden] { display: none !important; }
+.booking-calendar-card { padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: var(--white); box-shadow: 0 8px 24px rgba(19,55,39,.06); }
+.booking-calendar-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.booking-calendar-nav > strong { font: 800 1rem "Manrope",sans-serif; color: var(--ink-900); }
+.calendar-arrow { width: 37px; height: 37px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 11px; background: var(--white); color: var(--green-800); transition: .2s var(--ease); }
+.calendar-arrow:hover { border-color: var(--green-500); background: var(--green-50); }
+.calendar-arrow svg { width: 18px; height: 18px; }
+.calendar-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 15px; margin: 0 0 14px; padding: 9px 11px; border-radius: 11px; background: var(--surface); color: var(--ink-500); font-size: .67rem; font-weight: 700; }
+.calendar-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+.legend-dot.available { background: var(--green-600); }
+.legend-dot.limited { background: #e5a80b; }
+.legend-dot.unavailable { background: #cf554d; }
+.booking-calendar-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 5px; }
+.calendar-weekday { display: grid; place-items: center; min-height: 24px; color: var(--ink-400); font-size: .66rem; font-weight: 800; text-transform: uppercase; }
+.calendar-blank { aspect-ratio: 1; }
+.booking-calendar-day { position: relative; aspect-ratio: 1; min-width: 0; display: grid; place-items: center; border: 1px solid transparent; border-radius: 11px; background: transparent; color: var(--ink-800); font: 700 .78rem "Inter",sans-serif; transition: .18s var(--ease); }
+.booking-calendar-day > i { position: absolute; bottom: 5px; width: 5px; height: 5px; border-radius: 50%; background: var(--green-600); }
+.booking-calendar-day.available:hover, .booking-calendar-day.limited:hover { border-color: var(--green-500); background: var(--green-50); transform: translateY(-1px); }
+.booking-calendar-day.limited > i { background: #e5a80b; }
+.booking-calendar-day.unavailable { color: #b8aaa7; background: #faf4f3; text-decoration: line-through; cursor: not-allowed; }
+.booking-calendar-day.unavailable > i { background: #cf554d; }
+.booking-calendar-day:disabled { opacity: .72; }
+.booking-calendar-day.today { border-color: var(--green-300); }
+.booking-calendar-day.selected, .booking-calendar-day.range-start, .booking-calendar-day.range-end { color: var(--white); border-color: var(--green-800); background: var(--green-800); box-shadow: 0 6px 16px rgba(32,91,65,.22); }
+.booking-calendar-day.selected > i, .booking-calendar-day.range-start > i, .booking-calendar-day.range-end > i { background: var(--yellow); }
+.booking-calendar-day.in-range { border-radius: 8px; background: var(--green-100); color: var(--green-900); }
+.slot-section { margin-top: 18px; }
+.slot-section-head { display: flex; align-items: end; justify-content: space-between; gap: 15px; margin-bottom: 10px; }
+.slot-section-head > div { display: grid; gap: 2px; }
+.slot-section-head span { color: var(--ink-500); font-size: .72rem; font-weight: 700; }
+.slot-section-head strong { font-size: .9rem; }
+.availability-count { padding: 6px 9px; border-radius: 999px; background: var(--green-50); color: var(--green-800) !important; white-space: nowrap; }
+.booking-slot-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.booking-slot { min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); color: var(--ink-800); text-align: left; transition: .2s var(--ease); }
+.booking-slot:hover:not(:disabled) { border-color: var(--green-600); background: var(--green-50); }
+.booking-slot > span { min-width: 0; display: grid; gap: 2px; }
+.booking-slot strong { font-size: .79rem; white-space: nowrap; }
+.booking-slot small { color: var(--ink-500); font-size: .68rem; }
+.booking-slot b { color: var(--green-800); font-size: .66rem; text-align: right; }
+.booking-slot.selected { border-color: var(--green-700); background: var(--green-50); box-shadow: 0 0 0 3px rgba(47,125,88,.09); }
+.booking-slot.unavailable { color: var(--ink-400); background: #faf7f5; cursor: not-allowed; }
+.booking-slot.unavailable b { color: var(--danger); }
+.schedule-note { display: flex; align-items: flex-start; gap: 8px; margin: 11px 0 0; color: var(--ink-500); font-size: .7rem; line-height: 1.5; }
+.schedule-note svg { width: 15px; height: 15px; flex: 0 0 auto; color: var(--green-700); }
+.whole-day-time-field { margin-bottom: 14px; }
+.range-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.range-summary-grid > div { display: grid; gap: 3px; padding: 13px 14px; border: 1px solid var(--line); border-radius: 13px; background: var(--white); }
+.range-summary-grid span { color: var(--ink-500); font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.range-summary-grid strong { font-size: .8rem; }
+.range-duration-card { grid-column: 1/-1; background: var(--green-50) !important; }
+.range-availability { display: flex; align-items: center; gap: 9px; margin-top: 10px; padding: 11px 13px; border-radius: 12px; background: #eef8f2; color: var(--green-800); font-size: .74rem; font-weight: 700; }
+.range-availability.unavailable { background: var(--danger-soft); color: var(--danger); }
+.range-availability svg { width: 17px; height: 17px; }
+.vehicle-available-label { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; color: var(--green-700); font-size: .68rem; font-weight: 800; }
+.vehicle-available-label svg { width: 14px; height: 14px; }
+.no-available-vehicles { padding: 35px 20px; border: 1px dashed var(--line); border-radius: 16px; text-align: center; background: var(--surface); }
+.no-available-vehicles svg { width: 34px; height: 34px; color: var(--danger); }
+.no-available-vehicles h4 { margin: 10px 0 4px; }
+.no-available-vehicles p { margin: 0; color: var(--ink-500); font-size: .78rem; }
+
+@media (max-width: 680px) {
+  .booking-calendar-card { padding: 13px 10px; border-radius: 15px; }
+  .booking-calendar-grid { gap: 3px; }
+  .booking-calendar-day { border-radius: 8px; font-size: .72rem; }
+  .booking-calendar-day > i { bottom: 3px; }
+  .calendar-legend { justify-content: flex-start; }
+  .booking-slot-list { grid-template-columns: 1fr; }
+  .slot-section-head { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .range-summary-grid { grid-template-columns: 1fr; }
+  .range-duration-card { grid-column: auto; }
 }

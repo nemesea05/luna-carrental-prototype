@@ -107,7 +107,7 @@
           <div class="quick-book-grid">
             <label class="field"><span>Pickup location</span><span class="input-wrap"><i data-lucide="map-pin"></i><select id="heroLocation"><option>Quezon City, Metro Manila</option><option>Makati City, Metro Manila</option><option>Pasig City, Metro Manila</option><option>Taguig City, Metro Manila</option></select></span></label>
             <label class="field"><span>Pickup date</span><span class="input-wrap"><i data-lucide="calendar"></i><input type="date" id="heroDate" required></span></label>
-            <label class="field" id="heroTimeField"><span>Pickup time</span><span class="input-wrap"><i data-lucide="clock-3"></i><select id="heroTime"><option>7:00 AM</option><option>10:00 AM</option><option>1:00 PM</option><option>4:00 PM</option></select></span></label>
+            <label class="field" id="heroTimeField"><span>Pickup time</span><span class="input-wrap"><i data-lucide="clock-3"></i><select id="heroTime"><option>7:00 AM</option><option>10:00 PM</option><option>1:00 PM</option><option>4:00 AM</option></select></span></label>
             <button class="primary-btn search-submit" type="submit">Search vehicles <i data-lucide="search"></i></button>
           </div>
         </form>
@@ -234,10 +234,48 @@
       <div class="booking-progress" id="bookingProgress"><div class="active"><span>1</span><small>Schedule</small></div><i></i><div><span>2</span><small>Vehicle</small></div><i></i><div><span>3</span><small>Details</small></div><i></i><div><span>4</span><small>Review</small></div></div>
       <form id="bookingForm">
         <div class="booking-step active" data-step="1" id="bookingStep1">
-          <div class="step-heading"><h3>Choose your schedule</h3><p>Tell us when and where your trip begins.</p></div>
-          <div class="rental-choice-grid"><button type="button" class="rental-choice active" data-booking-type="12hour"><i data-lucide="clock-3"></i><span><strong>12-hour rental</strong><small>Flexible half-day use</small></span><b>From ₱2,300</b></button><button type="button" class="rental-choice" data-booking-type="wholeday"><i data-lucide="sun"></i><span><strong>Whole-day rental</strong><small>Full 24-hour use</small></span><b>From ₱3,200</b></button></div>
-          <div class="two-col"><label class="field"><span>Pickup location</span><span class="input-wrap"><i data-lucide="map-pin"></i><select id="bookingLocation"><option>Quezon City, Metro Manila</option><option>Makati City, Metro Manila</option><option>Pasig City, Metro Manila</option><option>Taguig City, Metro Manila</option></select></span></label><label class="field"><span>Pickup date</span><span class="input-wrap"><i data-lucide="calendar"></i><input id="bookingDate" type="date" required></span></label></div>
-          <div class="two-col"><label class="field" id="bookingTimeField"><span>Pickup time</span><span class="input-wrap"><i data-lucide="clock"></i><select id="bookingTime"><option>7:00 AM</option><option>10:00 AM</option><option>1:00 PM</option><option>4:00 PM</option></select></span></label><label class="field" id="returnDateField" hidden><span>Return date</span><span class="input-wrap"><i data-lucide="calendar-check"></i><input id="bookingReturnDate" type="date"></span></label></div>
+          <div class="step-heading"><h3>Choose your schedule</h3><p>Unavailable dates and time slots are disabled automatically.</p></div>
+          <div class="rental-choice-grid">
+            <button type="button" class="rental-choice active" data-booking-type="12hour"><i data-lucide="clock-3"></i><span><strong>12-hour rental</strong><small>Fixed 12-hour slots with a 3-hour preparation gap</small></span><b>From ₱2,300</b></button>
+            <button type="button" class="rental-choice" data-booking-type="wholeday"><i data-lucide="calendar-range"></i><span><strong>Whole-day rental</strong><small>24 hours per day, pickup and return at the same time</small></span><b>From ₱3,200/day</b></button>
+          </div>
+
+          <label class="field schedule-location"><span>Pickup location</span><span class="input-wrap"><i data-lucide="map-pin"></i><select id="bookingLocation"><option>Quezon City, Metro Manila</option><option>Makati City, Metro Manila</option><option>Pasig City, Metro Manila</option><option>Taguig City, Metro Manila</option></select></span></label>
+
+          <div class="availability-scope" id="availabilityScope"><i data-lucide="info"></i><div><strong id="availabilityScopeTitle">Fleet availability</strong><p id="availabilityScopeText">The calendar checks all vehicles. Dates turn unavailable only when no vehicle can accept the selected schedule.</p></div></div>
+
+          <section class="schedule-panel" id="calendar12Panel">
+            <div class="booking-calendar-card">
+              <div class="booking-calendar-nav"><button type="button" class="calendar-arrow" id="calendar12Prev" aria-label="Previous month"><i data-lucide="chevron-left"></i></button><strong id="calendar12Label">Month Year</strong><button type="button" class="calendar-arrow" id="calendar12Next" aria-label="Next month"><i data-lucide="chevron-right"></i></button></div>
+              <div class="calendar-legend"><span><i class="legend-dot available"></i>Available</span><span><i class="legend-dot limited"></i>Limited</span><span><i class="legend-dot unavailable"></i>Unavailable</span></div>
+              <div class="booking-calendar-grid" id="calendar12Grid" aria-label="12-hour rental calendar"></div>
+            </div>
+            <div class="slot-section">
+              <div class="slot-section-head"><div><span>12-hour time slots</span><strong id="selected12DateLabel">Select a date</strong></div><span class="availability-count" id="slotAvailabilityCount">—</span></div>
+              <div class="booking-slot-list" id="bookingSlotList"></div>
+              <p class="schedule-note"><i data-lucide="sparkles"></i> A 3-hour preparation allowance is enforced before and after every booking for cleaning, inspection, and refueling.</p>
+            </div>
+          </section>
+
+          <section class="schedule-panel" id="calendarDayPanel" hidden>
+            <label class="field whole-day-time-field"><span>Pickup and return time</span><span class="input-wrap"><i data-lucide="clock"></i><select id="bookingWholeDayTime"><option>7:00 AM</option><option>10:00 AM</option><option>1:00 PM</option><option>4:00 PM</option></select></span></label>
+            <div class="booking-calendar-card">
+              <div class="booking-calendar-nav"><button type="button" class="calendar-arrow" id="calendarDayPrev" aria-label="Previous month"><i data-lucide="chevron-left"></i></button><strong id="calendarDayLabel">Month Year</strong><button type="button" class="calendar-arrow" id="calendarDayNext" aria-label="Next month"><i data-lucide="chevron-right"></i></button></div>
+              <div class="calendar-legend"><span><i class="legend-dot available"></i>Available</span><span><i class="legend-dot limited"></i>Limited</span><span><i class="legend-dot unavailable"></i>Unavailable</span></div>
+              <div class="booking-calendar-grid" id="calendarDayGrid" aria-label="Whole-day rental calendar"></div>
+            </div>
+            <div class="range-summary-grid">
+              <div><span>Pickup date</span><strong id="rangeStartLabel">Select a date</strong></div>
+              <div><span>Return date</span><strong id="rangeEndLabel">Select a date</strong></div>
+              <div class="range-duration-card"><span>Rental duration</span><strong id="rangeDurationLabel">Minimum 1 day</strong></div>
+            </div>
+            <div class="range-availability" id="rangeAvailability"><i data-lucide="car-front"></i><span>Select a pickup date, then select a return date.</span></div>
+            <p class="schedule-note"><i data-lucide="info"></i> One rental day equals 24 hours. For example, pickup at 7:00 AM and return the next day at 7:00 AM.</p>
+          </section>
+
+          <input id="bookingDate" type="hidden">
+          <input id="bookingReturnDate" type="hidden">
+          <input id="bookingTime" type="hidden">
         </div>
         <div class="booking-step" data-step="2" id="bookingStep2"><div class="step-heading"><h3>Select a vehicle</h3><p>Choose the best fit for your passengers and plans.</p></div><div class="booking-vehicle-list" id="bookingVehicleList"></div></div>
         <div class="booking-step" data-step="3" id="bookingStep3"><div class="step-heading"><h3>Your contact details</h3><p>We’ll use these details to confirm your booking request.</p></div><div class="two-col"><label class="field"><span>First name</span><input id="guestFirstName" required placeholder="Juan"></label><label class="field"><span>Last name</span><input id="guestLastName" required placeholder="Dela Cruz"></label></div><div class="two-col"><label class="field"><span>Email address</span><input id="guestEmail" type="email" required placeholder="juan@example.com"></label><label class="field"><span>Mobile number</span><input id="guestPhone" type="tel" required placeholder="09XX XXX XXXX"></label></div><label class="field"><span>Trip notes <small>(optional)</small></span><textarea id="guestNotes" rows="4" placeholder="Pickup instructions, child seat request, or other details"></textarea></label><label class="consent-row"><input type="checkbox" id="bookingConsent" required><span>I confirm that the information is correct and agree to be contacted about this request.</span></label></div>
