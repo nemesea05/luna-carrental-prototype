@@ -1,1040 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EveryRide PH | Car Rental Services</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#12372a">
+  <meta name="description" content="EveryRide PH responsive car-rental website prototype.">
+  <title>EveryRide PH — Every journey, every story</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-<link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <a class="skip-link" href="#mainContent">Skip to content</a>
 
-<div class="app-shell">
-
-    <!-- =====================================================
-         MOBILE TOP BAR — shown on every view under 992px.
-         Pairs with the sidebar drawer below for consistent
-         navigation on phones and tablets.
-    ====================================================== -->
-    <header class="mobile-topbar">
-        <button type="button" class="mobile-topbar-menu" id="drawerToggle" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
-        <div class="logo-block clickable-logo" data-go="home">
-            <span class="logo-icon"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M8 16C10 9 16.5 4.5 24 4.5C33 4.5 40.5 11 42.5 20" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                    <path d="M13.5 6.8L8 16L4 8.8" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M40 32C38 39 31.5 43.5 24 43.5C15 43.5 7.5 37 5.5 28" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                    <path d="M34.5 41.2L40 32L44 39.2" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M15 27.5C15 26.1 16 25 17.5 24.7L19.5 24.3C20 22 21 20.5 23 20.5H26C28 20.5 29 22 29.5 24.3L31.5 24.7C33 25 34 26.1 34 27.5V29.5C34 30.3 33.3 31 32.5 31H31C30.7 32.4 29.5 33.5 28 33.5C26.5 33.5 25.3 32.4 25 31H23C22.7 32.4 21.5 33.5 20 33.5C18.5 33.5 17.3 32.4 17 31H16.5C15.7 31 15 30.3 15 29.5V27.5Z" fill="currentColor"/>
-                    <circle cx="20" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                    <circle cx="28" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                </svg></span>
-            <span class="logo-text">
-                <span class="logo-word">every<span class="accent-ride">ride</span></span>
-            </span>
-        </div>
-        <div class="mobile-topbar-actions">
-            <button type="button" class="notif-btn" data-go="myBookings" aria-label="My Bookings">
-                <i class="fa-regular fa-bell"></i>
-                <span class="cart-badge" id="mobileBookingsBadge">0</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- =====================================================
-         SIDEBAR — persistent nav on desktop, slide-in drawer
-         on mobile (same element, toggled by .open). This is
-         the one navigation system used across every view.
-    ====================================================== -->
-    <aside class="app-sidebar" id="appSidebar">
-        <button type="button" class="sidebar-brand" data-go="home" aria-label="EveryRide home">
-            <span class="sidebar-brand-mark"><i class="fa-solid fa-car-side"></i></span>
-            <span>every<span class="accent-ride">ride</span><small>car rental services</small></span>
-        </button>
-
-        <nav class="sidebar-nav" aria-label="Main navigation">
-            <button type="button" data-go="home"><i class="fa-solid fa-house"></i> Home</button>
-            <button type="button" data-go="allVehicles"><i class="fa-solid fa-car"></i> Vehicles</button>
-            <button type="button" data-go="myBookings"><i class="fa-regular fa-calendar-days"></i> My Bookings <span class="cart-badge" id="sidebarBookingsBadge">0</span></button>
-            <button type="button" data-go="about"><i class="fa-regular fa-user"></i> About Us</button>
-            <button type="button" data-go="contact"><i class="fa-solid fa-phone"></i> Contact Us</button>
-        </nav>
-
-        <div class="sidebar-promo">
-            <span>First 5 booked<br>rent customers will have</span>
-            <strong>FREE <small>ADDITIONAL<br>3 HOURS!</small></strong>
-        </div>
-
-        <a href="tel:09123456789" class="sidebar-contact"><i class="fa-solid fa-phone"></i> 0912 345 6789 — We're happy to help!</a>
-
-        <button type="button" class="sidebar-login" id="sidebarLoginBtn"><i class="fa-regular fa-user"></i> Login / Sign Up</button>
-        <div class="sidebar-user-chip" id="sidebarUserChip" style="display:none;">
-            <div class="sidebar-user-chip-avatar" id="sidebarUserChipAvatar">J</div>
-            <div class="sidebar-user-chip-text"><strong>Hi, <span id="sidebarUserChipName">Juan</span>!</strong><span>Let's start your journey</span></div>
-            <button type="button" id="sidebarUserChipLogout" title="Log out"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-        </div>
-    </aside>
-    <div class="drawer-backdrop" id="drawerBackdrop"></div>
-
-    <div class="tab-loading-overlay" id="tabLoadingOverlay" aria-hidden="true">
-        <div class="tab-loading-inner">
-            <div class="tab-loading-spinner"><i class="fa-solid fa-car-side"></i></div>
-            <div class="tab-loading-text" id="tabLoadingText">Loading</div>
-            <div class="tab-loading-dots"><span></span><span></span><span></span></div>
-        </div>
+  <div class="announcement-bar">
+    <div class="container announcement-inner">
+      <p><span class="announcement-dot"></span> First 5 confirmed bookings get 3 additional hours free.</p>
+      <a href="tel:+639123456789"><i data-lucide="phone"></i> 0912 345 6789</a>
     </div>
+  </div>
 
-    <div class="app-content">
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-shell">
+      <a href="#home" class="brand" data-route="home" aria-label="EveryRide home">
+        <span class="brand-mark" aria-hidden="true"><i data-lucide="car-front"></i></span>
+        <span class="brand-copy"><strong>every<span>ride</span></strong><small>CAR RENTAL SERVICES</small></span>
+      </a>
 
-        <!-- Contextual bar for booking-flow steps: back button + step progress.
-             Hidden on browse-type pages (home / vehicles / about / contact). -->
-        <div class="flow-context-bar" id="flowContextBar" style="display:none;">
-            <div class="flow-context-inner">
-                <button type="button" class="back-btn" id="flowBackBtn" aria-label="Go back"><i class="fa-solid fa-arrow-left"></i></button>
-                <span class="flow-context-title" id="flowContextTitle">Book Your Ride</span>
-                <div class="booking-flow-progress" id="bookingFlowProgress" aria-label="Booking progress">
-                    <div class="flow-progress-inner">
-                        <div class="flow-stage"><span>1</span><small>Type of rental</small></div><div class="flow-link"></div>
-                        <div class="flow-stage"><span>2</span><small>Selecting dates</small></div><div class="flow-link"></div>
-                        <div class="flow-stage"><span>3</span><small>Vehicles</small></div><div class="flow-link"></div>
-                        <div class="flow-stage"><span>4</span><small>Your details</small></div><div class="flow-link"></div>
-                        <div class="flow-stage"><span>5</span><small>Submit request</small></div>
-                    </div>
-                </div>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <button class="nav-link active" data-route="home">Home</button>
+        <button class="nav-link" data-route="vehicles">Vehicles</button>
+        <button class="nav-link" data-route="bookings">My bookings</button>
+        <button class="nav-link" data-route="about">About</button>
+        <button class="nav-link" data-route="contact">Contact</button>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="icon-btn desktop-only" id="openSearchBtn" aria-label="Search vehicles"><i data-lucide="search"></i></button>
+        <button class="account-btn" id="accountBtn"><i data-lucide="user-round"></i><span>Login</span></button>
+        <button class="primary-btn compact desktop-only" data-start-booking>Book a ride</button>
+        <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu" aria-expanded="false"><i data-lucide="menu"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <aside class="mobile-drawer" id="mobileDrawer" aria-hidden="true">
+    <div class="drawer-head">
+      <a href="#home" class="brand" data-route="home">
+        <span class="brand-mark"><i data-lucide="car-front"></i></span>
+        <span class="brand-copy"><strong>every<span>ride</span></strong><small>CAR RENTAL SERVICES</small></span>
+      </a>
+      <button class="icon-btn" id="closeDrawerBtn" aria-label="Close menu"><i data-lucide="x"></i></button>
+    </div>
+    <nav class="drawer-nav" aria-label="Mobile navigation">
+      <button data-route="home"><i data-lucide="house"></i> Home</button>
+      <button data-route="vehicles"><i data-lucide="car"></i> Vehicles</button>
+      <button data-route="bookings"><i data-lucide="calendar-days"></i> My bookings <span class="count-pill" data-booking-count>0</span></button>
+      <button data-route="about"><i data-lucide="circle-help"></i> About us</button>
+      <button data-route="contact"><i data-lucide="messages-square"></i> Contact us</button>
+    </nav>
+    <div class="drawer-promo">
+      <span class="eyebrow light">WELCOME OFFER</span>
+      <h3>Get 3 extra hours free.</h3>
+      <p>Available to the first five confirmed rental customers.</p>
+      <button class="light-btn" data-start-booking>Start booking</button>
+    </div>
+    <button class="drawer-account" id="drawerAccountBtn"><i data-lucide="user-round"></i><span>Login or create account</span><i data-lucide="chevron-right"></i></button>
+  </aside>
+  <div class="backdrop" id="drawerBackdrop"></div>
+
+  <main id="mainContent">
+    <!-- HOME -->
+    <section class="page active" id="page-home" data-page="home">
+      <section class="hero-section">
+        <div class="hero-media" role="img" aria-label="A modern family car ready for a road trip"></div>
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+          <div class="hero-copy reveal">
+            <span class="eyebrow light"><i data-lucide="sparkles"></i> YOUR NEXT STORY STARTS HERE</span>
+            <h1>Every journey deserves a ride you can trust.</h1>
+            <p>Comfortable, reliable, and thoughtfully prepared vehicles for family trips, barkada getaways, and everyday plans.</p>
+            <div class="hero-actions">
+              <button class="accent-btn" data-start-booking>Book your ride <i data-lucide="arrow-right"></i></button>
+              <button class="glass-btn" data-route="vehicles"><i data-lucide="play"></i> Explore vehicles</button>
             </div>
+            <div class="hero-proof">
+              <div class="avatars" aria-hidden="true"><span>MS</span><span>JR</span><span>KL</span><span>+</span></div>
+              <div><div class="stars">★★★★★</div><p>Loved by Metro Manila renters</p></div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <main id="app">
-
-        <!-- =========================================================
-             VIEW: HOME
-        ========================================================== -->
-        <section id="view-home" class="view">
-
-            <div class="home-utility-bar">
-                <div class="home-utility-location"><i class="fa-solid fa-location-dot"></i><span>Quezon City, Metro Manila</span><i class="fa-solid fa-chevron-down"></i></div>
-                <div class="home-utility-actions"><a href="tel:09123456789" class="home-utility-call"><i class="fa-solid fa-phone"></i><span>0912 345 6789<small>We're happy to help!</small></span></a><button type="button" class="home-utility-bookings" data-go="myBookings"><i class="fa-regular fa-calendar-days"></i> My Bookings</button></div>
+      <section class="quick-book-wrap container reveal">
+        <form class="quick-book-card" id="quickBookForm">
+          <div class="quick-book-head">
+            <div><span class="eyebrow">QUICK SEARCH</span><h2>Where are we taking you?</h2></div>
+            <div class="segmented-control" id="heroRentalType" role="group" aria-label="Rental duration">
+              <button type="button" class="active" data-type="12hour">12 hours</button>
+              <button type="button" data-type="wholeday">Whole day</button>
             </div>
-
-            <section class="luna-hero" role="img" aria-label="Family taking a photo beside an EveryRide Mitsubishi Xpander">
-                <div class="luna-hero-overlay"></div>
-                <div class="luna-hero-copy"><h1>Every<span>Journey,</span><br>Every<span>Story.</span></h1><p>We don't just rent cars. We help you create unforgettable moments with the people you love — your family, your barkada, your person.</p><button type="button" class="luna-cta" data-go="chooseType"><i class="fa-solid fa-car-side"></i> Rent a car with us!</button></div>
-            </section>
-
-            <form class="luna-search-card" id="lunaSearchForm">
-                <div class="luna-search-head"><h2>Where are we taking you?</h2><div class="luna-rental-switch"><button class="active" type="button" data-luna-type="12hour">12 Hours</button><button type="button" data-luna-type="wholeday">Whole Day</button></div></div>
-                <div class="luna-search-fields"><label>Pick-up Location<select id="lunaLocation"><option>Quezon City, Metro Manila</option><option>Makati City, Metro Manila</option><option>Pasig City, Metro Manila</option><option>Taguig City, Metro Manila</option></select></label><label>Date<input type="date" id="lunaDate"></label><label class="luna-time-field">Time<select id="lunaTime"><option value="0">7:00 AM</option><option value="1">10:00 PM</option><option value="2">1:00 PM</option><option value="3">4:00 AM</option></select></label><button type="submit" class="luna-search-btn">Search Vehicles <i class="fa-solid fa-magnifying-glass"></i></button></div>
-            </form>
-
-            <section class="luna-showcase">
-                <div class="luna-intro"><span>OUR TOP VEHICLE</span><h2>Made for every<br>journey.</h2><i></i><p>Comfort, style, and reliability for your next story.</p></div>
-                <article class="luna-vehicle-card"><div class="luna-vehicle-media"><i class="fa-solid fa-van-shuttle"></i></div><div><small>Mitsubishi</small><h2>Xpander GLS</h2><p><i class="fa-solid fa-user"></i> 7 Seats &nbsp; <i class="fa-solid fa-suitcase"></i> 4 Bags &nbsp; <i class="fa-solid fa-gear"></i> Automatic</p><button type="button" id="lunaVehicleDetails">View Details <i class="fa-solid fa-arrow-right"></i></button></div></article>
-                <article class="luna-benefit"><i class="fa-solid fa-shield-heart"></i><h3>Clean &amp; Well-Maintained</h3><p>All vehicles are thoroughly cleaned and regularly serviced.</p></article>
-                <article class="luna-benefit"><i class="fa-solid fa-user-shield"></i><h3>Trusted Drivers</h3><p>Professional, courteous, and knowledgeable.</p></article>
-                <article class="luna-benefit"><i class="fa-solid fa-heart"></i><h3>Great Experience</h3><p>Comfortable, honest, and memorable.</p></article>
-            </section>
-
-            <section class="luna-story-grid">
-                <article class="luna-story-copy">
-                    <span class="luna-section-label">THE EVERYRIDE EXPERIENCE</span>
-                    <h2>More than a ride.<br><em>More memories.</em></h2>
-                    <p>From family errands to weekend escapes, Luna gives every group room to relax, laugh, and enjoy the road together.</p>
-                    <div class="luna-story-points"><span><i class="fa-solid fa-wifi"></i> Complimentary WiFi</span><span><i class="fa-solid fa-cookie-bite"></i> Snack-ready rides</span><span><i class="fa-solid fa-kit-medical"></i> Safety essentials</span></div>
-                    <button type="button" class="luna-outline-cta" data-go="about">Discover EveryRide <i class="fa-solid fa-arrow-right"></i></button>
-                </article>
-                <article class="luna-story-photo" role="img" aria-label="A family enjoying a comfortable EveryRide journey"><span class="luna-photo-badge"><i class="fa-solid fa-heart"></i> Made for the moments that matter</span></article>
-            </section>
-            <section class="luna-brand-banner" role="img" aria-label="EveryRide: Every Journey, Every Story"><div><span>YOUR NEXT STORY AWAITS</span><h2>Comfort for every mile.</h2><button type="button" data-go="chooseType">Start a booking <i class="fa-solid fa-arrow-right"></i></button></div></section>
-
-            <!-- Feature strip -->
-            <section class="feature-strip">
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <div><h4>Trusted &amp; Reliable</h4><p>Your safety is our top priority.</p></div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fa-solid fa-percent"></i></div>
-                    <div><h4>Affordable Pricing</h4><p>Great rates with no hidden charges.</p></div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fa-regular fa-calendar-check"></i></div>
-                    <div><h4>Easy &amp; Fast Booking</h4><p>Book your ride in a few simple steps.</p></div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fa-solid fa-car"></i></div>
-                    <div><h4>Well-Maintained Cars</h4><p>Clean, comfortable, and ready for you.</p></div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fa-solid fa-headset"></i></div>
-                    <div><h4>24/7 Customer Support</h4><p>We're here whenever you need us.</p></div>
-                </div>
-            </section>
-
-            <!-- The EveryRide Experience -->
-            <section class="experience-strip">
-                <div class="experience-head">
-                    <span class="eyebrow">EVERY CUSTOMER DESERVES</span>
-                    <h2>The EveryRide Experience</h2>
-                </div>
-                <div class="experience-grid">
-                    <div class="experience-card">
-                        <div class="experience-icon"><i class="fa-solid fa-cookie-bite"></i></div>
-                        <h4>Free Snack Bar</h4>
-                        <p>Enjoy complimentary snacks and drinks on every ride.</p>
-                    </div>
-                    <div class="experience-card">
-                        <div class="experience-icon"><i class="fa-solid fa-wifi"></i></div>
-                        <h4>WiFi Access</h4>
-                        <p>Stay connected with free WiFi on board.</p>
-                    </div>
-                    <div class="experience-card">
-                        <div class="experience-icon"><i class="fa-solid fa-gift"></i></div>
-                        <h4>Special Celebrations</h4>
-                        <p>We make every occasion extra special with you.</p>
-                    </div>
-                    <div class="experience-card">
-                        <div class="experience-icon"><i class="fa-solid fa-kit-medical"></i></div>
-                        <h4>Emergency Kit</h4>
-                        <p>Your safety on the road is always our top priority.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Browse Cars — highlighted single-vehicle spotlight + Upcoming Trip -->
-            <section id="fleet" class="browse-section">
-
-                <div class="browse-head">
-                    <div class="browse-head-title">
-                        <span class="eyebrow">MEET THE MEMBERS OF THE FAMILY</span>
-                        <h2>Browse Cars</h2>
-                    </div>
-                    <div class="browse-filters" role="tablist" aria-label="Vehicle type">
-                        <button type="button" class="filter-chip active" data-go="allVehicles">All Cars</button>
-                        <button type="button" class="filter-chip" data-go="allVehicles">MPV</button>
-                        <button type="button" class="filter-chip disabled" disabled title="More vehicles joining the family soon">SUV</button>
-                        <button type="button" class="filter-chip disabled" disabled title="More vehicles joining the family soon">Sedan</button>
-                        <button type="button" class="filter-chip disabled" disabled title="More vehicles joining the family soon">Van</button>
-                    </div>
-                    <a href="#" class="browse-view-all" data-go="allVehicles">View all vehicles <i class="fa-solid fa-arrow-right"></i></a>
-                </div>
-
-                <div class="family-spotlight-layout">
-                    <div class="spotlight-card featured-card">
-                        <span class="featured-ribbon"><i class="fa-solid fa-heart"></i> Family Favorite</span>
-                        <div class="spotlight-media" id="spotlightMedia"><i class="fa-solid fa-van-shuttle"></i></div>
-                        <div class="spotlight-body">
-                            <div class="spotlight-rating">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                                <span id="spotlightRatingText">4.9 &middot; loved by 120+ families</span>
-                            </div>
-                            <span class="spotlight-eyebrow">TODAY'S HIGHLIGHT</span>
-                            <div class="spotlight-name" id="spotlightNickname">Luna</div>
-                            <div class="spotlight-model" id="spotlightModel">Mitsubishi Xpander GLS 2026</div>
-                            <p class="spotlight-tagline">Every family needs a ride they can count on. Luna's roomy, reliable, and ready for your next barkada trip or family getaway.</p>
-                            <div class="spotlight-specs" id="spotlightSpecs"></div>
-                            <div class="spotlight-price-row">
-                                <div class="spotlight-price" id="spotlightPrice">₱3,000 <small>/12 hrs</small></div>
-                            </div>
-                            <button type="button" class="btn btn-navy btn-block" id="spotlightViewBtn">Get to Know Luna</button>
-                        </div>
-                    </div>
-
-                    <div class="upcoming-trip-card" id="upcomingTripCard">
-                        <h3>Upcoming Trip</h3>
-                        <div id="upcomingTripContent"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Testimonial + Newsletter -->
-            <section>
-                <div class="testimonial-newsletter-layout">
-                    <div class="testimonial-card">
-                        <div class="testimonial-quote-mark">&ldquo;</div>
-                        <p class="testimonial-text" id="testimonialText">Great service, smooth booking, and the car was in excellent condition. Our family trip was truly memorable!</p>
-                        <div class="testimonial-person">
-                            <div class="testimonial-avatar" id="testimonialAvatar">M</div>
-                            <div>
-                                <div class="testimonial-name" id="testimonialName">Maria Santos</div>
-                                <div class="testimonial-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                            </div>
-                        </div>
-                        <div class="testimonial-dots" id="testimonialDots"></div>
-                    </div>
-
-                    <div class="newsletter-card">
-                        <h3>Join the EveryRide Family!</h3>
-                        <p>Get exclusive promos and travel tips straight to your inbox.</p>
-                        <form class="newsletter-form" id="newsletterForm">
-                            <input type="email" id="newsletterEmail" placeholder="Enter your email address" required>
-                            <button type="submit" class="btn btn-accent">Subscribe</button>
-                        </form>
-                        <p class="newsletter-success" id="newsletterSuccess" style="display:none;"><i class="fa-solid fa-circle-check"></i> You're on the list — welcome to the family!</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Trust badge strip -->
-            <section class="trust-strip">
-                <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> Your trusted car rental partner in Metro Manila</div>
-                <div class="trust-item"><i class="fa-solid fa-car-side"></i> Clean cars for your safety</div>
-                <div class="trust-item"><i class="fa-solid fa-user-check"></i> Verified &amp; trusted drivers</div>
-                <div class="trust-item"><i class="fa-solid fa-lock"></i> Secure payments</div>
-                <div class="trust-item"><i class="fa-solid fa-tag"></i> No hidden fees</div>
-                <div class="trust-item"><i class="fa-solid fa-circle-check"></i> Easy booking, anytime, anywhere</div>
-            </section>
-
-        </section>
-
-        <!-- =========================================================
-             VIEW: CHOOSE RENTAL TYPE
-        ========================================================== -->
-        <section id="view-chooseType" class="view flow-view booking-step" style="display:none;">
-            <div class="flow-container narrow">
-                <h1>Choose Rental Type</h1>
-                <p class="flow-sub">Select the type of rental that suits your journey.</p>
-
-                <div class="location-field">
-                    <label><i class="fa-solid fa-location-dot"></i> Pick-up Location</label>
-                    <select id="ctLocation">
-                        <option>Quezon City, Metro Manila</option>
-                        <option>Makati City, Metro Manila</option>
-                        <option>Pasig City, Metro Manila</option>
-                        <option>Taguig City, Metro Manila</option>
-                    </select>
-                </div>
-
-                <div class="rental-type-cards">
-                    <button type="button" class="rental-type-card" data-type="12hour">
-                        <div class="rtc-icon"><i class="fa-regular fa-clock"></i></div>
-                        <div class="rtc-body">
-                            <h3>12-Hour Rental</h3>
-                            <p>Includes 3-hour preparation gap between rentals.</p>
-                        </div>
-                        <div class="rtc-price">₱2,500+</div>
-                    </button>
-                    <button type="button" class="rental-type-card" data-type="wholeday">
-                        <div class="rtc-icon"><i class="fa-regular fa-calendar-days"></i></div>
-                        <div class="rtc-body">
-                            <h3>Whole Day Rental</h3>
-                            <p>Rent for 24 hours from pickup to return.</p>
-                        </div>
-                        <div class="rtc-price">₱5,000+</div>
-                    </button>
-                </div>
-
-                <div class="info-box">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <div>
-                        <strong id="infoBoxTitle">About 12-Hour Rental</strong>
-                        <p id="infoBoxText">Each 12-hour rental includes a 3-hour preparation gap between bookings for cleaning, inspection, and refueling between rentals.</p>
-                    </div>
-                </div>
-
-                <button type="button" class="btn btn-navy btn-block confirm-type-btn" id="confirmTypeBtn" disabled>Confirm</button>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: 12-HOUR RENTAL - SELECT DATE & TIME
-        ========================================================== -->
-        <section id="view-selectDateTime" class="view flow-view booking-step" style="display:none;">
-            <div class="flow-container narrow">
-                <h1>Select Date & Time</h1>
-                <p class="flow-sub">Choose your preferred 12-hour time slot.</p>
-
-                <div class="calendar-card">
-                    <div class="calendar-nav">
-                        <button type="button" class="cal-arrow" id="calPrev12"><i class="fa-solid fa-chevron-left"></i></button>
-                        <span id="calLabel12">July 2026</span>
-                        <button type="button" class="cal-arrow" id="calNext12"><i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-                    <div class="calendar-grid" id="calGrid12"></div>
-                </div>
-
-                <div class="slots-block">
-                    <div class="slots-label">Available Time Slots for <span id="slotsDateLabel">--</span></div>
-                    <div class="time-slot-list" id="timeSlotList"></div>
-                    <p class="slots-note"><i class="fa-solid fa-circle-info"></i> Each rental includes a 3-hour preparation gap between bookings. Exact pricing is shown after you choose your vehicle.</p>
-                </div>
-
-                <button type="button" class="btn btn-navy btn-block" id="continue12Btn" disabled>Continue</button>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: WHOLE DAY RENTAL - SELECT PICKUP & RETURN DATES
-        ========================================================== -->
-        <section id="view-selectDates" class="view flow-view booking-step" style="display:none;">
-            <div class="flow-container narrow">
-                <h1>Select Pickup & Return Dates</h1>
-                <p class="flow-sub">Choose your pickup and return dates.</p>
-
-                <div class="calendar-card">
-                    <div class="calendar-nav">
-                        <button type="button" class="cal-arrow" id="calPrevDay"><i class="fa-solid fa-chevron-left"></i></button>
-                        <span id="calLabelDay">July 2026</span>
-                        <button type="button" class="cal-arrow" id="calNextDay"><i class="fa-solid fa-chevron-right"></i></button>
-                    </div>
-                    <div class="calendar-grid" id="calGridDay"></div>
-                </div>
-
-                <div class="range-summary">
-                    <div class="range-box">
-                        <span>Pickup Date</span>
-                        <strong id="rangePickupLabel">Select a date</strong>
-                    </div>
-                    <div class="range-box">
-                        <span>Return Date</span>
-                        <strong id="rangeReturnLabel">Select a date</strong>
-                    </div>
-                </div>
-                <div class="range-duration" id="rangeDurationBox" style="display:none;">
-                    <span>Rental Duration</span>
-                    <strong id="rangeDurationLabel">--</strong>
-                </div>
-                <p class="range-hint"><i class="fa-solid fa-circle-info"></i> Whole Day Rental requires a minimum of 1 night — pick a return date after your pickup date.</p>
-
-                <button type="button" class="btn btn-navy btn-block" id="continueDayBtn" disabled>Search Availability</button>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: SEARCH RESULTS
-        ========================================================== -->
-        <section id="view-searchResults" class="view flow-view booking-step" style="display:none;">
-            <div class="flow-container wide">
-                <div class="results-layout">
-
-                    <aside class="search-summary-card">
-                        <h3>Search Summary</h3>
-                        <div class="ss-line"><span>Rental Type</span><strong id="ssRentalType">--</strong></div>
-                        <div class="ss-line"><span>Pick-up Date</span><strong id="ssPickupDate">--</strong></div>
-                        <div class="ss-line" id="ssTimeSlotRow"><span>Time Slot</span><strong id="ssTimeSlot">--</strong></div>
-                        <div class="ss-line" id="ssReturnDateRow" style="display:none;"><span>Return Date</span><strong id="ssReturnDate">--</strong></div>
-                        <div class="ss-line"><span>Location</span><strong id="ssLocation">--</strong></div>
-                        <button type="button" class="btn btn-outline btn-block" id="changeSearchBtn">Change Search</button>
-                    </aside>
-
-                    <div class="results-main">
-                        <div class="results-head">
-                            <div>
-                                <h2>Available Vehicles</h2>
-                                <p id="resultsCountLabel">vehicles available for your selected schedule</p>
-                            </div>
-                            <div class="sort-select">
-                                <label for="sortSelect">Sort by</label>
-                                <select id="sortSelect">
-                                    <option value="low">Price: Low to High</option>
-                                    <option value="high">Price: High to Low</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="result-vehicle-list" id="resultVehicleList"></div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: VEHICLE DETAILS
-        ========================================================== -->
-        <section id="view-vehicleDetails" class="view flow-view" style="display:none;">
-            <div class="flow-container wide">
-                <div class="details-layout">
-
-                    <div class="details-main">
-                        <div class="vehicle-photo-main" id="vdPhotoMain"><i class="fa-solid fa-car-side"></i></div>
-                        <div class="vehicle-photo-strip" id="vdPhotoStrip"></div>
-                    </div>
-
-                    <aside class="details-side">
-                        <h1 id="vdName">Vehicle Name</h1>
-                        <p class="vd-type" id="vdType">SUV · Automatic · Diesel</p>
-                        <div class="vd-rating" id="vdRating">
-                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                            <span id="vdRatingText">4.9 &middot; loved by 120+ families</span>
-                        </div>
-
-                        <h4>Specifications</h4>
-                        <div class="vd-specs" id="vdSpecs"></div>
-
-                        <div class="vd-price-box">
-                            <h4>Rental Rates</h4>
-                            <div class="vd-rate-list">
-                                <div class="vd-rate-row">
-                                    <span><strong>12-Hour Rental</strong><small>Perfect for a quick city trip</small></span>
-                                    <b id="vdPrice12">₱2,300</b>
-                                </div>
-                                <div class="vd-rate-row">
-                                    <span><strong>Whole Day Rental</strong><small>Up to 24 hours of adventure</small></span>
-                                    <b id="vdPriceDay">₱3,200</b>
-                                </div>
-                            </div>
-                            <p class="vd-price-note"><i class="fa-solid fa-circle-check"></i> Both rates include Driver, Fuel, and Insurance</p>
-                            <button type="button" class="btn btn-navy btn-block" id="bookNowBtn"><i class="fa-solid fa-car-side"></i> Book Now</button>
-                        </div>
-                    </aside>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: BOOKING SUMMARY
-        ========================================================== -->
-        <section id="view-bookingSummary" class="view flow-view booking-step" style="display:none;">
-            <div class="flow-container narrow">
-                <h1>Booking Summary</h1>
-                <p class="flow-sub">Please review your booking details.</p>
-
-                <div class="summary-card">
-                    <div class="summary-vehicle-row">
-                        <div class="summary-vehicle-icon" id="bsVehicleIcon"><i class="fa-solid fa-car-side"></i></div>
-                        <div>
-                            <strong id="bsVehicleName">--</strong>
-                            <p id="bsVehicleType">--</p>
-                        </div>
-                    </div>
-
-                    <div class="summary-lines">
-                        <div class="sl-line"><span>Rental Type</span><strong id="bsRentalType">--</strong></div>
-                        <div class="sl-line"><span>Pick-up Date</span><strong id="bsPickupDate">--</strong></div>
-                        <div class="sl-line" id="bsTimeSlotRow"><span>Time Slot</span><strong id="bsTimeSlot">--</strong></div>
-                        <div class="sl-line" id="bsReturnDateRow" style="display:none;"><span>Return Date</span><strong id="bsReturnDate">--</strong></div>
-                        <div class="sl-line"><span>Location</span><strong id="bsLocation">--</strong></div>
-                        <div class="sl-line"><span>Price</span><strong id="bsPrice">--</strong></div>
-                        <div class="sl-line"><span>Add-ons</span><strong>--</strong></div>
-                    </div>
-
-                    <div class="summary-total-row">
-                        <span>Total Amount</span>
-                        <strong id="bsTotal">--</strong>
-                    </div>
-
-                    <button type="button" class="btn btn-navy btn-block" id="continueCheckoutBtn">Continue to Checkout</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: CHECKOUT
-        ========================================================== -->
-        <section id="view-checkout" class="view flow-view booking-step" style="display:none;">
-            <div class="flow-container narrow">
-                <h1>Checkout</h1>
-                <p class="flow-sub">Fill in your details to complete the booking.</p>
-
-                <form class="checkout-card" id="checkoutForm" novalidate>
-                    <h4>Contact Information</h4>
-                    <div class="cf-field">
-                        <label for="ckName">Full Name</label>
-                        <input type="text" id="ckName" placeholder="Juan Dela Cruz" required>
-                    </div>
-                    <div class="cf-field">
-                        <label for="ckEmail">Email Address</label>
-                        <input type="email" id="ckEmail" placeholder="juandelacruz@email.com" required>
-                    </div>
-                    <div class="cf-field">
-                        <label for="ckPhone">Phone Number</label>
-                        <input type="tel" id="ckPhone" placeholder="0912 345 6789" pattern="^(0|\+63)9[0-9\s]{8,11}$" title="Enter a valid PH mobile number, e.g. 0912 345 6789" required>
-                    </div>
-
-                    <h4>Payment Method</h4>
-                    <div class="payment-options">
-                        <label class="pay-option">
-                            <input type="radio" name="payMethod" value="cash" checked>
-                            <span>Cash on Pick-up</span>
-                        </label>
-                        <label class="pay-option">
-                            <input type="radio" name="payMethod" value="bank">
-                            <span>Bank Transfer</span>
-                        </label>
-                        <label class="pay-option">
-                            <input type="radio" name="payMethod" value="card">
-                            <span>Credit / Debit Card</span>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn btn-navy btn-block"><i class="fa-solid fa-paper-plane"></i> Submit Booking Request</button>
-                </form>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: BOOKING CONFIRMED
-        ========================================================== -->
-        <section id="view-confirmation" class="view flow-view booking-step" style="display:none;">
-            <div class="flow-container narrow">
-                <div class="confirm-card">
-                    <div class="confirm-icon"><i class="fa-solid fa-check"></i></div>
-                    <h1>Booking Confirmed!</h1>
-                    <p class="flow-sub">Here's your receipt — we've sent a copy of these details to your email too.</p>
-
-                    <div class="confirm-details-box">
-                        <div class="cd-line"><span>Booking ID</span><strong id="cfBookingId">--</strong></div>
-                        <div class="cd-line"><span>Status</span><span class="status-badge status-pending" id="cfStatus">Pending</span></div>
-                        <div class="cd-line"><span>Vehicle</span><strong id="cfVehicle">--</strong></div>
-                        <div class="cd-line"><span>Rental Type</span><strong id="cfRentalType">--</strong></div>
-                        <div class="cd-line"><span>Pick-up</span><strong id="cfPickup">--</strong></div>
-                        <div class="cd-line"><span>Return</span><strong id="cfReturn">--</strong></div>
-                        <div class="cd-line"><span>Location</span><strong id="cfLocation">--</strong></div>
-                        <div class="cd-line"><span>Booked By</span><strong id="cfName">--</strong></div>
-                        <div class="cd-line"><span>Payment Method</span><strong id="cfPayment">--</strong></div>
-                    </div>
-                    <div class="confirm-total-row"><span>Total Amount</span><strong id="cfTotal">--</strong></div>
-
-                    <section class="request-status-card" aria-label="Booking request status">
-                        <div class="request-status-head"><span class="request-status-icon"><i class="fa-solid fa-clock"></i></span><div><strong>Request under review</strong><small>We usually confirm bookings within 30 minutes.</small></div><span class="status-badge status-pending" id="cfStatusHead">Pending</span></div>
-                        <div class="booking-status-tracker">
-                            <div class="tracker-step done"><span><i class="fa-solid fa-check"></i></span><small>Request sent</small></div><div class="tracker-line active"></div>
-                            <div class="tracker-step current"><span>2</span><small>Under review</small></div><div class="tracker-line"></div>
-                            <div class="tracker-step"><span>3</span><small>Confirmed</small></div><div class="tracker-line"></div>
-                            <div class="tracker-step"><span>4</span><small>Ready to drive</small></div>
-                        </div>
-                    </section>
-                    <p class="confirm-note"><i class="fa-solid fa-circle-info"></i> We will contact you shortly to confirm your booking. Thank you for riding with us!</p>
-
-                    <button type="button" class="btn btn-navy btn-block" id="goToBookingsBtn">Go to My Bookings</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: MY BOOKINGS
-        ========================================================== -->
-        <section id="view-myBookings" class="view flow-view" style="display:none;">
-            <div class="flow-container narrow">
-                <h1>My Bookings</h1>
-                <p class="flow-sub">Track the status of the booking requests you've submitted.</p>
-
-                <div class="booking-tabs" id="bookingTabs">
-                    <button type="button" class="booking-tab active" data-filter="all">All</button>
-                    <button type="button" class="booking-tab" data-filter="pending">Pending</button>
-                    <button type="button" class="booking-tab" data-filter="confirmed">Confirmed</button>
-                    <button type="button" class="booking-tab" data-filter="completed">Completed</button>
-                    <button type="button" class="booking-tab" data-filter="cancelled">Cancelled</button>
-                </div>
-
-                <div class="bookings-list" id="myBookingsList"></div>
-                <div class="bookings-empty" id="myBookingsEmpty">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                    <h3>No bookings yet</h3>
-                    <p>Reserve a car to see your booking request here.</p>
-                    <button type="button" class="btn btn-navy" data-go="chooseType">Browse Vehicles</button>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- =========================================================
-             VIEW: ALL VEHICLES (with filters)
-        ========================================================== -->
-        <section id="view-allVehicles" class="view flow-view" style="display:none;">
-            <div class="flow-container wide">
-                <h1>All Vehicles</h1>
-                <p class="flow-sub">Browse our full fleet and filter to find the right ride for your trip.</p>
-
-                <div class="results-layout">
-                    <aside class="filters-sidebar">
-                        <div class="filters-head">
-                            <h3>Filters</h3>
-                            <button type="button" id="clearFiltersBtn">Clear all</button>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Vehicle Type</h4>
-                            <label class="filter-check"><input type="checkbox" class="f-type" value="Sedan"><span>Sedan</span></label>
-                            <label class="filter-check"><input type="checkbox" class="f-type" value="MPV"><span>MPV</span></label>
-                            <label class="filter-check"><input type="checkbox" class="f-type" value="SUV"><span>SUV</span></label>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Transmission</h4>
-                            <label class="filter-check"><input type="checkbox" class="f-transmission" value="Automatic"><span>Automatic</span></label>
-                            <label class="filter-check"><input type="checkbox" class="f-transmission" value="Manual"><span>Manual</span></label>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Fuel Type</h4>
-                            <label class="filter-check"><input type="checkbox" class="f-fuel" value="Petrol"><span>Petrol</span></label>
-                            <label class="filter-check"><input type="checkbox" class="f-fuel" value="Diesel"><span>Diesel</span></label>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Seats</h4>
-                            <label class="filter-check"><input type="checkbox" class="f-seats" value="5"><span>5 Seats</span></label>
-                            <label class="filter-check"><input type="checkbox" class="f-seats" value="7"><span>7 Seats</span></label>
-                        </div>
-
-                        <div class="filter-group">
-                            <h4>Max Price (12-Hour)</h4>
-                            <input type="range" id="priceRangeInput" min="2000" max="4000" step="100" value="4000">
-                            <div class="price-range-label"><span>₱2,000</span><strong id="priceRangeValue">₱4,000</strong></div>
-                        </div>
-                    </aside>
-
-                    <div class="results-main">
-                        <div class="results-head">
-                            <div>
-                                <h2 id="allVehiclesCountLabel">Vehicles</h2>
-                                <p>Showing all available vehicles</p>
-                            </div>
-                            <div class="sort-select">
-                                <label for="allVehiclesSortSelect">Sort by</label>
-                                <select id="allVehiclesSortSelect">
-                                    <option value="low">Price: Low to High</option>
-                                    <option value="high">Price: High to Low</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="result-vehicle-list" id="allVehiclesList"></div>
-                        <div class="filters-empty" id="filtersEmptyState" style="display:none;">
-                            <i class="fa-solid fa-filter-circle-xmark"></i>
-                            <h3>No vehicles match your filters</h3>
-                            <p>Try adjusting or clearing your filters.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: ABOUT US
-        ========================================================== -->
-        <section id="view-about" class="view flow-view" style="display:none;">
-            <div class="page-banner">
-                <h1>Every journey, every story.</h1>
-                <p>Your travel companion in the Philippines.</p>
-            </div>
-            <div class="flow-container wide">
-                <div class="about-mission">
-                    <h2>Our Mission</h2>
-                    <p class="about-lead">To provide safe, reliable, and hassle-free car rental services that help people create more meaningful journeys and memories.</p>
-                    <div class="mission-grid">
-                        <div class="mission-item">
-                            <div class="mission-icon"><i class="fa-solid fa-handshake"></i></div>
-                            <h4>Reliable Service</h4>
-                            <p>Well-maintained cars you can count on for every trip.</p>
-                        </div>
-                        <div class="mission-item">
-                            <div class="mission-icon"><i class="fa-solid fa-heart"></i></div>
-                            <h4>Service with Heart</h4>
-                            <p>Your comfort and safety always come first with us.</p>
-                        </div>
-                        <div class="mission-item">
-                            <div class="mission-icon"><i class="fa-solid fa-tag"></i></div>
-                            <h4>Honest Pricing</h4>
-                            <p>Quality service at rates that respect your budget.</p>
-                        </div>
-                    </div>
-
-                    <div class="values-strip">
-                        <span class="value-pill"><i class="fa-solid fa-shield-halved"></i> Safety First</span>
-                        <span class="value-pill"><i class="fa-solid fa-heart"></i> Service with Heart</span>
-                        <span class="value-pill"><i class="fa-solid fa-circle-check"></i> Reliability</span>
-                        <span class="value-pill"><i class="fa-solid fa-hands-holding"></i> Respect</span>
-                        <span class="value-pill"><i class="fa-solid fa-camera-retro"></i> Creating Memories</span>
-                    </div>
-                </div>
-
-                <div class="about-story">
-                    <div class="about-story-text">
-                        <h2>Who We Are</h2>
-                        <p>Built from our family's love for exploring new places together, EveryRide was born to make travel more accessible. We believe everyone deserves the freedom to travel, connect, and create unforgettable memories, even without owning a car.</p>
-                        <p>Whether you need a car for a few hours or a full day out of town, our fleet and flexible 12-hour and whole-day rental options are built around how Filipino families, barkadas, and couples actually travel — with clear pricing, easy booking, and a team that's actually reachable when you need help.</p>
-                    </div>
-                    <div class="about-story-stats">
-                        <div class="stat-box"><strong>10k+</strong><span>Happy Customers</span></div>
-                        <div class="stat-box"><strong>24/7</strong><span>Customer Support</span></div>
-                        <div class="stat-box"><strong>15+</strong><span>Vehicles in Fleet</span></div>
-                    </div>
-                </div>
-
-                <div class="audience-section">
-                    <h2>Who We Serve</h2>
-                    <div class="audience-grid">
-                        <div class="audience-card">
-                            <div class="audience-icon"><i class="fa-solid fa-people-roof"></i></div>
-                            <h4>Filipino Families</h4>
-                            <p>Families who value quality time, comfort, and safety on every trip.</p>
-                        </div>
-                        <div class="audience-card">
-                            <div class="audience-icon"><i class="fa-solid fa-user-group"></i></div>
-                            <h4>Barkadas</h4>
-                            <p>Groups of friends who love road trips, adventures, and spontaneous getaways.</p>
-                        </div>
-                        <div class="audience-card">
-                            <div class="audience-icon"><i class="fa-solid fa-heart-circle-check"></i></div>
-                            <h4>Couples</h4>
-                            <p>Couples looking for romantic getaways and memorable moments together.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- =========================================================
-             VIEW: CONTACT
-        ========================================================== -->
-        <section id="view-contact" class="view flow-view" style="display:none;">
-            <div class="page-banner">
-                <h1>Get in touch with us</h1>
-                <p>We're here to help.</p>
-            </div>
-            <div class="flow-container wide">
-                <div class="contact-layout">
-                    <div class="contact-info">
-                        <div class="contact-info-item">
-                            <div class="ci-icon"><i class="fa-solid fa-location-dot"></i></div>
-                            <div>
-                                <h4>Visit Us</h4>
-                                <p>123 Travel Street, Quezon City, Metro Manila, Philippines</p>
-                            </div>
-                        </div>
-                        <div class="contact-info-item">
-                            <div class="ci-icon"><i class="fa-solid fa-phone"></i></div>
-                            <div>
-                                <h4>Call Us</h4>
-                                <p>+63 912 345 6789</p>
-                            </div>
-                        </div>
-                        <div class="contact-info-item">
-                            <div class="ci-icon"><i class="fa-solid fa-envelope"></i></div>
-                            <div>
-                                <h4>Email Us</h4>
-                                <p>hello@everyrideph.com</p>
-                            </div>
-                        </div>
-                        <div class="contact-info-item">
-                            <div class="ci-icon"><i class="fa-brands fa-instagram"></i></div>
-                            <div>
-                                <h4>Follow Us</h4>
-                                <p>@everyrideph</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form class="contact-form-card" id="contactForm" novalidate>
-                        <div class="contact-form-grid">
-                            <div class="cf-field">
-                                <label for="cnName">Full Name</label>
-                                <input type="text" id="cnName" placeholder="Juan Dela Cruz" required>
-                            </div>
-                            <div class="cf-field">
-                                <label for="cnEmail">Email Address</label>
-                                <input type="email" id="cnEmail" placeholder="juandelacruz@email.com" required>
-                            </div>
-                        </div>
-                        <div class="cf-field">
-                            <label for="cnPhone">Phone Number</label>
-                            <input type="tel" id="cnPhone" placeholder="0912 345 6789">
-                        </div>
-                        <div class="cf-field">
-                            <label for="cnMessage">Your Message</label>
-                            <textarea id="cnMessage" rows="5" placeholder="How can we help you?" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-navy" id="contactSubmitBtn">Send Message</button>
-                        <p class="contact-success" id="contactSuccessMsg" style="display:none;"><i class="fa-solid fa-circle-check"></i> Message sent! We'll get back to you shortly.</p>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        </main>
-
-        <footer class="site-footer" id="siteFooter">
-            <div class="footer-inner">
-                <div class="footer-brand">
-                    <div class="logo-block">
-                        <span class="logo-text">
-                            <span class="logo-word light">every<span class="accent-ride">ride</span></span>
-                            <span class="logo-sub light">car rental services</span>
-                        </span>
-                    </div>
-                    <p>Every journey, every story. We help you create unforgettable moments with the people you love.</p>
-                    <span class="footer-tagline">Reliable. Honest. Memorable.</span>
-                    <div class="footer-socials">
-                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <a href="#" data-go="home">Home</a>
-                    <a href="#" data-go="allVehicles">Vehicles</a>
-                    <a href="#" data-go="myBookings">Bookings</a>
-                    <a href="#" data-go="about">About Us</a>
-                    <a href="#" data-go="contact">Contact</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Contact Us</h4>
-                    <p><i class="fa-solid fa-location-dot"></i> Quezon City, Metro Manila</p>
-                    <p><i class="fa-solid fa-phone"></i> +63 912 345 6789</p>
-                    <p><i class="fa-solid fa-envelope"></i> hello@everyrideph.com</p>
-                </div>
-            </div>
-            <div class="footer-bottom">© 2026 EveryRide PH. All rights reserved.</div>
-        </footer>
-
-    </div><!-- /.app-content -->
-</div><!-- /.app-shell -->
-
-<!-- =========================================================
-     LOGIN MODAL
-========================================================== -->
-<div class="modal-overlay" id="loginModalOverlay" style="display:none;">
-    <div class="modal-card">
-        <button type="button" class="modal-close" id="loginModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-
-        <div class="logo-block modal-logo">
-            <span class="logo-icon"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M8 16C10 9 16.5 4.5 24 4.5C33 4.5 40.5 11 42.5 20" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                    <path d="M13.5 6.8L8 16L4 8.8" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M40 32C38 39 31.5 43.5 24 43.5C15 43.5 7.5 37 5.5 28" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                    <path d="M34.5 41.2L40 32L44 39.2" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M15 27.5C15 26.1 16 25 17.5 24.7L19.5 24.3C20 22 21 20.5 23 20.5H26C28 20.5 29 22 29.5 24.3L31.5 24.7C33 25 34 26.1 34 27.5V29.5C34 30.3 33.3 31 32.5 31H31C30.7 32.4 29.5 33.5 28 33.5C26.5 33.5 25.3 32.4 25 31H23C22.7 32.4 21.5 33.5 20 33.5C18.5 33.5 17.3 32.4 17 31H16.5C15.7 31 15 30.3 15 29.5V27.5Z" fill="currentColor"/>
-                    <circle cx="20" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                    <circle cx="28" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                </svg></span>
-            <span class="logo-text">
-                <span class="logo-word">every<span class="accent-ride">ride</span></span>
-            </span>
-        </div>
-        <h2>Welcome back</h2>
-        <p class="modal-sub">Log in to manage your bookings.</p>
-
-        <div class="social-auth-list">
-            <button type="button" class="social-auth-btn" id="googleLoginBtn">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="social-icon">
-                Continue with Google
-            </button>
-            <button type="button" class="social-auth-btn facebook" id="facebookLoginBtn">
-                <i class="fa-brands fa-facebook social-icon"></i>
-                Continue with Facebook
-            </button>
-        </div>
-
-        <div class="modal-divider"><span>or log in with email</span></div>
-
-        <form id="loginForm" novalidate>
-            <div class="cf-field">
-                <label for="loginEmail">Email Address</label>
-                <input type="email" id="loginEmail" placeholder="juandelacruz@email.com" required>
-            </div>
-            <div class="cf-field">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" placeholder="••••••••" required minlength="6">
-            </div>
-            <button type="submit" class="btn btn-navy btn-block">Log In</button>
+          </div>
+          <div class="quick-book-grid">
+            <label class="field"><span>Pickup location</span><span class="input-wrap"><i data-lucide="map-pin"></i><select id="heroLocation"><option>Quezon City, Metro Manila</option><option>Makati City, Metro Manila</option><option>Pasig City, Metro Manila</option><option>Taguig City, Metro Manila</option></select></span></label>
+            <label class="field"><span>Pickup date</span><span class="input-wrap"><i data-lucide="calendar"></i><input type="date" id="heroDate" required></span></label>
+            <label class="field" id="heroTimeField"><span>Pickup time</span><span class="input-wrap"><i data-lucide="clock-3"></i><select id="heroTime"><option>7:00 AM</option><option>10:00 AM</option><option>1:00 PM</option><option>4:00 PM</option></select></span></label>
+            <button class="primary-btn search-submit" type="submit">Search vehicles <i data-lucide="search"></i></button>
+          </div>
         </form>
+      </section>
 
-        <p class="modal-switch">Don't have an account? <a href="#" id="switchToSignup">Sign Up</a></p>
-    </div>
-</div>
-
-<!-- =========================================================
-     SIGNUP MODAL
-========================================================== -->
-<div class="modal-overlay" id="signupModalOverlay" style="display:none;">
-    <div class="modal-card">
-        <button type="button" class="modal-close" id="signupModalClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-
-        <div class="logo-block modal-logo">
-            <span class="logo-icon"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M8 16C10 9 16.5 4.5 24 4.5C33 4.5 40.5 11 42.5 20" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                    <path d="M13.5 6.8L8 16L4 8.8" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M40 32C38 39 31.5 43.5 24 43.5C15 43.5 7.5 37 5.5 28" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>
-                    <path d="M34.5 41.2L40 32L44 39.2" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M15 27.5C15 26.1 16 25 17.5 24.7L19.5 24.3C20 22 21 20.5 23 20.5H26C28 20.5 29 22 29.5 24.3L31.5 24.7C33 25 34 26.1 34 27.5V29.5C34 30.3 33.3 31 32.5 31H31C30.7 32.4 29.5 33.5 28 33.5C26.5 33.5 25.3 32.4 25 31H23C22.7 32.4 21.5 33.5 20 33.5C18.5 33.5 17.3 32.4 17 31H16.5C15.7 31 15 30.3 15 29.5V27.5Z" fill="currentColor"/>
-                    <circle cx="20" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                    <circle cx="28" cy="31.2" r="1.6" fill="var(--logo-bg)"/>
-                </svg></span>
-            <span class="logo-text">
-                <span class="logo-word">every<span class="accent-ride">ride</span></span>
-            </span>
+      <section class="section container">
+        <div class="section-heading split reveal">
+          <div><span class="eyebrow">WHY EVERYRIDE</span><h2>Easy from booking to drop-off.</h2></div>
+          <p>Transparent pricing, well-maintained vehicles, and responsive support—without unnecessary steps.</p>
         </div>
-        <h2>Create your account</h2>
-        <p class="modal-sub">Sign up to start booking with EveryRide.</p>
-
-        <div class="social-auth-list">
-            <button type="button" class="social-auth-btn" id="googleSignupBtn">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" class="social-icon">
-                Sign up with Google
-            </button>
-            <button type="button" class="social-auth-btn facebook" id="facebookSignupBtn">
-                <i class="fa-brands fa-facebook social-icon"></i>
-                Sign up with Facebook
-            </button>
+        <div class="benefit-grid">
+          <article class="benefit-card reveal"><span class="benefit-icon"><i data-lucide="badge-check"></i></span><h3>Trusted & reliable</h3><p>Every vehicle is cleaned, inspected, and prepared before your trip.</p></article>
+          <article class="benefit-card reveal"><span class="benefit-icon"><i data-lucide="wallet-cards"></i></span><h3>Clear pricing</h3><p>Know your estimated rental total before you submit your request.</p></article>
+          <article class="benefit-card reveal"><span class="benefit-icon"><i data-lucide="calendar-check-2"></i></span><h3>Simple booking</h3><p>Choose your schedule, vehicle, and details in one guided flow.</p></article>
+          <article class="benefit-card reveal"><span class="benefit-icon"><i data-lucide="headphones"></i></span><h3>Helpful support</h3><p>Reach the EveryRide team before, during, or after your rental.</p></article>
         </div>
+      </section>
 
-        <div class="modal-divider"><span>or sign up with email</span></div>
+      <section class="section soft-section">
+        <div class="container">
+          <div class="section-heading split reveal">
+            <div><span class="eyebrow">OUR FLEET</span><h2>A ride for every kind of plan.</h2></div>
+            <button class="text-btn" data-route="vehicles">View all vehicles <i data-lucide="arrow-up-right"></i></button>
+          </div>
+          <div class="vehicle-grid" id="featuredVehicleGrid"></div>
+        </div>
+      </section>
 
-        <form id="signupForm" novalidate>
-            <div class="cf-field">
-                <label for="signupName">Full Name</label>
-                <input type="text" id="signupName" placeholder="Juan Dela Cruz" required>
-            </div>
-            <div class="cf-field">
-                <label for="signupEmail">Email Address</label>
-                <input type="email" id="signupEmail" placeholder="juandelacruz@email.com" required>
-            </div>
-            <div class="cf-field">
-                <label for="signupPassword">Password</label>
-                <input type="password" id="signupPassword" placeholder="At least 6 characters" required minlength="6">
-            </div>
-            <button type="submit" class="btn btn-navy btn-block">Create Account</button>
-        </form>
+      <section class="section container">
+        <div class="story-panel reveal">
+          <div class="story-image"><span class="floating-review"><span class="stars">★★★★★</span><strong>“Smooth from start to finish.”</strong><small>— Maria S., Quezon City</small></span></div>
+          <div class="story-copy"><span class="eyebrow light">THE EVERYRIDE EXPERIENCE</span><h2>More than a rental. A better way to travel together.</h2><p>From complimentary essentials to a clean and comfortable cabin, every detail is prepared so you can focus on the people and places that matter.</p><div class="story-features"><span><i data-lucide="wifi"></i> Complimentary Wi-Fi</span><span><i data-lucide="cookie"></i> Trip-ready snacks</span><span><i data-lucide="briefcase-medical"></i> Safety essentials</span></div><button class="accent-btn" data-route="about">Discover our story</button></div>
+        </div>
+      </section>
 
-        <p class="modal-switch">Already have an account? <a href="#" id="switchToLogin">Log In</a></p>
+      <section class="section newsletter-section">
+        <div class="container newsletter-card reveal">
+          <div><span class="eyebrow light">JOIN THE EVERYRIDE FAMILY</span><h2>Promos and travel ideas, minus the spam.</h2><p>Get occasional offers and practical road-trip tips.</p></div>
+          <form id="newsletterForm"><label class="sr-only" for="newsletterEmail">Email address</label><input id="newsletterEmail" type="email" placeholder="you@example.com" required><button class="accent-btn" type="submit">Subscribe</button></form>
+        </div>
+      </section>
+    </section>
+
+    <!-- VEHICLES -->
+    <section class="page" id="page-vehicles" data-page="vehicles">
+      <section class="page-hero compact-hero">
+        <div class="container"><span class="eyebrow light">FIND YOUR RIDE</span><h1>Vehicles ready for your next story.</h1><p>Compare space, features, and rental prices in one place.</p></div>
+      </section>
+      <section class="section container vehicles-layout">
+        <aside class="filter-panel" id="filterPanel">
+          <div class="filter-head"><h3>Filters</h3><button class="text-btn small" id="resetFilters">Reset</button></div>
+          <label class="field"><span>Search</span><span class="input-wrap"><i data-lucide="search"></i><input type="search" id="vehicleSearch" placeholder="Brand or model"></span></label>
+          <div class="filter-group"><span class="filter-label">Vehicle type</span><div class="chip-group" id="typeFilters"><button class="filter-chip active" data-filter="All">All</button><button class="filter-chip" data-filter="MPV">MPV</button><button class="filter-chip" data-filter="SUV">SUV</button><button class="filter-chip" data-filter="Sedan">Sedan</button></div></div>
+          <div class="filter-group"><span class="filter-label">Passenger capacity</span><label class="check-row"><input type="checkbox" value="5" name="seatFilter"><span>5+ seats</span></label><label class="check-row"><input type="checkbox" value="7" name="seatFilter"><span>7+ seats</span></label></div>
+          <label class="field"><span>Sort by</span><select class="standalone-select" id="vehicleSort"><option value="recommended">Recommended</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="seats">Most seats</option></select></label>
+        </aside>
+        <div class="vehicle-results">
+          <div class="results-toolbar"><div><h2>Available vehicles</h2><p><span id="vehicleResultCount">0</span> vehicles found</p></div><button class="outline-btn mobile-filter-btn" id="mobileFilterBtn"><i data-lucide="sliders-horizontal"></i> Filters</button></div>
+          <div class="vehicle-grid results-grid" id="vehicleGrid"></div>
+          <div class="empty-state" id="vehicleEmptyState" hidden><span><i data-lucide="car-front"></i></span><h3>No matching vehicles</h3><p>Try clearing one or more filters.</p><button class="primary-btn compact" id="emptyResetBtn">Clear filters</button></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- BOOKINGS -->
+    <section class="page" id="page-bookings" data-page="bookings">
+      <section class="page-hero simple-hero"><div class="container"><span class="eyebrow light">YOUR TRIPS</span><h1>My bookings</h1><p>Review your requests and manage upcoming plans.</p></div></section>
+      <section class="section container">
+        <div class="booking-toolbar"><div class="segmented-control" id="bookingTabs"><button class="active" data-booking-tab="upcoming">Upcoming</button><button data-booking-tab="past">Past</button><button data-booking-tab="cancelled">Cancelled</button></div><button class="primary-btn compact" data-start-booking><i data-lucide="plus"></i> New booking</button></div>
+        <div class="booking-list" id="bookingList"></div>
+        <div class="empty-state booking-empty" id="bookingEmpty"><span><i data-lucide="calendar-heart"></i></span><h3>No bookings here yet</h3><p>Plan your next trip in a few simple steps.</p><button class="primary-btn" data-start-booking>Book a ride</button></div>
+      </section>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="page" id="page-about" data-page="about">
+      <section class="page-hero about-hero"><div class="container"><span class="eyebrow light">ABOUT EVERYRIDE</span><h1>Built around better journeys.</h1><p>A local car-rental experience focused on comfort, trust, and genuine service.</p></div></section>
+      <section class="section container about-grid"><div class="about-copy reveal"><span class="eyebrow">OUR STORY</span><h2>We help people make room for moments that matter.</h2><p>EveryRide PH started with a simple idea: renting a car should feel clear, personal, and dependable. Whether the plan is a family celebration, an airport pickup, or an unplanned weekend escape, we want every customer to feel supported from inquiry to return.</p><p>This front-end prototype demonstrates the complete customer experience without a backend. Bookings and account data are stored only in the browser.</p><div class="metric-row"><div><strong>24/7</strong><span>Support access</span></div><div><strong>100%</strong><span>Upfront estimates</span></div><div><strong>4.9/5</strong><span>Demo rating</span></div></div></div><div class="about-photo reveal"></div></section>
+      <section class="section soft-section"><div class="container"><div class="section-heading centered reveal"><span class="eyebrow">OUR VALUES</span><h2>What guides every ride.</h2></div><div class="value-grid"><article class="value-card reveal"><i data-lucide="shield-check"></i><h3>Safety first</h3><p>Prepared vehicles, clear policies, and essential road-safety support.</p></article><article class="value-card reveal"><i data-lucide="heart-handshake"></i><h3>Human service</h3><p>Friendly communication and assistance that feels personal.</p></article><article class="value-card reveal"><i data-lucide="scan-eye"></i><h3>Clear and honest</h3><p>No confusing steps, hidden totals, or unnecessary surprises.</p></article></div></div></section>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="page" id="page-contact" data-page="contact">
+      <section class="page-hero simple-hero"><div class="container"><span class="eyebrow light">LET'S TALK</span><h1>How can we help?</h1><p>Send an inquiry or reach us through the contact details below.</p></div></section>
+      <section class="section container contact-layout">
+        <div class="contact-info reveal"><span class="eyebrow">CONTACT EVERYRIDE</span><h2>We’re happy to help.</h2><p>Questions about availability, your booking, or special trip requirements? Send us a message.</p><div class="contact-methods"><a href="tel:+639123456789"><span><i data-lucide="phone"></i></span><div><small>CALL OR TEXT</small><strong>0912 345 6789</strong></div></a><a href="mailto:hello@everyride.ph"><span><i data-lucide="mail"></i></span><div><small>EMAIL</small><strong>hello@everyride.ph</strong></div></a><div><span><i data-lucide="map-pin"></i></span><div><small>SERVICE AREA</small><strong>Metro Manila, Philippines</strong></div></div></div><div class="contact-hours"><i data-lucide="clock-4"></i><div><strong>Support hours</strong><p>Monday–Sunday, 7:00 AM–10:00 PM</p></div></div></div>
+        <form class="contact-form reveal" id="contactForm"><div class="form-heading"><h2>Send a message</h2><p>We usually respond within the same day.</p></div><div class="two-col"><label class="field"><span>Full name</span><input id="contactName" required placeholder="Your name"></label><label class="field"><span>Email address</span><input id="contactEmail" type="email" required placeholder="you@example.com"></label></div><label class="field"><span>Topic</span><select id="contactTopic"><option>Vehicle availability</option><option>Existing booking</option><option>Rates and inclusions</option><option>Partnership inquiry</option><option>Other</option></select></label><label class="field"><span>Message</span><textarea id="contactMessage" rows="6" required placeholder="Tell us how we can help..."></textarea></label><button class="primary-btn" type="submit">Send message <i data-lucide="send"></i></button></form>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand"><a href="#home" class="brand light-brand" data-route="home"><span class="brand-mark"><i data-lucide="car-front"></i></span><span class="brand-copy"><strong>every<span>ride</span></strong><small>CAR RENTAL SERVICES</small></span></a><p>Comfortable, dependable rides for every story.</p><div class="social-links"><a href="#" aria-label="Facebook"><i data-lucide="facebook"></i></a><a href="#" aria-label="Instagram"><i data-lucide="instagram"></i></a><a href="#" aria-label="TikTok"><i data-lucide="music-2"></i></a></div></div>
+      <div><h3>Explore</h3><button data-route="vehicles">Vehicles</button><button data-route="bookings">My bookings</button><button data-route="about">About us</button></div>
+      <div><h3>Support</h3><button data-route="contact">Contact us</button><a href="tel:+639123456789">0912 345 6789</a><a href="mailto:hello@everyride.ph">hello@everyride.ph</a></div>
+      <div><h3>Service area</h3><p>Quezon City<br>Metro Manila, Philippines</p><span class="footer-badge"><i data-lucide="badge-check"></i> Customer-first service</span></div>
     </div>
-</div>
+    <div class="container footer-bottom"><p>© <span id="currentYear"></span> EveryRide PH. Front-end prototype only.</p><div><a href="#">Privacy</a><a href="#">Terms</a></div></div>
+  </footer>
 
-<!-- Booking details and cancellation feedback -->
-<div class="modal-overlay" id="bookingDetailsOverlay" style="display:none;">
-    <div class="modal-card booking-details-modal" role="dialog" aria-modal="true" aria-labelledby="bookingDetailsTitle">
-        <button type="button" class="modal-close" data-close-booking-details aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-        <div id="bookingDetailsContent"></div>
-    </div>
-</div>
+  <nav class="mobile-bottom-nav" aria-label="Mobile primary navigation">
+    <button class="active" data-route="home"><i data-lucide="house"></i><span>Home</span></button>
+    <button data-route="vehicles"><i data-lucide="car-front"></i><span>Vehicles</span></button>
+    <button class="mobile-book-fab" data-start-booking aria-label="Book a ride"><i data-lucide="plus"></i></button>
+    <button data-route="bookings"><span class="mobile-nav-icon"><i data-lucide="calendar-days"></i><b data-booking-count>0</b></span><span>Bookings</span></button>
+    <button id="mobileAccountBtn"><i data-lucide="user-round"></i><span>Account</span></button>
+  </nav>
 
-<div class="modal-overlay" id="cancelBookingOverlay" style="display:none;">
-    <div class="modal-card cancel-booking-modal" role="dialog" aria-modal="true" aria-labelledby="cancelBookingTitle">
-        <button type="button" class="modal-close" data-close-cancel aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-        <div class="cancel-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
-        <h2 id="cancelBookingTitle">Cancel this booking?</h2>
-        <p class="modal-sub">Your request will be cancelled and this action cannot be undone.</p>
-        <form id="cancelBookingForm">
-            <fieldset class="cancel-reasons"><legend>Why are you cancelling? <span>(optional)</span></legend>
-                <label><input type="radio" name="cancelReason" value="Plans changed"> Plans changed</label>
-                <label><input type="radio" name="cancelReason" value="Found another ride"> Found another ride</label>
-                <label><input type="radio" name="cancelReason" value="Need a different date or time"> Need a different date or time</label>
-                <label><input type="radio" name="cancelReason" value="other"> Other</label>
-            </fieldset>
-            <label class="feedback-label" for="cancelFeedback">Anything else you'd like us to know?</label>
-            <textarea id="cancelFeedback" rows="3" maxlength="300" placeholder="Share feedback or tell us how we can help."></textarea>
-            <div class="cancel-modal-actions"><button type="button" class="btn btn-outline" data-close-cancel>Keep Booking</button><button type="submit" class="btn cancel-confirm-btn">Yes, Cancel Booking</button></div>
-        </form>
-    </div>
-</div>
+  <!-- VEHICLE DETAILS MODAL -->
+  <div class="modal-shell" id="vehicleModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="vehicleModal"></div>
+    <section class="modal-card vehicle-modal-card" role="dialog" aria-modal="true" aria-labelledby="vehicleModalTitle">
+      <button class="modal-close icon-btn" data-close-modal="vehicleModal" aria-label="Close vehicle details"><i data-lucide="x"></i></button>
+      <div id="vehicleModalContent"></div>
+    </section>
+  </div>
 
-<div class="modal-overlay processing-overlay" id="bookingProcessingOverlay" style="display:none;">
-    <div class="processing-card" role="status" aria-live="polite">
-        <div class="processing-spinner"><i class="fa-solid fa-car-side"></i></div>
-        <h2>Processing your booking</h2>
-        <p>We're securely sending your request to the EveryRide team.</p>
-        <div class="processing-progress"><span></span></div>
-        <div class="processing-steps"><span><i class="fa-solid fa-check"></i> Checking details</span><span><i class="fa-solid fa-check"></i> Saving request</span><span><i class="fa-solid fa-circle-notch fa-spin"></i> Almost done</span></div>
-    </div>
-</div>
+  <!-- BOOKING WIZARD -->
+  <div class="modal-shell" id="bookingModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="bookingModal"></div>
+    <section class="modal-card booking-modal-card" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle">
+      <header class="booking-modal-head"><div><span class="eyebrow">BOOK YOUR RIDE</span><h2 id="bookingModalTitle">Create booking</h2></div><button class="modal-close icon-btn" data-close-modal="bookingModal" aria-label="Close booking"><i data-lucide="x"></i></button></header>
+      <div class="booking-progress" id="bookingProgress"><div class="active"><span>1</span><small>Schedule</small></div><i></i><div><span>2</span><small>Vehicle</small></div><i></i><div><span>3</span><small>Details</small></div><i></i><div><span>4</span><small>Review</small></div></div>
+      <form id="bookingForm">
+        <div class="booking-step active" data-step="1" id="bookingStep1">
+          <div class="step-heading"><h3>Choose your schedule</h3><p>Tell us when and where your trip begins.</p></div>
+          <div class="rental-choice-grid"><button type="button" class="rental-choice active" data-booking-type="12hour"><i data-lucide="clock-3"></i><span><strong>12-hour rental</strong><small>Flexible half-day use</small></span><b>From ₱2,300</b></button><button type="button" class="rental-choice" data-booking-type="wholeday"><i data-lucide="sun"></i><span><strong>Whole-day rental</strong><small>Full 24-hour use</small></span><b>From ₱3,200</b></button></div>
+          <div class="two-col"><label class="field"><span>Pickup location</span><span class="input-wrap"><i data-lucide="map-pin"></i><select id="bookingLocation"><option>Quezon City, Metro Manila</option><option>Makati City, Metro Manila</option><option>Pasig City, Metro Manila</option><option>Taguig City, Metro Manila</option></select></span></label><label class="field"><span>Pickup date</span><span class="input-wrap"><i data-lucide="calendar"></i><input id="bookingDate" type="date" required></span></label></div>
+          <div class="two-col"><label class="field" id="bookingTimeField"><span>Pickup time</span><span class="input-wrap"><i data-lucide="clock"></i><select id="bookingTime"><option>7:00 AM</option><option>10:00 AM</option><option>1:00 PM</option><option>4:00 PM</option></select></span></label><label class="field" id="returnDateField" hidden><span>Return date</span><span class="input-wrap"><i data-lucide="calendar-check"></i><input id="bookingReturnDate" type="date"></span></label></div>
+        </div>
+        <div class="booking-step" data-step="2" id="bookingStep2"><div class="step-heading"><h3>Select a vehicle</h3><p>Choose the best fit for your passengers and plans.</p></div><div class="booking-vehicle-list" id="bookingVehicleList"></div></div>
+        <div class="booking-step" data-step="3" id="bookingStep3"><div class="step-heading"><h3>Your contact details</h3><p>We’ll use these details to confirm your booking request.</p></div><div class="two-col"><label class="field"><span>First name</span><input id="guestFirstName" required placeholder="Juan"></label><label class="field"><span>Last name</span><input id="guestLastName" required placeholder="Dela Cruz"></label></div><div class="two-col"><label class="field"><span>Email address</span><input id="guestEmail" type="email" required placeholder="juan@example.com"></label><label class="field"><span>Mobile number</span><input id="guestPhone" type="tel" required placeholder="09XX XXX XXXX"></label></div><label class="field"><span>Trip notes <small>(optional)</small></span><textarea id="guestNotes" rows="4" placeholder="Pickup instructions, child seat request, or other details"></textarea></label><label class="consent-row"><input type="checkbox" id="bookingConsent" required><span>I confirm that the information is correct and agree to be contacted about this request.</span></label></div>
+        <div class="booking-step" data-step="4" id="bookingStep4"><div class="step-heading"><h3>Review your request</h3><p>Check the details before submitting.</p></div><div class="review-layout" id="bookingReview"></div><div class="notice-box"><i data-lucide="info"></i><p>This prototype does not process payments. Submitting saves the booking request only in this browser.</p></div></div>
+        <footer class="booking-actions"><button type="button" class="outline-btn" id="bookingBackBtn" hidden><i data-lucide="arrow-left"></i> Back</button><button type="button" class="primary-btn" id="bookingNextBtn">Continue <i data-lucide="arrow-right"></i></button><button type="submit" class="accent-btn" id="bookingSubmitBtn" hidden>Submit booking <i data-lucide="check"></i></button></footer>
+      </form>
+    </section>
+  </div>
 
-<script src="app.js"></script>
+  <!-- ACCOUNT MODAL -->
+  <div class="modal-shell" id="accountModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="accountModal"></div>
+    <section class="modal-card account-modal-card" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+      <button class="modal-close icon-btn" data-close-modal="accountModal" aria-label="Close account modal"><i data-lucide="x"></i></button>
+      <div class="account-visual"><div><span class="eyebrow light">EVERYRIDE ACCOUNT</span><h2>Save your details for faster bookings.</h2><p>This demo account stays only on your current browser.</p></div></div>
+      <div class="account-form-wrap" id="accountGuestView"><div class="form-heading"><h2 id="accountTitle">Welcome</h2><p>Login or create a demo account.</p></div><div class="segmented-control full" id="authTabs"><button class="active" data-auth-tab="login">Login</button><button data-auth-tab="signup">Create account</button></div><form id="loginForm" class="auth-form active"><label class="field"><span>Email address</span><input id="loginEmail" type="email" required placeholder="you@example.com"></label><label class="field"><span>Password</span><span class="password-wrap"><input id="loginPassword" type="password" required minlength="6" placeholder="At least 6 characters"><button type="button" data-toggle-password="loginPassword" aria-label="Show password"><i data-lucide="eye"></i></button></span></label><button class="primary-btn block" type="submit">Login</button></form><form id="signupForm" class="auth-form"><div class="two-col"><label class="field"><span>First name</span><input id="signupFirstName" required></label><label class="field"><span>Last name</span><input id="signupLastName" required></label></div><label class="field"><span>Email address</span><input id="signupEmail" type="email" required></label><label class="field"><span>Password</span><span class="password-wrap"><input id="signupPassword" type="password" required minlength="6"><button type="button" data-toggle-password="signupPassword" aria-label="Show password"><i data-lucide="eye"></i></button></span></label><button class="primary-btn block" type="submit">Create account</button></form></div>
+      <div class="account-form-wrap" id="accountUserView" hidden><div class="profile-summary"><span id="profileAvatar">JD</span><div><small>DEMO ACCOUNT</small><h2 id="profileName">Juan Dela Cruz</h2><p id="profileEmail">juan@example.com</p></div></div><div class="profile-stat-grid"><div><strong data-booking-count>0</strong><span>Total bookings</span></div><div><strong id="upcomingCount">0</strong><span>Upcoming</span></div></div><button class="outline-btn block" data-route="bookings" data-close-modal="accountModal"><i data-lucide="calendar-days"></i> View my bookings</button><button class="danger-text-btn" id="logoutBtn"><i data-lucide="log-out"></i> Log out</button></div>
+    </section>
+  </div>
+
+  <!-- CONFIRMATION MODAL -->
+  <div class="modal-shell" id="confirmationModal" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <section class="modal-card confirmation-card" role="dialog" aria-modal="true" aria-labelledby="confirmationTitle"><span class="success-icon"><i data-lucide="check"></i></span><span class="eyebrow">REQUEST RECEIVED</span><h2 id="confirmationTitle">Your booking is saved.</h2><p>Reference number <strong id="confirmationReference">ER-000000</strong>. The request is stored in this browser for demonstration.</p><div class="confirmation-actions"><button class="primary-btn" id="viewBookingBtn">View my booking</button><button class="outline-btn" id="closeConfirmationBtn">Back to home</button></div></section>
+  </div>
+
+  <!-- CANCEL MODAL -->
+  <div class="modal-shell" id="cancelModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal="cancelModal"></div>
+    <section class="modal-card small-modal" role="dialog" aria-modal="true" aria-labelledby="cancelTitle"><button class="modal-close icon-btn" data-close-modal="cancelModal"><i data-lucide="x"></i></button><span class="warning-icon"><i data-lucide="triangle-alert"></i></span><h2 id="cancelTitle">Cancel this booking?</h2><p>The booking will move to your cancelled tab. This action is saved only in your browser.</p><div class="modal-inline-actions"><button class="outline-btn" data-close-modal="cancelModal">Keep booking</button><button class="danger-btn" id="confirmCancelBtn">Cancel booking</button></div></section>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
